@@ -6,16 +6,16 @@
 #
 #    Nachos assumes that the location of the program startup routine (the
 # 	location the kernel jumps to when the program initially starts up)
-#       is at location 0.  This means: start.o must be the first .o passed 
+#       is at location 0.  This means: start.o must be the first .o passed
 # 	to ld, in order for the routine "Start" to be loaded at location 0
 #
 
 # Change the following to point to where you have the MIPS cross-compiler
 # installed.
-GCCDIR = /cse306/mips-gcc/
+GCCDIR = /Users/Joey/Documents/mips-gcc
 
 # Change the following to point to where you have Java executables installed.
-JAVADIR = 
+JAVADIR =
 
 # Uncomment the following when running on Windows.
 JAVA= $(JAVADIR)java -classpath '..'
@@ -65,7 +65,7 @@ halt: halt.o start.o
 # test programs.
 
 %.s: %.c
-	$(CC) $(SFLAGS) $< 
+	$(CC) $(SFLAGS) $<
 %.o: %.c
 	$(CC) $(CFLAGS) $<
 %: %.o start.o
