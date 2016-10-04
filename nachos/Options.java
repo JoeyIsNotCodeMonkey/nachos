@@ -63,6 +63,8 @@ public class Options {
 	    + "Copyright (c) 1998-1999 Rice University.\n"
 	    + "Copyright (c) 2003-2014 State University of New York at Stony Brook.\n"
 	    + "All rights reserved.";
+
+    
     
     /** Arguments in the form of a list. */
     private final List<String> argList;
@@ -161,7 +163,13 @@ public class Options {
     // Test/demo configuration options.
 
     /** Should we run the thread test? */
-    public boolean THREAD_TEST = true;  // Traditional Nachos behavior.
+    public boolean THREAD_TEST = false;  // Traditional Nachos behavior.
+    
+    public boolean CALLOUT_Test = true;
+
+    public boolean SYNCHRONOUSQUEUE_TEST = false;
+    
+    
     
     /** Should we run the multiprocessor scheduling test? */
     public boolean SMP_TEST = false;

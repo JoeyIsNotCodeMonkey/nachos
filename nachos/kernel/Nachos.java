@@ -35,7 +35,9 @@ import nachos.kernel.devices.test.SerialTest;
 import nachos.kernel.threads.Scheduler;
 import nachos.kernel.userprog.ExceptionHandler;
 import nachos.kernel.filesys.FileSystem;
+import nachos.kernel.threads.test.CalloutTest;
 import nachos.kernel.threads.test.SMPTest;
+import nachos.kernel.threads.test.SynchronousQueueTest;
 import nachos.kernel.threads.test.ThreadTest;
 import nachos.kernel.userprog.test.ProgTest;
 import nachos.kernel.filesys.test.FileSystemTest;
@@ -108,7 +110,11 @@ public class Nachos implements Runnable {
 	// These will typically create additional threads to do the actual
 	// work, leaving the first thread free to go on and start the rest.
 	if(options.THREAD_TEST)
-	    ThreadTest.start();
+	    CalloutTest.start();
+	if(options.CALLOUT_Test)
+	    CalloutTest.start();
+	if(options.SYNCHRONOUSQUEUE_TEST)
+	    SynchronousQueueTest.start();
 	if(options.SMP_TEST)
 	    SMPTest.start();
 	if(options.PROG_TEST)
