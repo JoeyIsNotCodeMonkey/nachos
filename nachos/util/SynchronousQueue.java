@@ -137,7 +137,7 @@ public class SynchronousQueue<T> implements Queue<T> {
     public boolean offer(T e) {
 	
 	
-	dataAvail.V();
+	
 	
 	counterLock.P();
 	flagPut--;
@@ -147,6 +147,9 @@ public class SynchronousQueue<T> implements Queue<T> {
 	boolean result = buffer.offer(e); 
 	bufferLock.V();
 	
+	if(result){
+	    dataAvail.V();
+	}
 	
 	return result ;
 	

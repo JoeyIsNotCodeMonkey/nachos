@@ -1,2 +1,407 @@
-In this assignment, we first implemented a Callout class to maintain an Arraylist of Object array that records multiple data needed to schedule a thread.
+In this assignment, we first implemented a Callout class to maintain an ArrayList of Object array that records multiple data needed to schedule a future task. For the second part of the assignment, the SynchronousQueue class allows different threads to share objects using a mutual buffer among them.
 
+The timer will be started once a callout is initialized, a list will be created to keep track of future scheduling. Inside our handleInterrupt() method, we will check whether we need to execute "Nachos.scheduler.readyToRun(t)" by checking if the thread is finished. This prevents situations where we are calling method offer(obj,time) in SynchrounousQueue but we have made another thread to take the object so both threads are now finished after the exchange. Consequently, the previous callout.schedule in offer(obj,time) is useless and we want to prevent it from executing the runnable. Therefore,  we make Scheduler class and Callout class share one callout list, and set the status of corresponding thread in callout list finished once it calls finishedThread();
+
+We set max running time 1000 ticks by checking whether "timePass" is larger than 1000 inside "handleInterrupt()". So when you test program, you have to limit the argument of "sleepThread" less than 1000. Or you can set a larger argument for timePass variable inside checking condition (at line 110 inside Callout.java).
+
+When we tested CalloutTest class and SynchronousQueueTest class, we added debug information to track the thread progress. Most of them are pretty straight forward, for instance, inside "public void sleepThread(int ticks);" we add "Entering Sleep Mode" before sem.P() and "Out SleepThead Mode(In Runnable)" after sem.V(); So when we see the result in console, we can calculate the time interval to see whether it is same as the argument we set to the sleepThread for corresponding thread.
+
+In SynchronousQueueTest class, we created multiple producer and consumer threads in which producer published some string arguments and the consumer try to retrieve them from the buffer.
+During the testing, we have tested different combinations such as using put and poll(time) and take and offer(T obj, time), as well as sleeping a thread before calling take or put. 
+
+We added “CALLOUT_Test” and “SYNCHRONOUSQUEUE_TEST” in options.java, and call start() for both inside nachos.java. You need to set corresponding test to “true” inside options.java when you test either part of the assignment. 
+
+
+
+
+Run Configuration:
+Add “-d t” will print out all of our debug information. 
+Use -ncpu and follow with the number of CPU that you intend to test to enable certain amount of CPU work. We used up to 4 CPU when we were testing the program.
+
+
+Callout Test:
+
+
+Output:
+0				[+] Entering main
+0				[t] Starting timer: General-purpose timer
+0				[t] Initializing scheduler
+0	CPU0	idle	on	[t] Setting status of FirstThread: JUST_CREATED -> RUNNING
+0	CPU0	system	on	[t] Thread FirstThread started on CPU0
+1	CPU0	system	on	[t] Starting Callout Test
+1	CPU0	system	off	[t] Putting thread on ready list: thread1 
+1	CPU0	system	off	[t] Setting status of thread1 : JUST_CREATED -> READY
+1	CPU0	system	off	[t] Dispatching thread1  on CPU1
+3	CPU1	idle	on	[t] Setting status of thread1 : READY -> RUNNING
+3	CPU1	system	on	[t] Thread thread1  started on CPU1
+3	CPU0	system	off	[t] Putting thread on ready list: thread2 
+3	CPU0	system	off	[t] Setting status of thread2 : JUST_CREATED -> READY
+3	CPU0	system	off	[t] Dispatching thread2  on CPU2
+5	CPU2	idle	on	[t] Setting status of thread2 : READY -> RUNNING
+5	CPU2	system	on	[t] Thread thread2  started on CPU2
+6	CPU0	system	off	[t] Finishing thread: FirstThread
+6	CPU0	system	off	[t] Setting status of FirstThread: RUNNING -> FINISHED
+9	CPU0	system	off	[t] Next thread to run: (none)
+9	CPU0	system	off	[t] Switching CPU0 from FirstThread to idle
+12	CPU1	system	on	[+] _______________________Entering Sleep Mode
+12	CPU1	system	off	[t] Sleeping thread: thread1 
+13	CPU2	system	on	[+] _______________________Entering Sleep Mode
+13	CPU1	system	off	[t] Next thread to run: (none)
+14	CPU1	system	off	[t] Switching CPU1 from thread1  to idle
+14	CPU1	system	off	[t] Setting status of thread1 : RUNNING -> BLOCKED
+15	CPU2	system	off	[t] Sleeping thread: thread2 
+16	CPU2	system	off	[t] Next thread to run: (none)
+17	CPU2	system	off	[t] Switching CPU2 from thread2  to idle
+17	CPU2	system	off	[t] Setting status of thread2 : RUNNING -> BLOCKED
+101	CPU0	system	off	[+] ________________________Timer interrupt: General-purpose timer
+101	CPU0	system	off	[t] Putting thread on ready list: runnable thread 
+101	CPU0	system	off	[t] Setting status of runnable thread : JUST_CREATED -> READY
+101	CPU0	system	off	[t] Dispatching runnable thread  on CPU0
+102	CPU0	idle	on	[t] Setting status of runnable thread : READY -> RUNNING
+102	CPU0	system	on	[t] Thread runnable thread  started on CPU0
+103	CPU0	system	off	[t] Putting thread on ready list: thread2 
+103	CPU0	system	off	[t] Setting status of thread2 : BLOCKED -> READY
+103	CPU0	system	off	[t] Dispatching thread2  on CPU1
+106	CPU1	system	off	[t] Setting status of thread2 : READY -> RUNNING
+106	CPU1	system	off	[t] Now in thread: thread2 
+106	CPU0	system	on	[t] _____________________________________Out SleepThead Mode(In Runnable)
+107	CPU0	system	off	[t] Finishing thread: runnable thread 
+108	CPU0	system	off	[t] Setting status of runnable thread : RUNNING -> FINISHED
+109				[t] Destroying thread: FirstThread
+110	CPU0	system	off	[t] Next thread to run: (none)
+110	CPU1	system	off	[t] Finishing thread: thread2 
+110	CPU0	system	off	[t] Switching CPU0 from runnable thread  to idle
+110	CPU1	system	off	[t] Setting status of thread2 : RUNNING -> FINISHED
+112				[t] Destroying thread: runnable thread 
+113	CPU1	system	off	[t] Next thread to run: (none)
+113	CPU1	system	off	[t] Switching CPU1 from thread2  to idle
+202	CPU0	system	off	[+] ________________________Timer interrupt: General-purpose timer
+303	CPU1	system	off	[+] ________________________Timer interrupt: General-purpose timer
+303	CPU1	system	off	[t] Putting thread on ready list: runnable thread 
+303	CPU1	system	off	[t] Setting status of runnable thread : JUST_CREATED -> READY
+303	CPU1	system	off	[t] Dispatching runnable thread  on CPU2
+304	CPU2	idle	on	[t] Setting status of runnable thread : READY -> RUNNING
+304	CPU2	system	on	[t] Thread runnable thread  started on CPU2
+304	CPU2	system	off	[t] Putting thread on ready list: thread1 
+304	CPU2	system	off	[t] Setting status of thread1 : BLOCKED -> READY
+304	CPU2	system	off	[t] Dispatching thread1  on CPU0
+307	CPU0	system	off	[t] Setting status of thread1 : READY -> RUNNING
+307	CPU0	system	off	[t] Now in thread: thread1 
+307	CPU2	system	on	[t] _____________________________________Out SleepThead Mode(In Runnable)
+309	CPU2	system	off	[t] Finishing thread: runnable thread 
+309	CPU2	system	off	[t] Setting status of runnable thread : RUNNING -> FINISHED
+309	CPU0	system	on	[t] _____________FINSHING sleepthread test
+310	CPU0	system	off	[t] Finishing thread: thread1 
+310				[t] Destroying thread: thread2 
+310	CPU0	system	off	[t] Setting status of thread1 : RUNNING -> FINISHED
+311	CPU2	system	off	[t] Next thread to run: (none)
+312	CPU2	system	off	[t] Switching CPU2 from runnable thread  to idle
+314				[t] Destroying thread: runnable thread 
+314	CPU0	system	off	[t] Next thread to run: (none)
+314	CPU0	system	off	[t] Switching CPU0 from thread1  to idle
+404	CPU2	system	off	[+] ________________________Timer interrupt: General-purpose timer
+505	CPU2	system	off	[+] ________________________Timer interrupt: General-purpose timer
+606	CPU1	system	off	[+] ________________________Timer interrupt: General-purpose timer
+707	CPU2	system	off	[+] ________________________Timer interrupt: General-purpose timer
+808	CPU0	system	off	[+] ________________________Timer interrupt: General-purpose timer
+909	CPU2	system	off	[+] ________________________Timer interrupt: General-purpose timer
+1010	CPU1	system	off	[+] ________________________Timer interrupt: General-purpose timer
+1111	CPU0	system	off	[+] ________________________Timer interrupt: General-purpose timer
+1111	CPU0	system	off	[t] Stopping timer: General-purpose timer
+1211	CPU2	idle	on	[+] No pending interrupts and all CPUs are idle
+Simulation terminating!
+
+Total ticks: 1211
+   CPU 0: user 0, system 30, interrupt 5, idle 1176
+   CPU 1: user 0, system 28, interrupt 4, idle 1179
+   CPU 2: user 0, system 28, interrupt 4, idle 1179
+Interrupts: 11
+   CPU 0: 4
+   CPU 1: 3
+   CPU 2: 4
+Console I/O: reads 0, writes 0
+Disk I/O: reads 0, writes 0
+Page faults: 0
+   CPU 0: 0
+   CPU 1: 0
+   CPU 2: 0
+
+We created two threads can called sleepThread() on each of them. One was put to sleep for 100 ticks and the other was 300 ticks. The bold lines are before entering sleeping mode and after waking up. 
+
+SynchronousQueue Test:
+
+Producer2, consumer3
+	Output: 
+	0				[+] Entering main
+0				[t] Starting timer: General-purpose timer
+0				[t] Initializing scheduler
+0	CPU0	idle	on	[t] Setting status of FirstThread: JUST_CREATED -> RUNNING
+0	CPU0	system	on	[t] Thread FirstThread started on CPU0
+1	CPU0	system	on	[t] Entering SynchronousQueue Test
+1	CPU0	system	off	[t] Putting thread on ready list: producer2 thread 
+1	CPU0	system	off	[t] Setting status of producer2 thread : JUST_CREATED -> READY
+1	CPU0	system	off	[t] Dispatching producer2 thread  on CPU1
+3	CPU1	idle	on	[t] Setting status of producer2 thread : READY -> RUNNING
+3	CPU1	system	on	[t] Thread producer2 thread  started on CPU1
+4	CPU0	system	off	[t] Putting thread on ready list: consumer3 thread 
+5	CPU0	system	off	[t] Setting status of consumer3 thread : JUST_CREATED -> READY
+5	CPU0	system	off	[t] Dispatching consumer3 thread  on CPU2
+7	CPU2	idle	on	[t] Setting status of consumer3 thread : READY -> RUNNING
+7	CPU2	system	on	[t] Thread consumer3 thread  started on CPU2
+8	CPU0	system	off	[t] Finishing thread: FirstThread
+8	CPU0	system	off	[t] Setting status of FirstThread: RUNNING -> FINISHED
+12	CPU0	system	off	[t] Next thread to run: (none)
+12	CPU0	system	off	[t] Switching CPU0 from FirstThread to idle
+25	CPU1	system	on	[t] ---------------------[producer2] published event : SECOND_SYNCHRONOUS_EVENT2 
+25	CPU2	system	on	[t] ---------------------[conusmer3] consumed event : SECOND_SYNCHRONOUS_EVENT2 
+25	CPU1	system	off	[t] Finishing thread: producer2 thread 
+25	CPU1	system	off	[t] Setting status of producer2 thread : RUNNING -> FINISHED
+25	CPU2	system	off	[t] Finishing thread: consumer3 thread 
+26	CPU2	system	off	[t] Setting status of consumer3 thread : RUNNING -> FINISHED
+26				[t] Destroying thread: FirstThread
+28	CPU1	system	off	[t] Next thread to run: (none)
+29	CPU2	system	off	[t] Next thread to run: (none)
+29	CPU1	system	off	[t] Switching CPU1 from producer2 thread  to idle
+30	CPU2	system	off	[t] Switching CPU2 from consumer3 thread  to idle
+30				[t] Destroying thread: producer2 thread 
+101	CPU0	system	off	[+] ________________________Timer interrupt: General-purpose timer
+202	CPU2	system	off	[+] ________________________Timer interrupt: General-purpose timer
+303	CPU1	system	off	[+] ________________________Timer interrupt: General-purpose timer
+404	CPU2	system	off	[+] ________________________Timer interrupt: General-purpose timer
+505	CPU1	system	off	[+] ________________________Timer interrupt: General-purpose timer
+606	CPU2	system	off	[+] ________________________Timer interrupt: General-purpose timer
+707	CPU1	system	off	[+] ________________________Timer interrupt: General-purpose timer
+808	CPU0	system	off	[+] ________________________Timer interrupt: General-purpose timer
+909	CPU1	system	off	[+] ________________________Timer interrupt: General-purpose timer
+1010	CPU2	system	off	[+] ________________________Timer interrupt: General-purpose timer
+1111	CPU1	system	off	[+] ________________________Timer interrupt: General-purpose timer
+1111	CPU1	system	off	[t] Stopping timer: General-purpose timer
+1211	CPU1	idle	on	[+] No pending interrupts and all CPUs are idle
+Simulation terminating!
+
+Total ticks: 1211
+   CPU 0: user 0, system 13, interrupt 2, idle 1196
+   CPU 1: user 0, system 30, interrupt 5, idle 1176
+   CPU 2: user 0, system 31, interrupt 4, idle 1176
+Interrupts: 11
+   CPU 0: 2
+   CPU 1: 5
+   CPU 2: 4
+Console I/O: reads 0, writes 0
+Disk I/O: reads 0, writes 0
+Page faults: 0
+   CPU 0: 0
+   CPU 1: 0
+   CPU 2: 0
+Basic test: a producer thread called put() and a consumer called take() to 
+
+
+2. Producer1(sleep(300)) and consumer2(poll(500))
+
+0				[+] Entering main
+0				[t] Starting timer: General-purpose timer
+0				[t] Initializing scheduler
+0	CPU0	idle	on	[t] Setting status of FirstThread: JUST_CREATED -> RUNNING
+0	CPU0	system	on	[t] Thread FirstThread started on CPU0
+1	CPU0	system	on	[t] Entering SynchronousQueue Test
+1	CPU0	system	off	[t] Putting thread on ready list: producer thread 
+1	CPU0	system	off	[t] Setting status of producer thread : JUST_CREATED -> READY
+1	CPU0	system	off	[t] Dispatching producer thread  on CPU1
+3	CPU1	idle	on	[t] Setting status of producer thread : READY -> RUNNING
+3	CPU1	system	on	[t] Thread producer thread  started on CPU1
+3	CPU0	system	off	[t] Putting thread on ready list: consumer2 thread 
+3	CPU0	system	off	[t] Setting status of consumer2 thread : JUST_CREATED -> READY
+3	CPU0	system	off	[t] Dispatching consumer2 thread  on CPU2
+5	CPU2	idle	on	[t] Setting status of consumer2 thread : READY -> RUNNING
+5	CPU2	system	on	[t] Thread consumer2 thread  started on CPU2
+6	CPU1	system	on	[+] _______________________Entering Sleep Mode
+7	CPU0	system	off	[t] Finishing thread: FirstThread
+7	CPU0	system	off	[t] Setting status of FirstThread: RUNNING -> FINISHED
+10	CPU1	system	off	[t] Sleeping thread: producer thread 
+10	CPU0	system	off	[t] Next thread to run: (none)
+11	CPU1	system	off	[t] Next thread to run: (none)
+12	CPU0	system	off	[t] Switching CPU0 from FirstThread to idle
+14	CPU1	system	off	[t] Switching CPU1 from producer thread  to idle
+14	CPU1	system	off	[t] Setting status of producer thread : RUNNING -> BLOCKED
+16	CPU2	system	off	[t] Sleeping thread: consumer2 thread 
+17	CPU2	system	off	[t] Next thread to run: (none)
+18	CPU2	system	off	[t] Switching CPU2 from consumer2 thread  to idle
+18	CPU2	system	off	[t] Setting status of consumer2 thread : RUNNING -> BLOCKED
+101	CPU1	system	off	[+] ________________________Timer interrupt: General-purpose timer
+202	CPU1	system	off	[+] ________________________Timer interrupt: General-purpose timer
+303	CPU0	system	off	[+] ________________________Timer interrupt: General-purpose timer
+303	CPU0	system	off	[t] Putting thread on ready list: runnable thread 
+303	CPU0	system	off	[t] Setting status of runnable thread : JUST_CREATED -> READY
+303	CPU0	system	off	[t] Dispatching runnable thread  on CPU0
+304	CPU0	idle	on	[t] Setting status of runnable thread : READY -> RUNNING
+304	CPU0	system	on	[t] Thread runnable thread  started on CPU0
+305	CPU0	system	off	[t] Putting thread on ready list: producer thread 
+305	CPU0	system	off	[t] Setting status of producer thread : BLOCKED -> READY
+305	CPU0	system	off	[t] Dispatching producer thread  on CPU1
+308	CPU1	system	off	[t] Setting status of producer thread : READY -> RUNNING
+308	CPU0	system	on	[t] _____________________________________Out SleepThead Mode(In Runnable)
+308	CPU1	system	off	[t] Now in thread: producer thread 
+308	CPU0	system	off	[t] Finishing thread: runnable thread 
+309	CPU0	system	off	[t] Setting status of runnable thread : RUNNING -> FINISHED
+311				[t] Destroying thread: FirstThread
+312	CPU0	system	off	[t] Next thread to run: (none)
+313	CPU0	system	off	[t] Switching CPU0 from runnable thread  to idle
+320	CPU1	system	off	[t] Putting thread on ready list: consumer2 thread 
+320	CPU1	system	off	[t] Setting status of consumer2 thread : BLOCKED -> READY
+320	CPU1	system	off	[t] Dispatching consumer2 thread  on CPU2
+323	CPU2	system	off	[t] Setting status of consumer2 thread : READY -> RUNNING
+323	CPU1	system	on	[t] ---------------------[producer] published event : FIRST_SYNCHRONOUS_EVENT 
+323	CPU2	system	off	[t] Now in thread: consumer2 thread 
+323	CPU1	system	off	[t] Finishing thread: producer thread 
+324	CPU1	system	off	[t] Setting status of producer thread : RUNNING -> FINISHED
+326				[t] Destroying thread: runnable thread 
+327	CPU1	system	off	[t] Next thread to run: (none)
+327	CPU1	system	off	[t] Switching CPU1 from producer thread  to idle
+333	CPU2	system	on	[t] ---------------------[conusmer2] consumed event : FIRST_SYNCHRONOUS_EVENT 
+333	CPU2	system	off	[t] Finishing thread: consumer2 thread 
+333	CPU2	system	off	[t] Setting status of consumer2 thread : RUNNING -> FINISHED
+334				[t] Destroying thread: producer thread 
+335	CPU2	system	off	[t] Next thread to run: (none)
+335	CPU2	system	off	[t] Switching CPU2 from consumer2 thread  to idle
+404	CPU1	system	off	[+] ________________________Timer interrupt: General-purpose timer
+505	CPU2	system	off	[+] ________________________Timer interrupt: General-purpose timer
+606	CPU2	system	off	[+] ________________________Timer interrupt: General-purpose timer
+707	CPU0	system	off	[+] ________________________Timer interrupt: General-purpose timer
+808	CPU1	system	off	[+] ________________________Timer interrupt: General-purpose timer
+909	CPU1	system	off	[+] ________________________Timer interrupt: General-purpose timer
+1010	CPU2	system	off	[+] ________________________Timer interrupt: General-purpose timer
+1111	CPU1	system	off	[+] ________________________Timer interrupt: General-purpose timer
+1111	CPU1	system	off	[t] Stopping timer: General-purpose timer
+1211	CPU1	idle	on	[+] No pending interrupts and all CPUs are idle
+Simulation terminating!
+
+Total ticks: 1211
+   CPU 0: user 0, system 23, interrupt 3, idle 1185
+   CPU 1: user 0, system 40, interrupt 6, idle 1165
+   CPU 2: user 0, system 39, interrupt 3, idle 1169
+Interrupts: 11
+   CPU 0: 2
+   CPU 1: 6
+   CPU 2: 3
+Console I/O: reads 0, writes 0
+Disk I/O: reads 0, writes 0
+Page faults: 0
+   CPU 0: 0
+   CPU 1: 0
+   CPU 2: 0
+This time the producer thread was put to sleep for first 300 ticks, then he put something on the queue. The consumer thread called poll(500), so it’s going to wait until tick 500.  And at around 300, they have exchanged the object.
+
+
+3. Producer1(sleep(300)) and consumer1(poll(200))
+0				[+] Entering main
+0				[t] Starting timer: General-purpose timer
+0				[t] Initializing scheduler
+0	CPU0	idle	on	[t] Setting status of FirstThread: JUST_CREATED -> RUNNING
+0	CPU0	system	on	[t] Thread FirstThread started on CPU0
+1	CPU0	system	on	[t] Entering SynchronousQueue Test
+1	CPU0	system	off	[t] Putting thread on ready list: producer thread 
+1	CPU0	system	off	[t] Setting status of producer thread : JUST_CREATED -> READY
+1	CPU0	system	off	[t] Dispatching producer thread  on CPU1
+3	CPU1	idle	on	[t] Setting status of producer thread : READY -> RUNNING
+3	CPU1	system	on	[t] Thread producer thread  started on CPU1
+3	CPU0	system	off	[t] Putting thread on ready list: consumer thread 
+3	CPU0	system	off	[t] Setting status of consumer thread : JUST_CREATED -> READY
+3	CPU0	system	off	[t] Dispatching consumer thread  on CPU2
+5	CPU2	idle	on	[t] Setting status of consumer thread : READY -> RUNNING
+5	CPU2	system	on	[t] Thread consumer thread  started on CPU2
+5	CPU0	system	off	[t] Finishing thread: FirstThread
+5	CPU0	system	off	[t] Setting status of FirstThread: RUNNING -> FINISHED
+7	CPU0	system	off	[t] Next thread to run: (none)
+7	CPU0	system	off	[t] Switching CPU0 from FirstThread to idle
+9	CPU1	system	on	[+] _______________________Entering Sleep Mode
+9	CPU1	system	off	[t] Sleeping thread: producer thread 
+10	CPU1	system	off	[t] Next thread to run: (none)
+12	CPU1	system	off	[t] Switching CPU1 from producer thread  to idle
+13	CPU1	system	off	[t] Setting status of producer thread : RUNNING -> BLOCKED
+14	CPU2	system	off	[t] Sleeping thread: consumer thread 
+15	CPU2	system	off	[t] Next thread to run: (none)
+16	CPU2	system	off	[t] Switching CPU2 from consumer thread  to idle
+16	CPU2	system	off	[t] Setting status of consumer thread : RUNNING -> BLOCKED
+101	CPU1	system	off	[+] ________________________Timer interrupt: General-purpose timer
+202	CPU2	system	off	[+] ________________________Timer interrupt: General-purpose timer
+202	CPU2	system	off	[t] Putting thread on ready list: runnable thread 
+202	CPU2	system	off	[t] Setting status of runnable thread : JUST_CREATED -> READY
+202	CPU2	system	off	[t] Dispatching runnable thread  on CPU0
+203	CPU0	idle	on	[t] Setting status of runnable thread : READY -> RUNNING
+203	CPU0	system	on	[t] Thread runnable thread  started on CPU0
+203	CPU0	system	on	[t] ____________________________Waking Consumer Thread
+203	CPU0	system	off	[t] Putting thread on ready list: consumer thread 
+203	CPU0	system	off	[t] Setting status of consumer thread : BLOCKED -> READY
+203	CPU0	system	off	[t] Dispatching consumer thread  on CPU1
+206	CPU1	system	off	[t] Setting status of consumer thread : READY -> RUNNING
+206	CPU1	system	off	[t] Now in thread: consumer thread 
+206	CPU0	system	off	[t] Sleeping thread: runnable thread 
+209	CPU0	system	off	[t] Next thread to run: (none)
+210	CPU0	system	off	[t] Switching CPU0 from runnable thread  to idle
+210	CPU0	system	off	[t] Setting status of runnable thread : RUNNING -> BLOCKED
+211	CPU1	system	off	[t] Putting thread on ready list: runnable thread 
+211	CPU1	system	off	[t] Setting status of runnable thread : BLOCKED -> READY
+211	CPU1	system	off	[t] Dispatching runnable thread  on CPU2
+214	CPU2	system	off	[t] Setting status of runnable thread : READY -> RUNNING
+214	CPU2	system	off	[t] Now in thread: runnable thread 
+219	CPU1	system	on	[t] ---------------------[conusmer] consumed event : null 
+221	CPU2	system	off	[t] Finishing thread: runnable thread 
+221	CPU1	system	off	[t] Finishing thread: consumer thread 
+221	CPU2	system	off	[t] Setting status of runnable thread : RUNNING -> FINISHED
+221	CPU1	system	off	[t] Setting status of consumer thread : RUNNING -> FINISHED
+222				[t] Destroying thread: FirstThread
+224	CPU2	system	off	[t] Next thread to run: (none)
+225	CPU1	system	off	[t] Next thread to run: (none)
+225	CPU2	system	off	[t] Switching CPU2 from runnable thread  to idle
+226	CPU1	system	off	[t] Switching CPU1 from consumer thread  to idle
+226				[t] Destroying thread: runnable thread 
+303	CPU0	system	off	[+] ________________________Timer interrupt: General-purpose timer
+303	CPU0	system	off	[t] Putting thread on ready list: runnable thread 
+303	CPU0	system	off	[t] Setting status of runnable thread : JUST_CREATED -> READY
+303	CPU0	system	off	[t] Dispatching runnable thread  on CPU0
+304	CPU0	idle	on	[t] Setting status of runnable thread : READY -> RUNNING
+304	CPU0	system	on	[t] Thread runnable thread  started on CPU0
+305	CPU0	system	off	[t] Putting thread on ready list: producer thread 
+305	CPU0	system	off	[t] Setting status of producer thread : BLOCKED -> READY
+305	CPU0	system	off	[t] Dispatching producer thread  on CPU2
+308	CPU2	system	off	[t] Setting status of producer thread : READY -> RUNNING
+308	CPU0	system	on	[t] _____________________________________Out SleepThead Mode(In Runnable)
+308	CPU2	system	off	[t] Now in thread: producer thread 
+308	CPU0	system	off	[t] Finishing thread: runnable thread 
+310	CPU0	system	off	[t] Setting status of runnable thread : RUNNING -> FINISHED
+311				[t] Destroying thread: consumer thread 
+312	CPU0	system	off	[t] Next thread to run: (none)
+313	CPU0	system	off	[t] Switching CPU0 from runnable thread  to idle
+322	CPU2	system	on	[t] ---------------------[producer] published event : FIRST_SYNCHRONOUS_EVENT 
+322	CPU2	system	off	[t] Finishing thread: producer thread 
+322	CPU2	system	off	[t] Setting status of producer thread : RUNNING -> FINISHED
+323				[t] Destroying thread: runnable thread 
+324	CPU2	system	off	[t] Next thread to run: (none)
+324	CPU2	system	off	[t] Switching CPU2 from producer thread  to idle
+404	CPU1	system	off	[+] ________________________Timer interrupt: General-purpose timer
+505	CPU2	system	off	[+] ________________________Timer interrupt: General-purpose timer
+606	CPU1	system	off	[+] ________________________Timer interrupt: General-purpose timer
+707	CPU0	system	off	[+] ________________________Timer interrupt: General-purpose timer
+808	CPU2	system	off	[+] ________________________Timer interrupt: General-purpose timer
+909	CPU1	system	off	[+] ________________________Timer interrupt: General-purpose timer
+1010	CPU1	system	off	[+] ________________________Timer interrupt: General-purpose timer
+1111	CPU1	system	off	[+] ________________________Timer interrupt: General-purpose timer
+1111	CPU1	system	off	[t] Stopping timer: General-purpose timer
+1211	CPU0	idle	on	[+] No pending interrupts and all CPUs are idle
+Simulation terminating!
+
+Total ticks: 1211
+   CPU 0: user 0, system 27, interrupt 3, idle 1181
+   CPU 1: user 0, system 37, interrupt 6, idle 1168
+   CPU 2: user 0, system 62, interrupt 104, idle 1045
+Interrupts: 11
+   CPU 0: 2
+   CPU 1: 6
+   CPU 2: 3
+Console I/O: reads 0, writes 0
+Disk I/O: reads 0, writes 0
+Page faults: 0
+   CPU 0: 0
+   CPU 1: 0
+   CPU 2: 0
+First the producer thread was put to sleep for 300 ticks. Meanwhile, the consumer thread called poll(200), so it’s going to wait until tick 200. At 200, nothing happened, so the consumer returns with null. At 300, the producer thread called offer(), so it doesn’t need to be pair with another consumer, hence it returns.

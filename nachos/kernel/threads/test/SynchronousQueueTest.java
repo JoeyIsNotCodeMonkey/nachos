@@ -117,7 +117,7 @@ public class SynchronousQueueTest   {
 	
 	Nachos.scheduler.readyToRun(consumer);
 
-	Nachos.scheduler.readyToRun(consumer2);
+	//Nachos.scheduler.readyToRun(consumer2);
 	//Nachos.scheduler.readyToRun(consumer3);
 	
     }
