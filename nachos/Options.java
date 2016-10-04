@@ -110,7 +110,7 @@ public class Options {
      * will run concurrently as Java threads, and will run truly concurrently
      * if the host system is a multi-CPU system and the JVM supports it.
      */
-    public int NUM_CPUS = 1;
+    public int NUM_CPUS = 3;
     
     /**
      * The number of consoles on the system.
@@ -165,9 +165,9 @@ public class Options {
     /** Should we run the thread test? */
     public boolean THREAD_TEST = false;  // Traditional Nachos behavior.
     
-    public boolean CALLOUT_Test = true;
+    public boolean CALLOUT_Test = false;
 
-    public boolean SYNCHRONOUSQUEUE_TEST = false;
+    public boolean SYNCHRONOUSQUEUE_TEST = true;
     
     
     

@@ -39,6 +39,6 @@ public class CalloutTest {
 	});
 	
 	Nachos.scheduler.readyToRun(thread1);
-	//Nachos.scheduler.readyToRun(thread2);
+	Nachos.scheduler.readyToRun(thread2);
     }
 }

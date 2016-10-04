@@ -211,7 +211,7 @@ public class SynchronousQueue<T> implements Queue<T> {
 	    public void run() {
 		
 		if(flagPut>0){
-		    Debug.println('t', "________________________Producer Self");
+		    Debug.println('t', "________________________Waking Producer Thread");
 			matchAvail.V();
 			
 			counterLock.P();
@@ -272,7 +272,7 @@ public class SynchronousQueue<T> implements Queue<T> {
 		if(flagTake>0){
 		    	
 		    
-		    Debug.println('t', "____________________________Consumer Self");
+		    Debug.println('t', "____________________________Waking Consumer Thread");
 		    	dataAvail.V();
 			matchAvail.P();
 			
