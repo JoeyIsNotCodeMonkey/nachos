@@ -405,3 +405,5 @@ Page faults: 0
    CPU 1: 0
    CPU 2: 0
 First the producer thread was put to sleep for 300 ticks. Meanwhile, the consumer thread called poll(200), so it’s going to wait until tick 200. At 200, nothing happened, so the consumer returns with null. At 300, the producer thread called offer(), so it doesn’t need to be pair with another consumer, hence it returns.
+
+test
