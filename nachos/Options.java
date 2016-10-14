@@ -175,7 +175,7 @@ public class Options {
     public boolean SMP_TEST = false;
 
     /** Should we run the user program test? */
-    public boolean PROG_TEST = false;
+    public boolean PROG_TEST = true;
     
     /** Should we run the console test? */
     public boolean CONSOLE_TEST = false;

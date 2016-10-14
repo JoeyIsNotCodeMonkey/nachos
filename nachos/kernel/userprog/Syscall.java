@@ -90,7 +90,23 @@ public class Syscall {
      *
      * @param name The name of the file to execute.
      */
-    public static int exec(String name) {return 0;}
+    public static int exec(String name) {
+	Task task = new Task(name);
+	AddrSpace addrSpace = new AddrSpace();
+	
+	//creates a new process (i.e. user thread plus user address space)
+	UserThread userThread = new UserThread(name, task, addrSpace);
+	
+	//it schedules the newly created process for execution on the CPU
+	Nachos.scheduler.readyToRun(userThread);
+	
+	//initializes the address space using the data from the NACHOS executable
+	
+	
+	//("SpaceId") that uniquely identifies the newly created process is returned to the caller
+	return addrSpace.getSpaceID();
+	
+    }
 
     /**
      * Wait for the user program specified by "id" to finish, and

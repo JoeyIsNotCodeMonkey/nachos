@@ -51,6 +51,8 @@ public class AddrSpace {
 
   /** Default size of the user stack area -- increase this as necessary! */
   private static final int UserStackSize = 1024;
+  
+  private int spaceID;
 
   /**
    * Create a new address space.
@@ -100,6 +102,7 @@ public class AddrSpace {
     for (int i = 0; i < numPages; i++) {
       pageTable[i] = new TranslationEntry();
       pageTable[i].virtualPage = i; // for now, virtual page# = phys page#
+      //pageTable[i].physicalPage = physicalMemoryManager.getPhysicalPage(pageTable[i].virtualPage);
       pageTable[i].physicalPage = i;
       pageTable[i].valid = true;
       pageTable[i].use = false;
@@ -190,4 +193,9 @@ public class AddrSpace {
   private long roundToPage(long size) {
     return(Machine.PageSize * ((size+(Machine.PageSize-1))/Machine.PageSize));
   }
+
+public int getSpaceID() {
+    // TODO Auto-generated method stub
+    return spaceID;
+}
 }

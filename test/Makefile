@@ -12,7 +12,7 @@
 
 # Change the following to point to where you have the MIPS cross-compiler
 # installed.
-GCCDIR = /Users/Joey/Documents/mips-gcc
+GCCDIR = /Users/Joey/Documents/mips-gcc/
 
 # Change the following to point to where you have Java executables installed.
 JAVADIR =
@@ -32,7 +32,7 @@ COFF2NOFF = $(JAVA) nachos.noff.Coff2Noff
 
 LDFLAGS = -T script -N
 ASFLAGS = -mips1
-CPPFLAGS = -I$(INCDIR)
+CPPFLAGS = -I$(INCDIR) -B $(GCCDIR)
 
 CFLAGS = -G 0 -I$(INCDIR) -B$(GCCDIR) -c -fno-builtin
 SFLAGS = -G 0 -I$(INCDIR) -B$(GCCDIR) -c -S -fno-builtin
