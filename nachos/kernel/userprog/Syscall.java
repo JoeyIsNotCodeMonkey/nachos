@@ -100,7 +100,7 @@ public class Syscall {
 	//it schedules the newly created process for execution on the CPU
 	Nachos.scheduler.readyToRun(userThread);
 	
-	//initializes the address space using the data from the NACHOS executable
+	//initializes the address space using the data from the NACHOS executable (initialized in task)
 	
 	
 	//("SpaceId") that uniquely identifies the newly created process is returned to the caller
