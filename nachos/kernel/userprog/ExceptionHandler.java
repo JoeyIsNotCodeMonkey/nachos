@@ -9,6 +9,8 @@ import nachos.machine.CPU;
 import nachos.machine.MIPS;
 import nachos.machine.Machine;
 import nachos.machine.MachineException;
+import nachos.machine.NachosThread;
+import nachos.machine.TranslationEntry;
 import nachos.kernel.userprog.Syscall;
 
 /**
@@ -62,8 +64,23 @@ public class ExceptionHandler implements nachos.machine.ExceptionHandler {
 		Syscall.exit(CPU.readRegister(4));
 		break;
 	    case Syscall.SC_Exec:
+		
+		AddrSpace as= ((UserThread)NachosThread.currentThread()).space;
+	
+		int va = CPU.readRegister(4);
+		int vpn = ((va>>7)&0x1ffffff);
+		int off = (va&0x7f);
+		TranslationEntry[] pagetable = as.getPageTable();
+		int ppn = pagetable[vpn].physicalPage; 
+		int pa = (((ppn<<7)|off));
+		
+		
+		
 		Syscall.exec("");
 		break;
+		
+		
+		
 	    case Syscall.SC_Write:
 		int ptr = CPU.readRegister(4);
 		int len = CPU.readRegister(5);

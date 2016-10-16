@@ -167,7 +167,7 @@ public class Options {
     
     public boolean CALLOUT_Test = false;
 
-    public boolean SYNCHRONOUSQUEUE_TEST = true;
+    public boolean SYNCHRONOUSQUEUE_TEST = false;
     
     
     

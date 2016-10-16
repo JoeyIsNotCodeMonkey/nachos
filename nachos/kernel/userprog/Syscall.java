@@ -91,6 +91,8 @@ public class Syscall {
      * @param name The name of the file to execute.
      */
     public static int exec(String name) {
+	
+	Debug.print('+', "Starting Exec.\n");
 	Task task = new Task(name);
 	AddrSpace addrSpace = new AddrSpace();
 	

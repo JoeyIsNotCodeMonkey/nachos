@@ -66,6 +66,7 @@ public class ProgTest implements Runnable {
 	}
 
 	AddrSpace space = ((UserThread)NachosThread.currentThread()).space;
+	
 	if(space.exec(executable) == -1) {
 	    Debug.println('+', "Unable to read executable file: " + execName);
 	    Nachos.scheduler.finishThread();

@@ -353,7 +353,7 @@ public class Scheduler {
 		    }
 		}, ticks);
 		
-		Debug.println('+', "_______________________Entering Sleep Mode");
+		Debug.println('t', "_______________________Entering Sleep Mode");
 		sem.P();
 	
     }

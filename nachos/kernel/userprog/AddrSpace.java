@@ -72,6 +72,10 @@ public class AddrSpace {
 	
 	return spaceID;
     }
+    public TranslationEntry[] getPageTable() {
+	
+	return pageTable;
+    }
 
     /**
      * Load the program from a file "executable", and set everything up so that
@@ -193,7 +197,10 @@ public class AddrSpace {
      */
     public void saveState() {
     }
-
+    
+    
+    
+    
     /**
      * On a context switch, restore any machine state specific to this address
      * space.
