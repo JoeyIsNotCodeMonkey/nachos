@@ -94,7 +94,9 @@ public class ExceptionHandler implements nachos.machine.ExceptionHandler {
 		    
 		}
 			
-		Syscall.exec(stringBuffer.toString());
+		int id= Syscall.exec(stringBuffer.toString());
+		CPU.writeRegister(2, id);
+		
 		break;
 		
 		
