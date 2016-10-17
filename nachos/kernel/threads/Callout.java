@@ -41,7 +41,7 @@ public class Callout {
 	timer = Machine.getTimer(0);
 	handleInterrupt = new HandleInterrupt(timer);
 	timer.setHandler(handleInterrupt);
-	timer.start();
+	//timer.start();
     }
     
     public ArrayList<Object[]> getCalloutList(){

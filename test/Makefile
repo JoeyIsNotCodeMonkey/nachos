@@ -6,19 +6,20 @@
 #
 #    Nachos assumes that the location of the program startup routine (the
 # 	location the kernel jumps to when the program initially starts up)
-#       is at location 0.  This means: start.o must be the first .o passed
+#       is at location 0.  This means: start.o must be the first .o passed 
 # 	to ld, in order for the routine "Start" to be loaded at location 0
 #
 
 # Change the following to point to where you have the MIPS cross-compiler
 # installed.
-GCCDIR = /Users/Joey/Documents/mips-gcc/
+GCCDIR = /cygdrive/c/Users/MC/Desktop/mips/
 
 # Change the following to point to where you have Java executables installed.
-JAVADIR =
+JAVADIR = /cygdrive/c/Program\ Files/JAVA/jdk1.8.0_40/bin/
 
 # Uncomment the following when running on Windows.
-JAVA= $(JAVADIR)java -classpath '..'
+JAVA= $(JAVADIR)java -classpath '../machine.jar'
+
 
 # Uncomment the following when running on Unix.
 #JAVA= $(JAVADIR)java -classpath '..'
@@ -32,7 +33,7 @@ COFF2NOFF = $(JAVA) nachos.noff.Coff2Noff
 
 LDFLAGS = -T script -N
 ASFLAGS = -mips1
-CPPFLAGS = -I$(INCDIR) -B $(GCCDIR)
+CPPFLAGS = -I$(INCDIR)
 
 CFLAGS = -G 0 -I$(INCDIR) -B$(GCCDIR) -c -fno-builtin
 SFLAGS = -G 0 -I$(INCDIR) -B$(GCCDIR) -c -S -fno-builtin
@@ -59,13 +60,16 @@ halt: halt.o start.o
 	$(COFF2NOFF) halt.coff halt
 	rm halt.coff
 
+
+
+
 # If you are using gmake, the following rules should enable you to
 # compile any of the test programs.  Otherwise, you have to copy the
 # above code for "halt", making appropriate changes, to compile other
 # test programs.
 
 %.s: %.c
-	$(CC) $(SFLAGS) $<
+	$(CC) $(SFLAGS) $< 
 %.o: %.c
 	$(CC) $(CFLAGS) $<
 %: %.o start.o

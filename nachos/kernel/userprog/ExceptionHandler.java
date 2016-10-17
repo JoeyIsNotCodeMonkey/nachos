@@ -65,18 +65,36 @@ public class ExceptionHandler implements nachos.machine.ExceptionHandler {
 		break;
 	    case Syscall.SC_Exec:
 		
+		StringBuffer stringBuffer = new StringBuffer();
+		
 		AddrSpace as= ((UserThread)NachosThread.currentThread()).space;
-	
-		int va = CPU.readRegister(4);
+	   	int va = CPU.readRegister(4);
 		int vpn = ((va>>7)&0x1ffffff);
 		int off = (va&0x7f);
 		TranslationEntry[] pagetable = as.getPageTable();
 		int ppn = pagetable[vpn].physicalPage; 
 		int pa = (((ppn<<7)|off));
+		int index=pa;
 		
+		if(pa>Machine.mainMemory.length){
+		    CPU.writeRegister(2, -1);
+		    return;	
+		}
+				
 		
-		
-		Syscall.exec("");
+		while(true){
+		    	    
+		    
+		    byte temp = Machine.mainMemory[index]; 
+		    if(temp==0){
+			break;
+		    }
+		    stringBuffer.append((char)temp);
+		    index++;
+		    
+		}
+			
+		Syscall.exec(stringBuffer.toString());
 		break;
 		
 		
