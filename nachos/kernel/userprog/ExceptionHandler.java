@@ -83,7 +83,6 @@ public class ExceptionHandler implements nachos.machine.ExceptionHandler {
 				
 		
 		while(true){
-		    	    
 		    
 		    byte temp = Machine.mainMemory[index]; 
 		    if(temp==0){

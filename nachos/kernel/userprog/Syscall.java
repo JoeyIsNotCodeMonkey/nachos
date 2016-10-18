@@ -8,13 +8,14 @@ package nachos.kernel.userprog;
 
 import nachos.Debug;
 import nachos.kernel.Nachos;
+import nachos.machine.Machine;
 import nachos.machine.NachosThread;
 import nachos.machine.Simulation;
 
 /**
- * Nachos system call interface.  These are Nachos kernel operations
- * 	that can be invoked from user programs, by trapping to the kernel
- *	via the "syscall" instruction.
+ * Nachos system call interface. These are Nachos kernel operations that can be
+ * invoked from user programs, by trapping to the kernel via the "syscall"
+ * instruction.
  *
  * @author Thomas Anderson (UC Berkeley), original C++ version
  * @author Peter Druschel (Rice University), Java translation
@@ -22,7 +23,7 @@ import nachos.machine.Simulation;
  */
 public class Syscall {
 
-    // System call codes -- used by the stubs to tell the kernel 
+    // System call codes -- used by the stubs to tell the kernel
     // which system call is being asked for.
 
     /** Integer code identifying the "Halt" system call. */
@@ -61,7 +62,6 @@ public class Syscall {
     /** Integer code identifying the "Remove" system call. */
     public static final byte SC_Remove = 11;
 
-
     /**
      * Stop Nachos, and print out performance stats.
      */
@@ -75,61 +75,72 @@ public class Syscall {
     /**
      * This user program is done.
      *
-     * @param status Status code to pass to processes doing a Join().
-     * status = 0 means the program exited normally.
+     * @param status
+     *            Status code to pass to processes doing a Join(). status = 0
+     *            means the program exited normally.
      */
     public static void exit(int status) {
-	Debug.println('+', "User program exits with status=" + status
-				+ ": " + NachosThread.currentThread().name);
+	Debug.println('+', "User program exits with status=" + status + ": "
+		+ NachosThread.currentThread().name);
+
+	UserThread userThread = (UserThread) NachosThread.currentThread();
+	AddrSpace space = userThread.space;
+
+	space.deAllocateAndZeroOut(space);
 	Nachos.scheduler.finishThread();
     }
 
     /**
-     * Run the executable, stored in the Nachos file "name", and return the 
+     * Run the executable, stored in the Nachos file "name", and return the
      * address space identifier.
      *
-     * @param name The name of the file to execute.
+     * @param name
+     *            The name of the file to execute.
      */
     public static int exec(String name) {
-	
+
 	Debug.print('+', "Starting Exec.\n");
 	Task task = new Task(name);
 	AddrSpace addrSpace = new AddrSpace();
-	
-	//creates a new process (i.e. user thread plus user address space)
+
+	// creates a new process (i.e. user thread plus user address space)
 	UserThread userThread = new UserThread(name, task, addrSpace);
-	
-	//it schedules the newly created process for execution on the CPU
+
+	// it schedules the newly created process for execution on the CPU
 	Nachos.scheduler.readyToRun(userThread);
-	
-	//initializes the address space using the data from the NACHOS executable (initialized in task)
-	
-	
-	//("SpaceId") that uniquely identifies the newly created process is returned to the caller
+
+	// initializes the address space using the data from the NACHOS
+	// executable (initialized in task)
+
+	// ("SpaceId") that uniquely identifies the newly created process is
+	// returned to the caller
 	return addrSpace.getSpaceID();
-	
+
     }
 
     /**
-     * Wait for the user program specified by "id" to finish, and
-     * return its exit status.
+     * Wait for the user program specified by "id" to finish, and return its
+     * exit status.
      *
-     * @param id The "space ID" of the program to wait for.
+     * @param id
+     *            The "space ID" of the program to wait for.
      * @return the exit status of the specified program.
      */
-    public static int join(int id) {return 0;}
+    public static int join(int id) {
+	return 0;
+    }
 
-
-    /* File system operations: Create, Open, Read, Write, Close
-     * These functions are patterned after UNIX -- files represent
-     * both files *and* hardware I/O devices.
+    /*
+     * File system operations: Create, Open, Read, Write, Close These functions
+     * are patterned after UNIX -- files represent both files *and* hardware I/O
+     * devices.
      *
-     * If this assignment is done before doing the file system assignment,
-     * note that the Nachos file system has a stub implementation, which
-     * will work for the purposes of testing out these routines.
+     * If this assignment is done before doing the file system assignment, note
+     * that the Nachos file system has a stub implementation, which will work
+     * for the purposes of testing out these routines.
      */
 
-    // When an address space starts up, it has two open files, representing 
+    // When an address space starts up, it has two open files, representing
     // keyboard input and display output (in UNIX terms, stdin and stdout).
     // Read and write can be used directly on these, without first opening
     // the console device.
@@ -143,81 +154,99 @@ public class Syscall {
     /**
      * Create a Nachos file with a specified name.
      *
-     * @param name  The name of the file to be created.
+     * @param name
+     *            The name of the file to be created.
      */
-    public static void create(String name) { }
+    public static void create(String name) {
+    }
 
     /**
      * Remove a Nachos file.
      *
-     * @param name  The name of the file to be removed.
+     * @param name
+     *            The name of the file to be removed.
      */
-    public static void remove(String name) { }
+    public static void remove(String name) {
+    }
 
     /**
-     * Open the Nachos file "name", and return an "OpenFileId" that can 
-     * be used to read and write to the file.
+     * Open the Nachos file "name", and return an "OpenFileId" that can be used
+     * to read and write to the file.
      *
-     * @param name  The name of the file to open.
-     * @return  An OpenFileId that uniquely identifies the opened file.
+     * @param name
+     *            The name of the file to open.
+     * @return An OpenFileId that uniquely identifies the opened file.
      */
-    public static int open(String name) {return 0;}
+    public static int open(String name) {
+	return 0;
+    }
 
     /**
      * Write "size" bytes from "buffer" to the open file.
      *
-     * @param buffer Location of the data to be written.
-     * @param size The number of bytes to write.
-     * @param id The OpenFileId of the file to which to write the data.
+     * @param buffer
+     *            Location of the data to be written.
+     * @param size
+     *            The number of bytes to write.
+     * @param id
+     *            The OpenFileId of the file to which to write the data.
      */
     public static void write(byte buffer[], int size, int id) {
 	if (id == ConsoleOutput) {
-	    for(int i = 0; i < size; i++) {
-		Nachos.consoleDriver.putChar((char)buffer[i]);
+	    for (int i = 0; i < size; i++) {
+		Nachos.consoleDriver.putChar((char) buffer[i]);
 	    }
 	}
     }
 
     /**
-     * Read "size" bytes from the open file into "buffer".  
-     * Return the number of bytes actually read -- if the open file isn't
-     * long enough, or if it is an I/O device, and there aren't enough 
-     * characters to read, return whatever is available (for I/O devices, 
-     * you should always wait until you can return at least one character).
+     * Read "size" bytes from the open file into "buffer". Return the number of
+     * bytes actually read -- if the open file isn't long enough, or if it is an
+     * I/O device, and there aren't enough characters to read, return whatever
+     * is available (for I/O devices, you should always wait until you can
+     * return at least one character).
      *
-     * @param buffer Where to put the data read.
-     * @param size The number of bytes requested.
-     * @param id The OpenFileId of the file from which to read the data.
+     * @param buffer
+     *            Where to put the data read.
+     * @param size
+     *            The number of bytes requested.
+     * @param id
+     *            The OpenFileId of the file from which to read the data.
      * @return The actual number of bytes read.
      */
-    public static int read(byte buffer[], int size, int id) {return 0;}
+    public static int read(byte buffer[], int size, int id) {
+	return 0;
+    }
 
     /**
      * Close the file, we're done reading and writing to it.
      *
-     * @param id  The OpenFileId of the file to be closed.
+     * @param id
+     *            The OpenFileId of the file to be closed.
      */
-    public static void close(int id) {}
-
+    public static void close(int id) {
+    }
 
     /*
-     * User-level thread operations: Fork and Yield.  To allow multiple
-     * threads to run within a user program. 
+     * User-level thread operations: Fork and Yield. To allow multiple threads
+     * to run within a user program.
      */
 
     /**
-     * Fork a thread to run a procedure ("func") in the *same* address space 
-     * as the current thread.
+     * Fork a thread to run a procedure ("func") in the *same* address space as
+     * the current thread.
      *
-     * @param func The user address of the procedure to be run by the
-     * new thread.
+     * @param func
+     *            The user address of the procedure to be run by the new thread.
      */
-    public static void fork(int func) {}
+    public static void fork(int func) {
+    }
 
     /**
-     * Yield the CPU to another runnable thread, whether in this address space 
-     * or not. 
+     * Yield the CPU to another runnable thread, whether in this address space
+     * or not.
      */
-    public static void yield() {}
+    public static void yield() {
+    }
 
 }

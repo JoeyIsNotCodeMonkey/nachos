@@ -53,6 +53,8 @@ public class AddrSpace {
     private static final int UserStackSize = 1024;
 
     private int spaceID = 0;
+    
+    private PhysicalMemoryManager pmm;
 
     private Semaphore spaceIDLock = new Semaphore("spaceIDLock", 1);
 
@@ -60,6 +62,8 @@ public class AddrSpace {
      * Create a new address space.
      */
     public AddrSpace() {
+	
+	pmm = new PhysicalMemoryManager();
 	spaceID = updateSpaceID();
 
     }
@@ -75,6 +79,23 @@ public class AddrSpace {
     public TranslationEntry[] getPageTable() {
 	
 	return pageTable;
+    }
+    
+    public void deAllocateAndZeroOut(AddrSpace addrSpace) {
+	TranslationEntry[] te = addrSpace.getPageTable();
+	
+	for(int i=0;i<te.length;i++){
+	    
+	    int start = te[i].physicalPage * 128;
+	    int end = start + 128;
+	    
+    	    for (int z = start; z < end; z++) {
+    	      Machine.mainMemory[z] = (byte) 0;
+    	    }
+	      	    
+    	    pmm.freePage(te[i].physicalPage);
+	}
+	
     }
 
     /**
@@ -119,8 +140,7 @@ public class AddrSpace {
 	for (int i = 0; i < numPages; i++) {
 	    pageTable[i] = new TranslationEntry();
 	    pageTable[i].virtualPage = i; // for now, virtual page# = phys page#
-	    pageTable[i].physicalPage = PhysicalMemoryManager
-		    .getPhysicalPage(pageTable[i].virtualPage);
+	    pageTable[i].physicalPage = pmm.getPhysicalPage(pageTable[i].virtualPage);
 	    // pageTable[i].physicalPage = i;
 	    pageTable[i].valid = true;
 	    pageTable[i].use = false;
@@ -223,4 +243,6 @@ public class AddrSpace {
 	// TODO Auto-generated method stub
 	return spaceID;
     }
+    
+    
 }
