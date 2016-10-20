@@ -117,6 +117,27 @@ public class Syscall {
 	return addrSpace.getSpaceID();
 
     }
+    
+    /**
+     * Fork a thread to run a procedure ("func") in the *same* address space as
+     * the current thread.
+     *
+     * @param func
+     *            The user address of the procedure to be run by the new thread.
+     */
+    public static void fork(int func) {
+	Debug.print('+', "Starting fork.\n");
+	ForkTask forkTask = new ForkTask(func);
+	
+	UserThread currentThread = (UserThread) NachosThread.currentThread();
+	AddrSpace currentAddrSpace = currentThread.space;
+	AddrSpace addrSpace = new AddrSpace();
+
+	// creates a new process (i.e. user thread plus user address space)
+	UserThread userThread = new UserThread("thread from fork", forkTask, addrSpace);
+	Nachos.scheduler.readyToRun(userThread);
+    }
+
 
     /**
      * Wait for the user program specified by "id" to finish, and return its
@@ -232,21 +253,13 @@ public class Syscall {
      * to run within a user program.
      */
 
-    /**
-     * Fork a thread to run a procedure ("func") in the *same* address space as
-     * the current thread.
-     *
-     * @param func
-     *            The user address of the procedure to be run by the new thread.
-     */
-    public static void fork(int func) {
-    }
 
     /**
      * Yield the CPU to another runnable thread, whether in this address space
      * or not.
      */
     public static void yield() {
+	Nachos.scheduler.yieldThread();
     }
 
 }

@@ -12,10 +12,10 @@
 
 # Change the following to point to where you have the MIPS cross-compiler
 # installed.
-GCCDIR = /cygdrive/c/Users/MC/Desktop/mips/
+GCCDIR = /Users/Joey/Documents/mips-gcc/
 
 # Change the following to point to where you have Java executables installed.
-JAVADIR = /cygdrive/c/Program\ Files/JAVA/jdk1.8.0_40/bin/
+JAVADIR = 
 
 # Uncomment the following when running on Windows.
 JAVA= $(JAVADIR)java -classpath '../machine.jar'
@@ -33,7 +33,7 @@ COFF2NOFF = $(JAVA) nachos.noff.Coff2Noff
 
 LDFLAGS = -T script -N
 ASFLAGS = -mips1
-CPPFLAGS = -I$(INCDIR)
+CPPFLAGS = -I$(INCDIR) -B $(GCCDIR)
 
 CFLAGS = -G 0 -I$(INCDIR) -B$(GCCDIR) -c -fno-builtin
 SFLAGS = -G 0 -I$(INCDIR) -B$(GCCDIR) -c -S -fno-builtin
