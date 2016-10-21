@@ -127,12 +127,13 @@ public class Syscall {
      */
     public static void fork(int func) {
 	Debug.print('+', "Starting fork.\n");
-	ForkTask forkTask = new ForkTask(func);
+	
 	
 	UserThread currentThread = (UserThread) NachosThread.currentThread();
-	AddrSpace currentAddrSpace = currentThread.space;
 	AddrSpace addrSpace = new AddrSpace();
-
+	
+	
+	ForkTask forkTask = new ForkTask(func,currentThread);
 	// creates a new process (i.e. user thread plus user address space)
 	UserThread userThread = new UserThread("thread from fork", forkTask, addrSpace);
 	Nachos.scheduler.readyToRun(userThread);

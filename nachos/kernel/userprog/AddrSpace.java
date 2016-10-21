@@ -57,6 +57,27 @@ public class AddrSpace {
     private PhysicalMemoryManager pmm;
 
     private Semaphore spaceIDLock = new Semaphore("spaceIDLock", 1);
+    
+    private long size;
+    
+    
+    public long getSize() {
+        return size;
+    }
+
+    public void setSize(long size) {
+        this.size = size;
+    }
+
+    public void setNumPages(int numPages) {
+        this.numPages = numPages;
+    }
+
+    public int getNumPages() {
+        return numPages;
+    }
+
+    private int numPages;
 
     /**
      * Create a new address space.
@@ -113,7 +134,6 @@ public class AddrSpace {
      */
     public int exec(OpenFile executable) {
 	NoffHeader noffH;
-	long size;
 
 	if ((noffH = NoffHeader.readHeader(executable)) == null)
 	    return (-1);
@@ -123,7 +143,7 @@ public class AddrSpace {
 		+ roundToPage(noffH.initData.size + noffH.uninitData.size)
 		+ UserStackSize; // we need to increase the size
 				 // to leave room for the stack
-	int numPages = (int) (size / Machine.PageSize);
+	numPages = (int) (size / Machine.PageSize);
 
 	Debug.ASSERT((numPages <= Machine.NumPhysPages), // check we're not
 							 // trying
@@ -242,6 +262,15 @@ public class AddrSpace {
     public int getSpaceID() {
 	// TODO Auto-generated method stub
 	return spaceID;
+    }
+
+    public void setPageTable(TranslationEntry[] pageTable) {
+        this.pageTable = pageTable;
+    }
+
+    public PhysicalMemoryManager getPmm() {
+	// TODO Auto-generated method stub
+	return pmm;
     }
     
     
