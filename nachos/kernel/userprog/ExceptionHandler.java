@@ -60,10 +60,7 @@ public class ExceptionHandler implements nachos.machine.ExceptionHandler {
 		Syscall.exit(CPU.readRegister(4));
 		break;
 
-	    case Syscall.SC_Fork:
-		int func = CPU.readRegister(4);
-		Syscall.fork(func);
-		break;
+
 
 	    case Syscall.SC_Exec:
 
@@ -99,7 +96,18 @@ public class ExceptionHandler implements nachos.machine.ExceptionHandler {
 		CPU.writeRegister(2, id);
 
 		break;
-
+	
+	    case Syscall.SC_Fork:
+		int func = CPU.readRegister(4);
+		Syscall.fork(func);
+		break;
+		
+	    case Syscall.SC_Join:
+		int processID = CPU.readRegister(4);
+		int status = Syscall.join(processID);
+		CPU.writeRegister(2, status);
+		break;	
+		
 	    case Syscall.SC_Write:
 		int ptr = CPU.readRegister(4);
 		int len = CPU.readRegister(5);

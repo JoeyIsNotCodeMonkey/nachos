@@ -23,6 +23,7 @@ import nachos.Debug;
 import nachos.machine.CPU;
 import nachos.machine.MIPS;
 import nachos.machine.Machine;
+import nachos.machine.NachosThread;
 import nachos.machine.TranslationEntry;
 import nachos.noff.NoffHeader;
 import nachos.kernel.filesys.OpenFile;
@@ -50,19 +51,38 @@ public class AddrSpace {
     private TranslationEntry pageTable[];
 
     /** Default size of the user stack area -- increase this as necessary! */
-    private static final int UserStackSize = 1024;
-
-    private int spaceID = 0;
+    private static final int UserStackSize = 1024;    
     
     private PhysicalMemoryManager pmm;
-
-    private Semaphore spaceIDLock = new Semaphore("spaceIDLock", 1);
     
     private long size;
+   
+    private int numPages;
     
+    private int spaceID;
+    
+    Semaphore join_lock;
+    /**
+     * Create a new address space.
+     */
+    public AddrSpace() {
+	
+	pmm = PhysicalMemoryManager.getInstance();
+	
+	spaceID = pmm.registerSpace(this);
+	
+	join_lock = new Semaphore("join_lock for process "+spaceID, 0);
+	
+    }
+
     
     public long getSize() {
         return size;
+    }
+    
+    public int calculateStackIndex(){
+	
+	return (int)((size-UserStackSize)/Machine.PageSize);
     }
 
     public void setSize(long size) {
@@ -76,46 +96,43 @@ public class AddrSpace {
     public int getNumPages() {
         return numPages;
     }
-
-    private int numPages;
-
-    /**
-     * Create a new address space.
-     */
-    public AddrSpace() {
-	
-	pmm = new PhysicalMemoryManager();
-	spaceID = updateSpaceID();
-
-    }
-
-    private int updateSpaceID() {
-	// TODO Auto-generated method stub
-	spaceIDLock.P();
-	spaceID++;
-	spaceIDLock.V();
-	
-	return spaceID;
-    }
+    
     public TranslationEntry[] getPageTable() {
 	
 	return pageTable;
     }
     
     public void deAllocateAndZeroOut(AddrSpace addrSpace) {
+	
+	
 	TranslationEntry[] te = addrSpace.getPageTable();
 	
 	for(int i=0;i<te.length;i++){
 	    
-	    int start = te[i].physicalPage * 128;
-	    int end = start + 128;
+	    pmm.decreaseCounter(te[i].physicalPage);
+	    Debug.println('+', "DeAllocateMemory PhysicAddress:" + i);
 	    
-    	    for (int z = start; z < end; z++) {
-    	      Machine.mainMemory[z] = (byte) 0;
-    	    }
-	      	    
-    	    pmm.freePage(te[i].physicalPage);
+	    
+	    if(pmm.getPhysicalPages()[i]==0){
+			
+		    addrSpace.join_lock.V();
+		    
+		    int start = te[i].physicalPage * 128;
+		    int end = start + 128;
+		    
+	    	    for (int z = start; z < end; z++) {
+	    	      Machine.mainMemory[z] = (byte) 0;
+	    	    }
+	    	    
+	     Debug.println('+', "ZeroOut PhysicAddress:" + i);	    
+	    }
+	    
+	    
+
 	}
+	
+	
+	pmm.getProcessTable().remove(addrSpace.getSpaceID());
 	
     }
 
@@ -159,9 +176,8 @@ public class AddrSpace {
 	pageTable = new TranslationEntry[numPages];
 	for (int i = 0; i < numPages; i++) {
 	    pageTable[i] = new TranslationEntry();
-	    pageTable[i].virtualPage = i; // for now, virtual page# = phys page#
-	    pageTable[i].physicalPage = pmm.getPhysicalPage(pageTable[i].virtualPage);
-	    // pageTable[i].physicalPage = i;
+	    pageTable[i].virtualPage = i; 
+	    pageTable[i].physicalPage = pmm.getPhysicalPage(pageTable[i].virtualPage);	 
 	    pageTable[i].valid = true;
 	    pageTable[i].use = false;
 	    pageTable[i].dirty = false;
@@ -199,6 +215,60 @@ public class AddrSpace {
 	return (0);
     }
 
+    
+    public void allocateFork(AddrSpace parentSpace, AddrSpace newSpace){
+	// how big is address space?
+	long size = parentSpace.getSize();
+	int numPages = (int) (size / Machine.PageSize);
+	int stackIndex = parentSpace.calculateStackIndex();
+	
+	Debug.ASSERT((numPages <= Machine.NumPhysPages), // check we're not
+							 // trying
+		"AddrSpace constructor: Not enough memory!");
+	// to run anything too big --
+	// at least until we have
+	// virtual memory
+
+	Debug.println('a', "Initializing address space, numPages=" + numPages
+		+ ", size=" + size);
+
+
+	
+	
+	TranslationEntry[] pageTable = new TranslationEntry[numPages];
+	PhysicalMemoryManager pmm = newSpace.getPmm();
+	for (int i = 0; i < numPages; i++) {
+	    
+	    
+	    pageTable[i] = new TranslationEntry();
+	    pageTable[i].virtualPage = i; 
+	    
+	    if(i<stackIndex){
+		 pageTable[i].physicalPage = parentSpace.getPageTable()[i].physicalPage;
+		 parentSpace.getPmm().increaseCounter(parentSpace.getPageTable()[i].physicalPage);
+		 
+	    }else{
+		 pageTable[i].physicalPage = pmm.getPhysicalPage(pageTable[i].virtualPage);
+	    }
+	   
+	  
+	    pageTable[i].valid = true;
+	    pageTable[i].use = false;
+	    pageTable[i].dirty = false;
+	    pageTable[i].readOnly = false; // if code and data segments live on
+					   // separate pages, we could set code
+					   // pages to be read-only
+	}
+	
+	
+	
+	
+	
+	
+	newSpace.setPageTable(pageTable);
+    }
+    
+    
     /**
      * Initialize the user-level register set to values appropriate for starting
      * execution of a user program loaded in this address space.
