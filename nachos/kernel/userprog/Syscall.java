@@ -130,12 +130,12 @@ public class Syscall {
 	
 	
 	UserThread currentThread = (UserThread) NachosThread.currentThread();
-	AddrSpace addrSpace = new AddrSpace();
-	
+	AddrSpace addrSpaceFork = new AddrSpace();
+	addrSpaceFork.allocateFork(currentThread.space, addrSpaceFork);
 	
 	ForkTask forkTask = new ForkTask(func,currentThread);
 	// creates a new process (i.e. user thread plus user address space)
-	UserThread userThread = new UserThread("thread from fork", forkTask, addrSpace);
+	UserThread userThread = new UserThread("thread from fork", forkTask, addrSpaceFork);
 	Nachos.scheduler.readyToRun(userThread);
     }
 
@@ -149,7 +149,12 @@ public class Syscall {
      * @return the exit status of the specified program.
      */
     public static int join(int id) {
+	Debug.print('+', "Starting Join- waiting for space ID: "+id+".\n");
+	AddrSpace s = PhysicalMemoryManager.getInstance().getSpaceByID(id);
+	s.join_lock.P();
+	Debug.print('+', "Finishing Join- space ID: "+id+".\n");
 	return 0;
+	
     }
 
     /*

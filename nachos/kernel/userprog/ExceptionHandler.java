@@ -98,7 +98,16 @@ public class ExceptionHandler implements nachos.machine.ExceptionHandler {
 		
 		break;
 		
+	    case Syscall.SC_Fork:
+		int func = CPU.readRegister(4);
+		Syscall.fork(func);
+		break;
 		
+	    case Syscall.SC_Join:
+		int processID = CPU.readRegister(4);
+		int status = Syscall.join(processID);
+		CPU.writeRegister(2, status);
+		break;	
 		
 	    case Syscall.SC_Write:
 		int ptr = CPU.readRegister(4);
