@@ -87,6 +87,8 @@ public class Syscall {
 	AddrSpace space = userThread.space;
 
 	space.deAllocateAndZeroOut(space);
+	int parentSpaceID = space.getPmm().getParentTable().get(space.getSpaceID());
+	space.getPmm().getSpaceByID(parentSpaceID).join_lock.V();
 	Nachos.scheduler.finishThread();
     }
 
@@ -102,6 +104,11 @@ public class Syscall {
 	Debug.print('+', "Starting Exec.\n");
 	Task task = new Task(name);
 	AddrSpace addrSpace = new AddrSpace();
+	
+	UserThread userCurrentThread = (UserThread) NachosThread.currentThread();
+	AddrSpace space = userCurrentThread.space;
+	
+	addrSpace.getPmm().registerParent(addrSpace.getSpaceID(), space.getSpaceID());
 
 	// creates a new process (i.e. user thread plus user address space)
 	UserThread userThread = new UserThread(name, task, addrSpace);
@@ -150,7 +157,8 @@ public class Syscall {
      */
     public static int join(int id) {
 	Debug.print('+', "Starting Join- waiting for space ID: "+id+".\n");
-	AddrSpace s = PhysicalMemoryManager.getInstance().getSpaceByID(id);
+	UserThread userThread = (UserThread) NachosThread.currentThread();
+	AddrSpace s = userThread.space;
 	s.join_lock.P();
 	Debug.print('+', "Finishing Join- space ID: "+id+".\n");
 	return 0;

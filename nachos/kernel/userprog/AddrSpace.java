@@ -62,6 +62,10 @@ public class AddrSpace {
     private int spaceID;
     
     Semaphore join_lock;
+    
+    
+
+
     /**
      * Create a new address space.
      */
@@ -72,6 +76,8 @@ public class AddrSpace {
 	spaceID = pmm.registerSpace(this);
 	
 	join_lock = new Semaphore("join_lock for process "+spaceID, 0);
+	
+	
 	
     }
 
@@ -115,7 +121,7 @@ public class AddrSpace {
 	    
 	    if(pmm.getPhysicalPages()[i]==0){
 			
-		    addrSpace.join_lock.V();
+		    
 		    
 		    int start = te[i].physicalPage * 128;
 		    int end = start + 128;
@@ -208,6 +214,8 @@ public class AddrSpace {
 	    executable.read(Machine.mainMemory, noffH.initData.virtualAddr,
 		    noffH.initData.size);
 	}
+	
+	
 
 	return (0);
     }

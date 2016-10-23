@@ -17,16 +17,19 @@ public class Task implements Runnable{
     public void run() {
 	// TODO Auto-generated method stub
 	OpenFile executable;
+	AddrSpace space = ((UserThread)NachosThread.currentThread()).space;
 
 	if((executable = Nachos.fileSystem.open(execName)) == null) {
 	    Debug.println('+', "Unable to open executable file: " + execName);
+	    //PhysicalMemoryManager.getInstance().getSpaceByID(space.getSpaceID()).join_lock.V();
 	    Nachos.scheduler.finishThread();
 	    return;
 	}
 
-	AddrSpace space = ((UserThread)NachosThread.currentThread()).space;
+	
 	if(space.exec(executable) == -1) {
 	    Debug.println('+', "Unable to read executable file: " + execName);
+	    //PhysicalMemoryManager.getInstance().getSpaceByID(space.getSpaceID()).join_lock.V();
 	    Nachos.scheduler.finishThread();
 	    return;
 	}
