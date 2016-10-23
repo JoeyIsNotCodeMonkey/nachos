@@ -126,11 +126,8 @@ public class AddrSpace {
 	    	    
 	     Debug.println('+', "ZeroOut PhysicAddress:" + i);	    
 	    }
-	    
-	    
-
+	   
 	}
-	
 	
 	pmm.getProcessTable().remove(addrSpace.getSpaceID());
 	
@@ -259,10 +256,6 @@ public class AddrSpace {
 					   // separate pages, we could set code
 					   // pages to be read-only
 	}
-	
-	
-	
-	
 	
 	
 	newSpace.setPageTable(pageTable);
