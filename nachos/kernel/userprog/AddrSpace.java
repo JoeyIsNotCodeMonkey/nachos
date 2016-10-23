@@ -63,6 +63,7 @@ public class AddrSpace {
     
     Semaphore join_lock;
     
+    private Semaphore lock;
     
 
 
@@ -77,7 +78,7 @@ public class AddrSpace {
 	
 	join_lock = new Semaphore("join_lock for process "+spaceID, 0);
 	
-	
+	lock = new Semaphore("lock", 1);
 	
     }
 
@@ -121,11 +122,8 @@ public class AddrSpace {
 	    
 	    if(pmm.getPhysicalPages()[i]==0){
 			
-		    
-		    
 		    int start = te[i].physicalPage * 128;
-		    int end = start + 128;
-		    
+		    int end = start + 128;		    
 	    	    for (int z = start; z < end; z++) {
 	    	      Machine.mainMemory[z] = (byte) 0;
 	    	    }
@@ -153,6 +151,10 @@ public class AddrSpace {
      * @return -1 if an error occurs while reading the object file, otherwise 0.
      */
     public int exec(OpenFile executable) {
+
+	
+	//lock.P();
+	
 	NoffHeader noffH;
 
 	if ((noffH = NoffHeader.readHeader(executable)) == null)
@@ -172,7 +174,7 @@ public class AddrSpace {
 	// at least until we have
 	// virtual memory
 
-	Debug.println('a', "Initializing address space, numPages=" + numPages
+	Debug.println('+', "Initializing address space, numPages=" + numPages
 		+ ", size=" + size);
 
 	// first, set up the translation
@@ -191,16 +193,25 @@ public class AddrSpace {
 
 	// Zero out the entire address space, to zero the uninitialized data
 	// segment and the stack segment.
-	for (int i = 0; i < size; i++)
-	    Machine.mainMemory[i] = (byte) 0;
+	if(this.getSpaceID()==1){
+	    for (int i = 0; i < size; i++)
+		    Machine.mainMemory[i] = (byte) 0;
+	}
+	
 
+	 
+	
 	// then, copy in the code and data segments into memory
 	if (noffH.code.size > 0) {
 	    Debug.println('a', "Initializing code segment, at "
 		    + noffH.code.virtualAddr + ", size " + noffH.code.size);
 
-	    executable.seek(noffH.code.inFileAddr);
-	    executable.read(Machine.mainMemory, noffH.code.virtualAddr,
+	    executable.seek(noffH.code.inFileAddr);	
+	    int pageNum  = noffH.code.virtualAddr/Machine.PageSize;
+	    int startPoint = pageTable[pageNum].physicalPage* Machine.PageSize + noffH.code.virtualAddr%Machine.PageSize;
+	
+	    
+	    executable.read(Machine.mainMemory, startPoint,
 		    noffH.code.size);
 	}
 
@@ -210,13 +221,17 @@ public class AddrSpace {
 			    + noffH.initData.virtualAddr + ", size "
 			    + noffH.initData.size);
 
-	    executable.seek(noffH.initData.inFileAddr);
-	    executable.read(Machine.mainMemory, noffH.initData.virtualAddr,
+	    executable.seek(noffH.initData.inFileAddr);	    
+	    int pageNum  = noffH.initData.virtualAddr/Machine.PageSize;
+	    int startPoint = pageTable[pageNum].physicalPage* Machine.PageSize + noffH.initData.virtualAddr%Machine.PageSize;
+	    executable.read(Machine.mainMemory, startPoint,
 		    noffH.initData.size);
 	}
 	
 	
-
+	//lock.V();
+	
+	
 	return (0);
     }
 

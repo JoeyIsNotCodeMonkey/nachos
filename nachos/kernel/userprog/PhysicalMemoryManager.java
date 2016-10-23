@@ -1,5 +1,6 @@
 package nachos.kernel.userprog;
 
+import java.util.ArrayList;
 import java.util.HashMap;
 
 import nachos.Debug;
@@ -15,11 +16,12 @@ public class PhysicalMemoryManager {
     private int spaceID=0;
     private HashMap<Integer, AddrSpace> processTable;
     private HashMap<Integer, Integer> parentTable;
+    private ArrayList<Object[]> joinList;
 
 
-    public HashMap<Integer, Integer> getParentTable() {
-        return parentTable;
-    }
+
+
+
 
     private static PhysicalMemoryManager pmm;
     
@@ -29,7 +31,37 @@ public class PhysicalMemoryManager {
 	physicalPage_lock = new Semaphore("physicalPage_lock", 1);
 	processTable = new HashMap<Integer, AddrSpace>();
 	parentTable = new HashMap<Integer, Integer>();
+	joinList = new ArrayList<Object[]>();
     }
+    
+    
+    public ArrayList<Object[]> getJoinList() {
+        return joinList;
+    }
+    
+    
+    
+    
+    public void awakeThread(int spaceID){
+	
+	
+	if(!joinList.isEmpty()){
+	    for(int i =0 ; i<joinList.size();i++){
+		Object[] o = joinList.get(i);
+		
+		if(((AddrSpace)o[1]).getSpaceID()==spaceID){		   
+		    ((AddrSpace)o[0]).join_lock.V();	
+		    
+		    joinList.remove(i);
+		}
+	    
+	    
+	    }
+	    
+	}
+    }
+    
+    
     
     public static PhysicalMemoryManager getInstance(){
 	if(pmm==null){
@@ -38,6 +70,10 @@ public class PhysicalMemoryManager {
 	return pmm;
     }
     
+    
+    public HashMap<Integer, Integer> getParentTable() {
+        return parentTable;
+    }
     
     public int getPhysicalPage(int virtualPage) {
 	
@@ -50,6 +86,7 @@ public class PhysicalMemoryManager {
 	physicalPages[index] ++;
 	physicalPage_lock.V();
 	Debug.println('+', "AllocateMemory PhysicAddress:" + index);
+	
 	return index;
     }
     
