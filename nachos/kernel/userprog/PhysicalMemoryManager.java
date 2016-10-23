@@ -1,6 +1,5 @@
 package nachos.kernel.userprog;
 
-import java.util.ArrayList;
 import java.util.HashMap;
 
 import nachos.Debug;
@@ -14,8 +13,13 @@ public class PhysicalMemoryManager {
     private static Semaphore physicalPage_lock;
     private static Semaphore spaceID_lock;
     private int spaceID=0;
-    private  HashMap<Integer, AddrSpace> processTable;
+    private HashMap<Integer, AddrSpace> processTable;
+    private HashMap<Integer, Integer> parentTable;
 
+
+    public HashMap<Integer, Integer> getParentTable() {
+        return parentTable;
+    }
 
     private static PhysicalMemoryManager pmm;
     
@@ -24,6 +28,7 @@ public class PhysicalMemoryManager {
 	spaceID_lock = new Semaphore("spaceID_lock", 1);
 	physicalPage_lock = new Semaphore("physicalPage_lock", 1);
 	processTable = new HashMap<Integer, AddrSpace>();
+	parentTable = new HashMap<Integer, Integer>();
     }
     
     public static PhysicalMemoryManager getInstance(){
@@ -70,6 +75,16 @@ public class PhysicalMemoryManager {
 	processTable.put(spaceID, addr);
 	spaceID_lock.V();
 	return spaceID;
+    }
+    
+    public void registerParent(int spaceID, int parentID) {
+	spaceID_lock.P();
+	if(spaceID == 1) {
+	    parentTable.put(1, 1);
+	} else {
+	    parentTable.put(spaceID, parentID);
+	}
+	spaceID_lock.V();
     }
     
     public AddrSpace getSpaceByID(int id){
