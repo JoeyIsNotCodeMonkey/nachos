@@ -87,8 +87,8 @@ public class Syscall {
 	AddrSpace space = userThread.space;
 
 	space.deAllocateAndZeroOut(space);
-	int parentSpaceID = space.getPmm().getParentTable().get(space.getSpaceID());
-	space.getPmm().getSpaceByID(parentSpaceID).join_lock.V();
+	//int parentSpaceID = space.getPmm().getParentTable().get(space.getSpaceID());
+	//space.getPmm().getSpaceByID(parentSpaceID).join_lock.V();
 	Nachos.scheduler.finishThread();
     }
 
