@@ -12,7 +12,9 @@ package nachos.kernel.userprog;
 
 import nachos.machine.MIPS;
 import nachos.machine.NachosThread;
+import nachos.kernel.devices.ConsoleDriver;
 import nachos.machine.CPU;
+import nachos.kernel.devices.ConsoleManager;
 
 /**
  * A UserThread is a NachosThread extended with the capability of
@@ -28,6 +30,8 @@ public class UserThread extends NachosThread {
 
     /** The context in which this thread will execute. */
     public final AddrSpace space;
+    private ConsoleDriver consoleDriver;
+    private ConsoleManager consoleManager;
 
     // A thread running a user program actually has *two* sets of 
     // CPU registers -- one for its state while executing user code,
@@ -50,6 +54,30 @@ public class UserThread extends NachosThread {
     public UserThread(String name, Runnable runObj, AddrSpace addrSpace) {
 	super(name, runObj);
 	space = addrSpace;
+	consoleManager = consoleManager.getInstance();
+	if(!(runObj instanceof Task)) {
+	    consoleDriver = consoleManager.getConsole();
+	} else {
+	    Task t = (Task) runObj;
+	    UserThread parentThread = t.getParentThread();
+	    consoleDriver = parentThread.getConsoleDriver();
+	}
+    }
+
+    public ConsoleDriver getConsoleDriver() {
+        return consoleDriver;
+    }
+
+    public void setConsoleDriver(ConsoleDriver consoleDriver) {
+        this.consoleDriver = consoleDriver;
+    }
+
+    public ConsoleManager getConsoleManager() {
+        return consoleManager;
+    }
+
+    public void setConsoleManager(ConsoleManager consoleManager) {
+        this.consoleManager = consoleManager;
     }
 
     /**

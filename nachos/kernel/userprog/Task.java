@@ -8,9 +8,11 @@ import nachos.machine.NachosThread;
 
 public class Task implements Runnable{
     private String execName;
+    private UserThread parentThread;
     
-    public Task(String name) {
+    public Task(String name, UserThread parentThread) {
 	execName = name;
+	this.parentThread = parentThread;
     }
 
     @Override
@@ -39,5 +41,9 @@ public class Task implements Runnable{
 
 	CPU.runUserCode();			// jump to the user progam
 	Debug.ASSERT(false);		// machine->Run never returns;
+    }
+
+    public UserThread getParentThread() {
+        return parentThread;
     }
 }

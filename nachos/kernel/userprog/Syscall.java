@@ -115,7 +115,8 @@ public class Syscall {
     public static int exec(String name) {
 
 	Debug.print('+', "Starting Exec.\n");
-	Task task = new Task(name);
+	UserThread currentThread = (UserThread) NachosThread.currentThread();
+	Task task = new Task(name, currentThread);
 	AddrSpace addrSpace = new AddrSpace();
 	
 	//UserThread userCurrentThread = (UserThread) NachosThread.currentThread();
@@ -253,10 +254,11 @@ public class Syscall {
     public static void write(byte buffer[], int size, int id) {
 	
 	consoleLock.P();
+	UserThread userThread = (UserThread) NachosThread.currentThread();
 	
 	if (id == ConsoleOutput) {
 	    for (int i = 0; i < size; i++) {
-		Nachos.consoleDriver.putChar((char) buffer[i]);
+		userThread.getConsoleDriver().putChar((char)buffer[i]);
 	    }
 	}
 	
@@ -281,14 +283,16 @@ public class Syscall {
     public static int read(byte buffer[], int size, int id) {
 	
 	consoleLock.P();
+	UserThread userThread = (UserThread) NachosThread.currentThread();
+	
 	
 	int index=0;
 	
 	if (id == ConsoleInput) {
 	    for (int i = 0; i < size; i++) {
 		
-		buffer[index++] = (byte) Nachos.consoleDriver.getChar();
-		Nachos.consoleDriver.putChar((char)buffer[index-1]);
+		buffer[index++] = (byte) userThread.getConsoleDriver().getChar();
+		userThread.getConsoleDriver().putChar((char)buffer[index-1]);
 		if(buffer[index-1] == '\n') {
 		    
 		    break;
