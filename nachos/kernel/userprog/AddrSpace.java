@@ -359,5 +359,13 @@ public class AddrSpace {
 	return pmm;
     }
     
+    public int translateAddr(int va, AddrSpace currentAddrSpace) {
+	int vpn = ((va >> 7) & 0x1ffffff);
+	int off = (va & 0x7f);
+	TranslationEntry[] pagetable = currentAddrSpace.getPageTable();
+	int ppn = pagetable[vpn].physicalPage;
+	int pa = (((ppn << 7) | off));
+	return pa;
+    }
     
 }

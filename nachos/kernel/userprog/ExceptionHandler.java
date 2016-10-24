@@ -69,17 +69,12 @@ public class ExceptionHandler implements nachos.machine.ExceptionHandler {
 
 		StringBuffer stringBuffer = new StringBuffer();
 
-		AddrSpace as = ((UserThread) NachosThread
+		AddrSpace currentAddrSpace = ((UserThread) NachosThread
 			.currentThread()).space;
-		int va = CPU.readRegister(4);
-		int vpn = ((va >> 7) & 0x1ffffff);
-		int off = (va & 0x7f);
-		TranslationEntry[] pagetable = as.getPageTable();
-		int ppn = pagetable[vpn].physicalPage;
-		int pa = (((ppn << 7) | off));
-		int index = pa;
+		int va = CPU.readRegister(4);		
+		int index = currentAddrSpace.translateAddr(va, currentAddrSpace);
 
-		if (pa > Machine.mainMemory.length) {
+		if (index > Machine.mainMemory.length) {
 		    CPU.writeRegister(2, -1);
 		    return;
 		}
@@ -110,6 +105,21 @@ public class ExceptionHandler implements nachos.machine.ExceptionHandler {
 		int status = Syscall.join(processID);
 		CPU.writeRegister(2, status);
 		break;	
+		
+	    case Syscall.SC_Read:
+		int readPtr = CPU.readRegister(4);
+		int readLen = CPU.readRegister(5);
+		byte readBuf[] = new byte[readLen];
+		
+		//translate
+		AddrSpace currentAddrSpaceRead = ((UserThread) NachosThread
+			.currentThread()).space;
+		int pa = currentAddrSpaceRead.translateAddr(readPtr, currentAddrSpaceRead);
+		
+		int size = Syscall.read(readBuf, readLen, CPU.readRegister(6));
+		System.arraycopy(readBuf, 0, Machine.mainMemory, pa, size);
+		
+		break;
 		
 	    case Syscall.SC_Write:
 		int ptr = CPU.readRegister(4);

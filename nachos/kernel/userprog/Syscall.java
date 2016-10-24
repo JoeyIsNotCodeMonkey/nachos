@@ -271,7 +271,17 @@ public class Syscall {
      * @return The actual number of bytes read.
      */
     public static int read(byte buffer[], int size, int id) {
-	return 0;
+	int i = 0;
+	if (id == ConsoleInput) {
+	    for (i = 0; i < size; i++) {
+		
+		buffer[i] = (byte) Nachos.consoleDriver.getChar();
+		if(buffer[i] == '\n') {
+		    break;
+		}
+	    }
+	}
+	return i;
     }
 
     /**
