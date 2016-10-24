@@ -8,6 +8,7 @@ package nachos.kernel.userprog;
 
 import nachos.Debug;
 import nachos.kernel.Nachos;
+import nachos.kernel.threads.Semaphore;
 import nachos.machine.Machine;
 import nachos.machine.NachosThread;
 import nachos.machine.Simulation;
@@ -62,6 +63,8 @@ public class Syscall {
     /** Integer code identifying the "Remove" system call. */
     public static final byte SC_Remove = 11;
 
+    
+    private static Semaphore  consoleLock = new Semaphore("consoleLock", 1);
     /**
      * Stop Nachos, and print out performance stats.
      */
@@ -248,11 +251,16 @@ public class Syscall {
      *            The OpenFileId of the file to which to write the data.
      */
     public static void write(byte buffer[], int size, int id) {
+	
+	consoleLock.P();
+	
 	if (id == ConsoleOutput) {
 	    for (int i = 0; i < size; i++) {
 		Nachos.consoleDriver.putChar((char) buffer[i]);
 	    }
 	}
+	
+	consoleLock.V();
     }
 
     /**
@@ -271,17 +279,26 @@ public class Syscall {
      * @return The actual number of bytes read.
      */
     public static int read(byte buffer[], int size, int id) {
-	int i = 0;
+	
+	consoleLock.P();
+	
+	int index=0;
+	
 	if (id == ConsoleInput) {
-	    for (i = 0; i < size; i++) {
+	    for (int i = 0; i < size; i++) {
 		
-		buffer[i] = (byte) Nachos.consoleDriver.getChar();
-		if(buffer[i] == '\n') {
+		buffer[index++] = (byte) Nachos.consoleDriver.getChar();
+		Nachos.consoleDriver.putChar((char)buffer[index-1]);
+		if(buffer[index-1] == '\n') {
+		    
 		    break;
 		}
 	    }
 	}
-	return i;
+
+	    
+	consoleLock.V();  
+	return index;
     }
 
     /**

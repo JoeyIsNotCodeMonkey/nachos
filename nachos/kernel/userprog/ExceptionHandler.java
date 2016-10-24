@@ -117,6 +117,7 @@ public class ExceptionHandler implements nachos.machine.ExceptionHandler {
 		int pa = currentAddrSpaceRead.translateAddr(readPtr, currentAddrSpaceRead);
 		
 		int size = Syscall.read(readBuf, readLen, CPU.readRegister(6));
+		
 		System.arraycopy(readBuf, 0, Machine.mainMemory, pa, size);
 		
 		break;
@@ -124,8 +125,14 @@ public class ExceptionHandler implements nachos.machine.ExceptionHandler {
 	    case Syscall.SC_Write:
 		int ptr = CPU.readRegister(4);
 		int len = CPU.readRegister(5);
+		
+		Debug.println('+', len +"___________");
+		
+		
+		AddrSpace as = ((UserThread) NachosThread.currentThread()).space;
+		ptr = as.translateAddr(ptr, as);
 		byte buf[] = new byte[len];
-
+		
 		System.arraycopy(Machine.mainMemory, ptr, buf, 0, len);
 		Syscall.write(buf, len, CPU.readRegister(6));
 		break;
