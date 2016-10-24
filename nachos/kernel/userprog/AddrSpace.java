@@ -19,6 +19,8 @@
 
 package nachos.kernel.userprog;
 
+
+
 import nachos.Debug;
 import nachos.machine.CPU;
 import nachos.machine.MIPS;
@@ -27,6 +29,7 @@ import nachos.machine.NachosThread;
 import nachos.machine.TranslationEntry;
 import nachos.noff.NoffHeader;
 import nachos.kernel.filesys.OpenFile;
+import nachos.kernel.threads.Lock;
 import nachos.kernel.threads.Semaphore;
 
 /**
@@ -59,12 +62,24 @@ public class AddrSpace {
    
     private int numPages;
     
-    private int spaceID;
+    private static int spaceID;
     
-    Semaphore join_lock;
+    static Semaphore join_lock;
     
-    private Semaphore lock;
+    private static Semaphore lock;
     
+    private static Lock pmmLock;
+    
+    
+    static{
+	
+	join_lock = new Semaphore("join_lock for process "+spaceID, 0);
+	
+	lock = new Semaphore("lock"+ spaceID, 1);
+	
+	pmmLock = new Lock("pmmLock" );
+	
+    }
 
 
     /**
@@ -76,10 +91,7 @@ public class AddrSpace {
 	
 	spaceID = pmm.registerSpace(this);
 	
-	join_lock = new Semaphore("join_lock for process "+spaceID, 0);
-	
-	lock = new Semaphore("lock"+ spaceID, 1);
-	
+
     }
 
     
@@ -153,7 +165,8 @@ public class AddrSpace {
     public int exec(OpenFile executable) {
 
 	
-	lock.P();
+	
+	pmmLock.acquire();
 	
 	NoffHeader noffH;
 
@@ -182,7 +195,11 @@ public class AddrSpace {
 	for (int i = 0; i < numPages; i++) {
 	    pageTable[i] = new TranslationEntry();
 	    pageTable[i].virtualPage = i; 
+	    
+	    
 	    pageTable[i].physicalPage = pmm.getPhysicalPage(pageTable[i].virtualPage);	 
+	  
+	    
 	    pageTable[i].valid = true;
 	    pageTable[i].use = false;
 	    pageTable[i].dirty = false;
@@ -228,8 +245,8 @@ public class AddrSpace {
 		    noffH.initData.size);
 	}
 	
+	pmmLock.release();
 	
-	lock.V();
 	
 	
 	return (0);

@@ -13,6 +13,10 @@ public class PhysicalMemoryManager {
     private static int physicalPages[];
     private static Semaphore physicalPage_lock;
     private static Semaphore spaceID_lock;
+    
+    
+    
+    
     private int spaceID=0;
     private HashMap<Integer, AddrSpace> processTable;
     private HashMap<Integer, Integer> parentTable;
