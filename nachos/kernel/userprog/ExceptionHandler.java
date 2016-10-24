@@ -126,7 +126,6 @@ public class ExceptionHandler implements nachos.machine.ExceptionHandler {
 		int ptr = CPU.readRegister(4);
 		int len = CPU.readRegister(5);
 		
-		Debug.println('+', len +"___________");
 		
 		
 		AddrSpace as = ((UserThread) NachosThread.currentThread()).space;

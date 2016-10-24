@@ -82,7 +82,7 @@ public class Nachos implements Runnable {
 	// Initialize device drivers.
 
 	if(Machine.NUM_CONSOLES > 0)
-	    consoleDriver = new ConsoleDriver(Machine.getConsole(0));
+	    consoleDriver = new ConsoleDriver(Machine.getConsole(0),0);
 
 	if(Machine.NUM_DISKS > 0)
 	    diskDriver = new DiskDriver(0);

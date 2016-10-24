@@ -37,6 +37,10 @@ public class ConsoleDriver {
     /** Lock used to ensure at most one thread trying to output at a time. */
     private Lock outputLock;
     
+    private int driverID;
+    
+
+
     /** Semaphore used to indicate that an input character is available. */
     private Semaphore charAvail = new Semaphore("Console char avail", 0);
     
@@ -54,11 +58,18 @@ public class ConsoleDriver {
      * 
      * @param console  The console device to be managed.
      */
-    public ConsoleDriver(Console console) {
+    public ConsoleDriver(Console console, int id) {
 	inputLock = new Lock("console driver input lock");
 	outputLock = new Lock("console driver output lock");
 	this.console = console;
+	
+	driverID = id;
 	// Delay setting the interrupt handlers until first use.
+    }   
+    
+    
+    public int getDriverID() {
+        return driverID;
     }
     
     /**
