@@ -23,6 +23,51 @@ public class ForkTask implements Runnable {
     public void run() {
 	// TODO Auto-generated method stub
 	// copy size and numPages
+	
+	long size = parentThread.space.getSize();
+	int numPages = (int) (size / Machine.PageSize);
+	int stackIndex = parentThread.space.calculateStackIndex();
+	
+	Debug.ASSERT((numPages <= Machine.NumPhysPages), // check we're not
+							 // trying
+		"AddrSpace constructor: Not enough memory!");
+	// to run anything too big --
+	// at least until we have
+	// virtual memory
+
+	Debug.println('a', "Initializing address space, numPages=" + numPages
+		+ ", size=" + size);
+
+
+	
+	
+	TranslationEntry[] pageTable = new TranslationEntry[numPages];
+	PhysicalMemoryManager pmm = space.getPmm();
+	for (int i = 0; i < numPages; i++) {
+	    
+	    
+	    pageTable[i] = new TranslationEntry();
+	    pageTable[i].virtualPage = i; 
+	    
+	    if(i<stackIndex){
+		 pageTable[i].physicalPage = parentThread.space.getPageTable()[i].physicalPage;
+		 parentThread.space.getPmm().increaseCounter(parentThread.space.getPageTable()[i].physicalPage);
+		 
+	    }else{
+		 pageTable[i].physicalPage = pmm.getPhysicalPage(pageTable[i].virtualPage);
+	    }
+	   
+	  
+	    pageTable[i].valid = true;
+	    pageTable[i].use = false;
+	    pageTable[i].dirty = false;
+	    pageTable[i].readOnly = false; // if code and data segments live on
+					   // separate pages, we could set code
+					   // pages to be read-only
+	}
+	
+	
+	space.setPageTable(pageTable);
 
 	
 
