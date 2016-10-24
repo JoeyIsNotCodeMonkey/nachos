@@ -78,7 +78,7 @@ public class AddrSpace {
 	
 	join_lock = new Semaphore("join_lock for process "+spaceID, 0);
 	
-	lock = new Semaphore("lock", 1);
+	lock = new Semaphore("lock"+ spaceID, 1);
 	
     }
 
@@ -153,7 +153,7 @@ public class AddrSpace {
     public int exec(OpenFile executable) {
 
 	
-	//lock.P();
+	lock.P();
 	
 	NoffHeader noffH;
 
@@ -229,60 +229,60 @@ public class AddrSpace {
 	}
 	
 	
-	//lock.V();
+	lock.V();
 	
 	
 	return (0);
     }
 
     
-//    public void allocateFork(AddrSpace parentSpace, AddrSpace newSpace){
-//	// how big is address space?
-//	long size = parentSpace.getSize();
-//	int numPages = (int) (size / Machine.PageSize);
-//	int stackIndex = parentSpace.calculateStackIndex();
-//	
-//	Debug.ASSERT((numPages <= Machine.NumPhysPages), // check we're not
-//							 // trying
-//		"AddrSpace constructor: Not enough memory!");
-//	// to run anything too big --
-//	// at least until we have
-//	// virtual memory
-//
-//	Debug.println('a', "Initializing address space, numPages=" + numPages
-//		+ ", size=" + size);
-//
-//
-//	
-//	
-//	TranslationEntry[] pageTable = new TranslationEntry[numPages];
-//	PhysicalMemoryManager pmm = newSpace.getPmm();
-//	for (int i = 0; i < numPages; i++) {
-//	    
-//	    
-//	    pageTable[i] = new TranslationEntry();
-//	    pageTable[i].virtualPage = i; 
-//	    
-//	    if(i<stackIndex){
-//		 pageTable[i].physicalPage = parentSpace.getPageTable()[i].physicalPage;
-//		 parentSpace.getPmm().increaseCounter(parentSpace.getPageTable()[i].physicalPage);
-//		 
-//	    }else{
-//		 pageTable[i].physicalPage = pmm.getPhysicalPage(pageTable[i].virtualPage);
-//	    }
-//	   
-//	  
-//	    pageTable[i].valid = true;
-//	    pageTable[i].use = false;
-//	    pageTable[i].dirty = false;
-//	    pageTable[i].readOnly = false; // if code and data segments live on
-//					   // separate pages, we could set code
-//					   // pages to be read-only
-//	}
-//	
-//	
-//	newSpace.setPageTable(pageTable);
-//    }
+    public void allocateFork(AddrSpace parentSpace, AddrSpace newSpace){
+	// how big is address space?
+	long size = parentSpace.getSize();
+	int numPages = (int) (size / Machine.PageSize);
+	int stackIndex = parentSpace.calculateStackIndex();
+	
+	Debug.ASSERT((numPages <= Machine.NumPhysPages), // check we're not
+							 // trying
+		"AddrSpace constructor: Not enough memory!");
+	// to run anything too big --
+	// at least until we have
+	// virtual memory
+
+	Debug.println('a', "Initializing address space, numPages=" + numPages
+		+ ", size=" + size);
+
+
+	
+	
+	TranslationEntry[] pageTable = new TranslationEntry[numPages];
+	PhysicalMemoryManager pmm = newSpace.getPmm();
+	for (int i = 0; i < numPages; i++) {
+	    
+	    
+	    pageTable[i] = new TranslationEntry();
+	    pageTable[i].virtualPage = i; 
+	    
+	    if(i<stackIndex){
+		 pageTable[i].physicalPage = parentSpace.getPageTable()[i].physicalPage;
+		 parentSpace.getPmm().increaseCounter(parentSpace.getPageTable()[i].physicalPage);
+		 
+	    }else{
+		 pageTable[i].physicalPage = pmm.getPhysicalPage(pageTable[i].virtualPage);
+	    }
+	   
+	  
+	    pageTable[i].valid = true;
+	    pageTable[i].use = false;
+	    pageTable[i].dirty = false;
+	    pageTable[i].readOnly = false; // if code and data segments live on
+					   // separate pages, we could set code
+					   // pages to be read-only
+	}
+	
+	
+	newSpace.setPageTable(pageTable);
+    }
     
     
     /**

@@ -26,6 +26,7 @@ import nachos.machine.CPU;
 import nachos.machine.Machine;
 import nachos.machine.NachosThread;
 import nachos.kernel.devices.ConsoleDriver;
+import nachos.kernel.devices.ConsoleManager;
 import nachos.kernel.devices.DiskDriver;
 import nachos.kernel.devices.NetworkDriver;
 import nachos.kernel.devices.SerialDriver;
@@ -82,8 +83,7 @@ public class Nachos implements Runnable {
 	// Initialize device drivers.
 
 	if(Machine.NUM_CONSOLES > 0)
-	    consoleDriver = new ConsoleDriver(Machine.getConsole(0),0);
-
+	    consoleDriver = ConsoleManager.getInstance().getDefaultConsole();
 	if(Machine.NUM_DISKS > 0)
 	    diskDriver = new DiskDriver(0);
 

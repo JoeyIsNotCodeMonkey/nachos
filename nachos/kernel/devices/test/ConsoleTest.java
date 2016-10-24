@@ -12,6 +12,7 @@ package nachos.kernel.devices.test;
 import nachos.Debug;
 import nachos.kernel.Nachos;
 import nachos.kernel.devices.ConsoleDriver;
+import nachos.kernel.devices.ConsoleManager;
 import nachos.machine.NachosThread;
 
 /**
@@ -31,10 +32,12 @@ public class ConsoleTest implements Runnable {
      */
     public void run() {
 	Debug.println('+', "ConsoleTest: starting");
-	Debug.ASSERT(Nachos.consoleDriver != null,
+	
+	console = ConsoleManager.getInstance().getConsole();
+	Debug.ASSERT(console != null,
 			"There is no console device to test!");
 
-	console = Nachos.consoleDriver;
+	
 	while (true) {
 	    char ch = console.getChar();
 	    console.putChar(ch);	// echo it!
@@ -43,11 +46,14 @@ public class ConsoleTest implements Runnable {
 		console.putChar('\r');
 
 	    if (ch == 'q') {
-		Debug.println('+', "ConsoleTest: quitting");
+		Debug.println('+', "ConsoleTest: quitting "+console.getDriverID());
 		console.stop();
 		Nachos.scheduler.finishThread();    // if q, quit
 	    }
+
 	}
+
+	
     }
 
     /**
@@ -60,7 +66,11 @@ public class ConsoleTest implements Runnable {
      */
     public static void start() {
 	NachosThread thread = new NachosThread("Console test", new ConsoleTest());
+	NachosThread thread2 = new NachosThread("Console test2", new ConsoleTest());
+	NachosThread thread3 = new NachosThread("Console test3", new ConsoleTest());
 	Nachos.scheduler.readyToRun(thread);
+	Nachos.scheduler.readyToRun(thread2);
+	Nachos.scheduler.readyToRun(thread3);
     }
 }
 

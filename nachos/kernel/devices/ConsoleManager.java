@@ -12,14 +12,14 @@ public class ConsoleManager {
     
     private ConsoleDriver[] consolePool;
     
-    private Semaphore poolLock = new Semaphore("poolLock", 1);
+    private static Semaphore poolLock = new Semaphore("poolLock", 1);
     
     public ConsoleManager(){
 	consolePool = new ConsoleDriver[Nachos.options.NUM_CONSOLES];
     }
     
     
-    public ConsoleManager getInstance(){
+    public static ConsoleManager getInstance(){
 	if(cm==null){
 	    cm=new ConsoleManager();	   
 	}
@@ -27,23 +27,32 @@ public class ConsoleManager {
 	
     }
     
-    
+    public ConsoleDriver getDefaultConsole(){
+	poolLock.P();
+
+   	if(consolePool[0]==null){
+   	 consolePool[0] = new ConsoleDriver(Machine.getConsole(0),0);
+   	}	
+   	poolLock.V();
+   	return consolePool[0];
+   	
+       }
     
     public ConsoleDriver getConsole(){
-	poolLock.P();
 	
+	poolLock.P();
 	for(int i =1; i<consolePool.length;i++){
 	    
 	    if(consolePool[i]==null){
 		
 		consolePool[i] = new ConsoleDriver(Machine.getConsole(i),i);
-		
+		poolLock.V();
 		return consolePool[i];
 	    }
 	    
 	}
-	poolLock.V();
 	
+	poolLock.V();
 	return null;
 	
 	

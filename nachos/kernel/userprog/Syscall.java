@@ -8,7 +8,9 @@ package nachos.kernel.userprog;
 
 import nachos.Debug;
 import nachos.kernel.Nachos;
+import nachos.kernel.devices.ConsoleManager;
 import nachos.kernel.threads.Semaphore;
+import nachos.kernel.threads.SpinLock;
 import nachos.machine.Machine;
 import nachos.machine.NachosThread;
 import nachos.machine.Simulation;
@@ -65,6 +67,8 @@ public class Syscall {
 
     
     private static Semaphore  consoleLock = new Semaphore("consoleLock", 1);
+    
+    private static SpinLock spinLock  = new SpinLock("syscall_lock");
     /**
      * Stop Nachos, and print out performance stats.
      */
@@ -87,6 +91,11 @@ public class Syscall {
 		+ NachosThread.currentThread().name);
 
 	UserThread userThread = (UserThread) NachosThread.currentThread();
+	
+	if(userThread.isTopLevel()){
+	   ConsoleManager.getInstance().freeConsole(userThread.getConsoleDriver());
+	}
+	
 	AddrSpace space = userThread.space;
 	
 	
@@ -113,7 +122,9 @@ public class Syscall {
      *            The name of the file to execute.
      */
     public static int exec(String name) {
-
+	
+	
+	
 	Debug.print('+', "Starting Exec.\n");
 	UserThread currentThread = (UserThread) NachosThread.currentThread();
 	Task task = new Task(name, currentThread);
@@ -137,6 +148,9 @@ public class Syscall {
 
 	// ("SpaceId") that uniquely identifies the newly created process is
 	// returned to the caller
+	
+	
+	
 	return addrSpace.getSpaceID();
 
     }
@@ -154,7 +168,7 @@ public class Syscall {
 	
 	UserThread currentThread = (UserThread) NachosThread.currentThread();
 	AddrSpace addrSpaceFork = new AddrSpace();
-	//addrSpaceFork.allocateFork(currentThread.space, addrSpaceFork);
+	addrSpaceFork.allocateFork(currentThread.space, addrSpaceFork);
 	
 	ForkTask forkTask = new ForkTask(func,currentThread);
 	// creates a new process (i.e. user thread plus user address space)
@@ -253,7 +267,7 @@ public class Syscall {
      */
     public static void write(byte buffer[], int size, int id) {
 	
-	consoleLock.P();
+	//consoleLock.P();
 	UserThread userThread = (UserThread) NachosThread.currentThread();
 	
 	if (id == ConsoleOutput) {
@@ -262,7 +276,7 @@ public class Syscall {
 	    }
 	}
 	
-	consoleLock.V();
+	//consoleLock.V();
     }
 
     /**
@@ -282,7 +296,7 @@ public class Syscall {
      */
     public static int read(byte buffer[], int size, int id) {
 	
-	consoleLock.P();
+	//consoleLock.P();
 	UserThread userThread = (UserThread) NachosThread.currentThread();
 	
 	
@@ -301,7 +315,7 @@ public class Syscall {
 	}
 
 	    
-	consoleLock.V();  
+	//consoleLock.V();  
 	return index;
     }
 

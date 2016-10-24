@@ -47,6 +47,8 @@ public class ProgTest implements Runnable {
 	execName = filename;
 	AddrSpace space = new AddrSpace();
 	UserThread t = new UserThread(name, this, space);
+	
+	
 	Nachos.scheduler.readyToRun(t);
     }
 
