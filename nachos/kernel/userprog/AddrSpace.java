@@ -64,22 +64,12 @@ public class AddrSpace {
     
     private static int spaceID;
     
-    static Semaphore join_lock;
-    
-    private static Semaphore lock;
-    
-    private static Lock pmmLock;
+    static Semaphore join_lock = new Semaphore("join_lock for process "+spaceID, 0);
+        
+    private static Lock pmmLock = new Lock("pmmLock" );
     
     
-    static{
-	
-	join_lock = new Semaphore("join_lock for process "+spaceID, 0);
-	
-	lock = new Semaphore("lock"+ spaceID, 1);
-	
-	pmmLock = new Lock("pmmLock" );
-	
-    }
+    
 
 
     /**
