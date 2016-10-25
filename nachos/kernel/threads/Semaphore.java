@@ -99,8 +99,8 @@ public class Semaphore {
 	    Nachos.scheduler.sleepThread(spinLock);
 	    spinLock.acquire();				// restore exclusion
 	}
-	Debug.println('s', "Semaphore " + name + ": value " + value
-		+ " -> " + (value-1));
+	//Debug.println('s', "Semaphore " + name + ": value " + value
+	//	+ " -> " + (value-1));
 	value--; 					// semaphore available, 
 							// consume its value
 	spinLock.release();				// release exclusion
@@ -123,8 +123,8 @@ public class Semaphore {
 	if (thread != null)  // make thread ready, consuming the V immediately
 	    Nachos.scheduler.readyToRun(thread);
 	
-	Debug.println('s', "Semaphore " + name + ": value " + value
-		+ " -> " + (value+1));
+	//Debug.println('s', "Semaphore " + name + ": value " + value
+	//	+ " -> " + (value+1));
 	value++;
 
 	spinLock.release();				// release exclusion

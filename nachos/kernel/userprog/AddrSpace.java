@@ -177,6 +177,13 @@ public class AddrSpace {
 	    Debug.println('+',"AddrSpace constructor: Not enough memory!");
 	    return -1;
 	}
+	
+	int pageLeft = PhysicalMemoryManager.getInstance().pageLeft();
+	
+	if(numPages>pageLeft){
+	    Debug.println('+',"AddrSpace constructor: Not enough memory!"+pageLeft);
+	    return -1;
+	}
 	   
 	
 	

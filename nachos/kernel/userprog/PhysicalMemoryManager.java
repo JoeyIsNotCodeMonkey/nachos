@@ -155,5 +155,15 @@ public class PhysicalMemoryManager {
         return processTable;
     }
     
+    public int pageLeft(){
+	int count =0;
+	
+	for(int i : physicalPages){
+	    if(i==0)
+		count++;
+	}
+	return count;
+    }
+    
 
 }
