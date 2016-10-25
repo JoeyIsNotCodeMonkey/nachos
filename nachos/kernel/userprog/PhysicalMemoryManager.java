@@ -99,7 +99,7 @@ public class PhysicalMemoryManager {
 	
 	
 	int index = 0;
-	while(index<physicalPages.length&&physicalPages[index]>0) {
+	while(physicalPages[index]>0) {
 	    index++;
 	}
 	
