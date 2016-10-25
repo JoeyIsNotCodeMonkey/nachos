@@ -89,6 +89,8 @@ public class Syscall {
     public static void exit(int status) {
 	Debug.println('+', "User program exits with status=" + status + ": "
 		+ NachosThread.currentThread().name);
+	
+	
 
 	UserThread userThread = (UserThread) NachosThread.currentThread();
 	
