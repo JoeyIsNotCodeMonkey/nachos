@@ -11,6 +11,10 @@ public class ForkTask implements Runnable {
     private int func;
 
     private UserThread parentThread;
+    public UserThread getParentThread() {
+        return parentThread;
+    }
+
     AddrSpace space;
 
     public ForkTask(int func, UserThread parentThread) {

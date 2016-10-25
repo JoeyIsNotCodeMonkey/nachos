@@ -127,13 +127,10 @@ public class Syscall {
 
 
 	
-	Debug.println('+', "spaceID "+ ((UserThread) NachosThread.currentThread()).space.getSpaceID());
 	UserThread currentThread = (UserThread) NachosThread.currentThread();
-	Debug.println('+', "spaceID "+ ((UserThread) NachosThread.currentThread()).space.getSpaceID());
 	Task task = new Task(name, currentThread);
-	Debug.println('+', "spaceID "+ ((UserThread) NachosThread.currentThread()).space.getSpaceID());
 	AddrSpace addrSpace = new AddrSpace();
-	Debug.println('+', "spaceID "+ ((UserThread) NachosThread.currentThread()).space.getSpaceID());
+	
 	
 	//UserThread userCurrentThread = (UserThread) NachosThread.currentThread();
 	//AddrSpace space = userCurrentThread.space;

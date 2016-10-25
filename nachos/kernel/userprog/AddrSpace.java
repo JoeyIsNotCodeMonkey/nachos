@@ -108,16 +108,18 @@ public class AddrSpace {
 
     public void deAllocateAndZeroOut(AddrSpace addrSpace) {
 
-	
+
+	Debug.println('+', "DeAllocateMemory SpaceID:" + addrSpace.getSpaceID());
+
 	pmmLock.acquire();
 	TranslationEntry[] te = addrSpace.getPageTable();
 
 	for (int i = 0; i < te.length; i++) {
 
 	    pmm.decreaseCounter(te[i].physicalPage);
-	    Debug.println('+', "DeAllocateMemory PhysicAddress:" + i);
+	    Debug.println('+', "DeAllocateMemory PhysicAddress:" + te[i].physicalPage );
 
-	    if (pmm.getPhysicalPages()[i] == 0) {
+	    if (pmm.getPhysicalPages()[te[i].physicalPage] == 0) {
 
 		int start = te[i].physicalPage * 128;
 		int end = start + 128;
@@ -125,7 +127,7 @@ public class AddrSpace {
 		    Machine.mainMemory[z] = (byte) 0;
 		}
 
-		Debug.println('+', "ZeroOut PhysicAddress:" + i);
+		Debug.println('+', "ZeroOut PhysicAddress:" + te[i].physicalPage);
 	    }
 
 	}
