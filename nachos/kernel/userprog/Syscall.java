@@ -66,9 +66,9 @@ public class Syscall {
     public static final byte SC_Remove = 11;
 
     
-    private static Semaphore  consoleLock = new Semaphore("consoleLock", 1);
+
     
-    private static SpinLock spinLock  = new SpinLock("syscall_lock");
+    
     /**
      * Stop Nachos, and print out performance stats.
      */

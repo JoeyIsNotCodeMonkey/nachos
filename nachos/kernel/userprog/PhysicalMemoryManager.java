@@ -80,17 +80,21 @@ public class PhysicalMemoryManager {
     }
     
     public int getPhysicalPage(int virtualPage) {
+	physicalPage_lock.P();
+	
 	
 	int index = 0;
 	while(physicalPages[index]>0) {
 	    index++;
 	}
 	
-	physicalPage_lock.P();
+	
 	physicalPages[index] ++;
-	physicalPage_lock.V();
+	
 	Debug.println('+', "AllocateMemory PhysicAddress:" + index);
 	
+	
+	physicalPage_lock.V();
 	return index;
     }
     

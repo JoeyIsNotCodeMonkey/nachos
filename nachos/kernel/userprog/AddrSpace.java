@@ -113,7 +113,7 @@ public class AddrSpace {
     
     public void deAllocateAndZeroOut(AddrSpace addrSpace) {
 	
-	
+	pmmLock.acquire();
 	TranslationEntry[] te = addrSpace.getPageTable();
 	
 	for(int i=0;i<te.length;i++){
@@ -136,7 +136,7 @@ public class AddrSpace {
 	}
 	
 	pmm.getProcessTable().remove(addrSpace.getSpaceID());
-	
+	pmmLock.release();
     }
 
     /**
@@ -170,9 +170,15 @@ public class AddrSpace {
 				 // to leave room for the stack
 	numPages = (int) (size / Machine.PageSize);
 
-	Debug.ASSERT((numPages <= Machine.NumPhysPages), // check we're not
-							 // trying
-		"AddrSpace constructor: Not enough memory!");
+	if(numPages > Machine.NumPhysPages){
+	    
+	    Debug.println('+',"AddrSpace constructor: Not enough memory!");
+	    return -1;
+	}
+	   
+	
+	
+	
 	// to run anything too big --
 	// at least until we have
 	// virtual memory
@@ -244,6 +250,10 @@ public class AddrSpace {
 
     
     public void allocateFork(AddrSpace parentSpace, AddrSpace newSpace){
+	
+	
+	pmmLock.acquire();
+	
 	// how big is address space?
 	long size = parentSpace.getSize();
 	int numPages = (int) (size / Machine.PageSize);
@@ -289,6 +299,10 @@ public class AddrSpace {
 	
 	
 	newSpace.setPageTable(pageTable);
+	
+
+	pmmLock.release();
+	
     }
     
     
@@ -353,7 +367,7 @@ public class AddrSpace {
     }
 
     public int getSpaceID() {
-	// TODO Auto-generated method stub
+	
 	return spaceID;
     }
 
@@ -362,7 +376,7 @@ public class AddrSpace {
     }
 
     public PhysicalMemoryManager getPmm() {
-	// TODO Auto-generated method stub
+	
 	return pmm;
     }
     
