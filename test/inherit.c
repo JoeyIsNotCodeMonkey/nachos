@@ -28,7 +28,7 @@ main()
 	Write((char *)&fd, sizeof(int), fd1);
 	Close(fd1);
 
-	pid = Exec("inherit-child");
+	pid = Exec("test/inherit-child");
 	Close(fd);
 	Join(pid);
 }

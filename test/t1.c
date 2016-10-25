@@ -3,9 +3,9 @@
 int main()
 {
   int i, j;
-  
-  Exec("timeshare2");
-  Exec("timeshare3");  
+
+  Exec("test/timeshare2");
+  Exec("test/timeshare3");  
 
   for(i=0;i<10;i++) {
 	for (j=0; j<100; j++);

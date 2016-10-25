@@ -2,6 +2,6 @@
 
 int main()
 {
-  Exec("multiprog2");
+  Exec("test/multiprog2");
   Write("Multiprogramming 1\n",19,ConsoleOutput);
 }

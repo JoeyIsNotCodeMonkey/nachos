@@ -8,7 +8,7 @@ int main()
   int i;
 
   Write("Big.\n",5,ConsoleOutput);
-  s2 = Exec("vm3");
+  s2 = Exec("test/vm3");
   for (i=0; i < 64; i++);
   Join(s2);
   Exit(0);

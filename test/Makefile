@@ -18,8 +18,7 @@ GCCDIR = /Users/Joey/Documents/mips-gcc/
 JAVADIR = 
 
 # Uncomment the following when running on Windows.
-JAVA= $(JAVADIR)java -classpath '../machine.jar'
-
+JAVA= $(JAVADIR)java -classpath '..'
 
 # Uncomment the following when running on Unix.
 #JAVA= $(JAVADIR)java -classpath '..'
@@ -33,7 +32,7 @@ COFF2NOFF = $(JAVA) nachos.noff.Coff2Noff
 
 LDFLAGS = -T script -N
 ASFLAGS = -mips1
-CPPFLAGS = -I$(INCDIR) -B $(GCCDIR)
+CPPFLAGS = -I$(INCDIR) -B$(GCCDIR)
 
 CFLAGS = -G 0 -I$(INCDIR) -B$(GCCDIR) -c -fno-builtin
 SFLAGS = -G 0 -I$(INCDIR) -B$(GCCDIR) -c -S -fno-builtin
@@ -59,9 +58,6 @@ halt: halt.o start.o
 	rm halt.o
 	$(COFF2NOFF) halt.coff halt
 	rm halt.coff
-
-
-
 
 # If you are using gmake, the following rules should enable you to
 # compile any of the test programs.  Otherwise, you have to copy the

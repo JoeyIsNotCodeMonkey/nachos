@@ -8,6 +8,6 @@ int main()
 {
   SpaceId child;
   Write("here\n", 5, 1);
-  child = Exec("stress-exec");
+  child = Exec("test/stress-exec");
   Exit(0);
 }

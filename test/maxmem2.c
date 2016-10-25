@@ -216,10 +216,10 @@ int main() {
     char buf[10];
     char* str = STR;
     int fd, i, pid;
-    
+
     for(i=0; i < 7; i++)
 	buf[i] = '0';
-    
+
     fd = Open("maxmem2.data");
     if(fd >= 0) {
 	Read(buf, 7, fd);
@@ -240,8 +240,8 @@ int main() {
     fd = Open("maxmem2.data");
     Write(buf, 7, fd);
     Close(fd);
-	
-    pid = Exec("maxmem2");
+
+    pid = Exec("test/maxmem2");
     if(pid >= 0)
 	Join(pid);
     else
