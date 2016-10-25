@@ -52,7 +52,9 @@ public class AddrSpace {
     private TranslationEntry pageTable[];
 
     /** Default size of the user stack area -- increase this as necessary! */
+
     private static final int UserStackSize = 1024;
+
 
     private PhysicalMemoryManager pmm;
 
@@ -162,9 +164,12 @@ public class AddrSpace {
 				 // to leave room for the stack
 	numPages = (int) (size / Machine.PageSize);
 
+	int remainder = (int) (size % Machine.PageSize);
+	
+	
+	
+	if((numPages > Machine.NumPhysPages)||((numPages==Machine.NumPhysPages)&&(remainder!=0))){	    
 
-	if(numPages > Machine.NumPhysPages){
-	    
 	    Debug.println('+',"AddrSpace constructor: Not enough memory!");
 	    return -1;
 	}

@@ -124,17 +124,19 @@ public class Syscall {
      *            The name of the file to execute.
      */
     public static int exec(String name) {
+
+
 	
 	
-	
-	Debug.print('+', "Starting Exec.\n");
 	UserThread currentThread = (UserThread) NachosThread.currentThread();
+	
 	Task task = new Task(name, currentThread);
+
 	AddrSpace addrSpace = new AddrSpace();
+
 	
 	//UserThread userCurrentThread = (UserThread) NachosThread.currentThread();
 	//AddrSpace space = userCurrentThread.space;
-	
 	
 	
 	//addrSpace.getPmm().registerParent(addrSpace.getSpaceID(), space.getSpaceID());
@@ -144,6 +146,7 @@ public class Syscall {
 
 	// it schedules the newly created process for execution on the CPU
 	Nachos.scheduler.readyToRun(userThread);
+
 
 	// initializes the address space using the data from the NACHOS
 	// executable (initialized in task)
@@ -189,15 +192,19 @@ public class Syscall {
      */
     public static int join(int id) {
 	Debug.print('+', "Starting Join- waiting for space ID: "+id+".\n");
-	UserThread userThread = (UserThread) NachosThread.currentThread();
-	AddrSpace s = userThread.space;
 	
+	
+	
+	UserThread userThread = (UserThread) NachosThread.currentThread();
+	//Debug.print('+', userThread.space.getSpaceID()+" currentspace_ \n");
+	AddrSpace s = userThread.space;
+	/*
 	Object [] temp = new Object[2];
 	temp[0] = s;				
 	temp[1] = s.getPmm().getSpaceByID(id); //waiting for this thread to be finished
+	*/ 
 	
-	
-	s.getPmm().getJoinList().add(temp);
+	s.getPmm().addJoinList(s,s.getPmm().getSpaceByID(id));
 	
 	s.join_lock.P();
 	

@@ -13,14 +13,14 @@ public class PhysicalMemoryManager {
     private static int physicalPages[];
     private static Semaphore physicalPage_lock;
     private static Semaphore spaceID_lock;
+    private static Semaphore joinList_lock;
     
     
     
-    
-    private int spaceID=0;
+    private static int spaceID=0;
     private HashMap<Integer, AddrSpace> processTable;
     private HashMap<Integer, Integer> parentTable;
-    private ArrayList<Object[]> joinList;
+    private static ArrayList<Object[]> joinList;
 
 
 
@@ -32,6 +32,7 @@ public class PhysicalMemoryManager {
     public PhysicalMemoryManager(){
 	physicalPages = new int[Machine.NumPhysPages];
 	spaceID_lock = new Semaphore("spaceID_lock", 1);
+	joinList_lock  = new Semaphore("joinList_lock", 1);
 	physicalPage_lock = new Semaphore("physicalPage_lock", 1);
 	processTable = new HashMap<Integer, AddrSpace>();
 	parentTable = new HashMap<Integer, Integer>();
@@ -48,21 +49,23 @@ public class PhysicalMemoryManager {
     
     public void awakeThread(int spaceID){
 	
-	
+	 joinList_lock.P();
 	if(!joinList.isEmpty()){
 	    for(int i =0 ; i<joinList.size();i++){
 		Object[] o = joinList.get(i);
 		
 		if(((AddrSpace)o[1]).getSpaceID()==spaceID){		   
 		    ((AddrSpace)o[0]).join_lock.V();	
-		    
+		   
 		    joinList.remove(i);
+		   
 		}
 	    
 	    
 	    }
 	    
 	}
+	joinList_lock.V();
     }
     
     
@@ -78,6 +81,18 @@ public class PhysicalMemoryManager {
     public HashMap<Integer, Integer> getParentTable() {
         return parentTable;
     }
+    
+    public void addJoinList(AddrSpace s1,AddrSpace s2){
+	// s1 is joining s2
+	joinList_lock.P();
+	Object [] temp = new Object[2];
+	temp[0] = s1;				
+	temp[1] = s2;
+	
+	joinList.add(temp);
+	joinList_lock.V();
+    }
+    
     
     public int getPhysicalPage(int virtualPage) {
 	physicalPage_lock.P();
