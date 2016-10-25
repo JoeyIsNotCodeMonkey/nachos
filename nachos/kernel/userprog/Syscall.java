@@ -127,13 +127,13 @@ public class Syscall {
 
 
 	
-	
+	Debug.println('+', "spaceID "+ ((UserThread) NachosThread.currentThread()).space.getSpaceID());
 	UserThread currentThread = (UserThread) NachosThread.currentThread();
-	
+	Debug.println('+', "spaceID "+ ((UserThread) NachosThread.currentThread()).space.getSpaceID());
 	Task task = new Task(name, currentThread);
-
+	Debug.println('+', "spaceID "+ ((UserThread) NachosThread.currentThread()).space.getSpaceID());
 	AddrSpace addrSpace = new AddrSpace();
-
+	Debug.println('+', "spaceID "+ ((UserThread) NachosThread.currentThread()).space.getSpaceID());
 	
 	//UserThread userCurrentThread = (UserThread) NachosThread.currentThread();
 	//AddrSpace space = userCurrentThread.space;
@@ -142,8 +142,9 @@ public class Syscall {
 	//addrSpace.getPmm().registerParent(addrSpace.getSpaceID(), space.getSpaceID());
 
 	// creates a new process (i.e. user thread plus user address space)
+	
 	UserThread userThread = new UserThread(name, task, addrSpace);
-
+	Debug.println('+', "spaceID "+ ((UserThread) NachosThread.currentThread()).space.getSpaceID());
 	// it schedules the newly created process for execution on the CPU
 	Nachos.scheduler.readyToRun(userThread);
 

@@ -62,9 +62,9 @@ public class AddrSpace {
 
     private int numPages;
 
-    private static int spaceID;
+    private int spaceID;
 
-    static Semaphore join_lock = new Semaphore(
+    Semaphore join_lock = new Semaphore(
 	    "join_lock for process " + spaceID, 0);
 
     private static Lock pmmLock = new Lock("pmmLock");
