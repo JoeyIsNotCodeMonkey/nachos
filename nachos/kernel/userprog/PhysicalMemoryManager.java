@@ -164,6 +164,14 @@ public class PhysicalMemoryManager {
 	}
 	return count;
     }
+
+
+    public boolean isEmpty() {
+	if(pageLeft()==128)
+	    return true;
+	else
+	    return false;
+    }
     
 
 }

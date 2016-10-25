@@ -35,6 +35,7 @@ import nachos.kernel.devices.test.NetworkTest;
 import nachos.kernel.devices.test.SerialTest;
 import nachos.kernel.threads.Scheduler;
 import nachos.kernel.userprog.ExceptionHandler;
+import nachos.kernel.userprog.PhysicalMemoryManager;
 import nachos.kernel.filesys.FileSystem;
 import nachos.kernel.threads.test.CalloutTest;
 import nachos.kernel.threads.test.SMPTest;
@@ -127,6 +128,14 @@ public class Nachos implements Runnable {
 	    NetworkTest.start();
 	if(options.CONSOLE_TEST)
 	    ConsoleTest.start();
+	
+	
+	if(!PhysicalMemoryManager.getInstance().isEmpty()){
+	    
+	    Nachos.scheduler.yieldThread();	    
+	}
+	   consoleDriver.stop();
+	   scheduler.stop();
 	
 	// Terminate the first thread, its job is done.
 	// Alternatively, you could give this thread the responsibility

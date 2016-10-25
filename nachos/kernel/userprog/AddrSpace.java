@@ -183,9 +183,7 @@ public class AddrSpace {
 	    return -1;
 	}
 	   
-	
-	
-	
+
 	// to run anything too big --
 	// at least until we have
 	// virtual memory

@@ -384,7 +384,7 @@ public class Scheduler {
 	// someone to try to destroy a thread that is not FINISHED.
 	
 	
-	callout.setFinishedStatus(currentThread.name, true);
+	//callout.setFinishedStatus(currentThread.name, true);
 	
 	currentThread.setStatus(NachosThread.FINISHED);
 	
