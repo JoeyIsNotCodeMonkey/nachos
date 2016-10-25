@@ -1,0 +1,21 @@
+In this assignment, we implemented system level methods including Exec(), Fork(), Join(), Yield(), Read(), Write(). Besides, the program supports multiple console if you write more than one “-x ” in run configuration. 
+
+
+We added a physicalMemeoryManager class as suggested inside userprog packege, which handles all of the operations about physical memory allocation.
+
+
+The strategy when we allocate memory for a new UserThread is that we used spinlock to ensure one cpu allocate for one thread continuously. 
+
+
+To make the program ends by itself when “-ps” is added, we add a condition check to see whether this program has other threads running besides the FirstThread.
+
+
+We used following test file to test our syscalls:
+
+
+forkTest -> Fork()
+Async-stub -> Exec() and Join() continuously
+Shell -> Read() and Write()
+
+
+Use more than one “-x test/shell” to start multiple consoles and also turn on multiple num of CPU inside options.java. Eg: “-d -x test/shell -x test/shell”

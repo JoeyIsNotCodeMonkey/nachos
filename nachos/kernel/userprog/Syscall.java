@@ -141,7 +141,7 @@ public class Syscall {
 	// creates a new process (i.e. user thread plus user address space)
 	
 	UserThread userThread = new UserThread(name, task, addrSpace);
-	Debug.println('+', "spaceID "+ ((UserThread) NachosThread.currentThread()).space.getSpaceID());
+	//Debug.println('+', "spaceID "+ ((UserThread) NachosThread.currentThread()).space.getSpaceID());
 	// it schedules the newly created process for execution on the CPU
 	Nachos.scheduler.readyToRun(userThread);
 
