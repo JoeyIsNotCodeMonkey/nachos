@@ -213,7 +213,7 @@ int main() {
     char* str = STR;
 
     Write(MSG1, sizeof(MSG1)-1, ConsoleOutput);
-    pid = Exec("maxmem1");
+    pid = Exec("test/maxmem1");
     if(pid >= 0)
 	Join(pid);
     else
@@ -221,5 +221,3 @@ int main() {
     Write(MSG2, sizeof(MSG2)-1, ConsoleOutput);
     Exit(0);
 }
-
-

@@ -9,7 +9,7 @@ int main()
   SpaceId child;
 
   Write("here\n", 5, 1);
-  child = Exec("stress-mem2");
-  child = Exec("stress-mem2");
+  child = Exec("test/stress-mem2");
+  child = Exec("test/stress-mem2");
   Exit(0);
 }

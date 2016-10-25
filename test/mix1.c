@@ -8,7 +8,7 @@ int A[ARRAYSIZE];
 main()
 {
   int i=0;
-  Exec("halt");
+  Exec("test/halt");
   while(1) {
     if(i%100 == 0)
       Write("1: here\n", 8, 1);

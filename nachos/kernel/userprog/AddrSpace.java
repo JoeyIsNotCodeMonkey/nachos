@@ -62,9 +62,9 @@ public class AddrSpace {
    
     private int numPages;
     
-    private static int spaceID;
+    private  int spaceID;
     
-    static Semaphore join_lock = new Semaphore("join_lock for process "+spaceID, 0);
+    Semaphore join_lock = new Semaphore("join_lock for process "+spaceID, 0);
         
     private static Lock pmmLock = new Lock("pmmLock" );
     
@@ -169,9 +169,11 @@ public class AddrSpace {
 		+ UserStackSize; // we need to increase the size
 				 // to leave room for the stack
 	numPages = (int) (size / Machine.PageSize);
-
-	if(numPages > Machine.NumPhysPages){
-	    
+	int remainder = (int) (size % Machine.PageSize);
+	
+	
+	
+	if((numPages > Machine.NumPhysPages)||((numPages==Machine.NumPhysPages)&&(remainder!=0))){	    
 	    Debug.println('+',"AddrSpace constructor: Not enough memory!");
 	    return -1;
 	}
