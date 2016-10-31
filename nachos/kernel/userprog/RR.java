@@ -9,27 +9,32 @@ import nachos.machine.InterruptHandler;
 import nachos.machine.Machine;
 import nachos.machine.NachosThread;
 import nachos.machine.Timer;
+import nachos.util.FIFOQueue;
+import nachos.util.Queue;
 import nachos.util.ReadyList;
 
 public class RR<T> extends java.util.LinkedList<T> implements ReadyList<T>{
     private static int quantum;
-    private LinkedList<T> queue;
+    private Queue<T> queue;
+
+
     private Timer timer;
     private TimerInterruptHandler interruptHandler;
     private static RR rr;
     private static UserThread lastThread;
     
+    private static int ticks =0;
     
     
     public RR() {
-	quantum = 1000;
-	queue = new LinkedList<T>();
-	lastThread = (UserThread) NachosThread.currentThread();
+	
+	queue = new FIFOQueue<T>();
+	
 	
 	timer = Machine.getTimer(0);
 	interruptHandler = new TimerInterruptHandler(timer);
 	timer.setHandler(interruptHandler);
-	timer.start();
+	//timer.start();
     }
     
     public static RR getInstance(){
@@ -39,6 +44,11 @@ public class RR<T> extends java.util.LinkedList<T> implements ReadyList<T>{
 	return rr;
     }
     
+    public Queue<T> getQueue() {
+        return queue;
+    }
+
+
     
     
     private static class TimerInterruptHandler implements InterruptHandler {
@@ -58,23 +68,28 @@ public class RR<T> extends java.util.LinkedList<T> implements ReadyList<T>{
 
 	public void handleInterrupt() {
 	    Debug.println('i', "Timer interrupt: " + timer.name);
-	    UserThread thisThread = (UserThread) RR.getInstance().peek();	    	    
+	    UserThread currentThread = (UserThread)NachosThread.currentThread();
 	    
-	    quantum -= 100;
+	   currentThread.setQuantum(currentThread.getQuantum()-100);
 	    
-	    if(quantum == 0 && thisThread == lastThread) {
+	    if(currentThread.getQuantum()==0 ) {
 		//throw it to the end of queue
-		thisThread = (UserThread) RR.getInstance().pop();
-		RR.getInstance().push(thisThread);	
-		Debug.println('+', "shift");
+//		thisThread = (UserThread) RR.getInstance().getQueue().poll();
+//		RR.getInstance().offer(thisThread);	
+		Debug.println('+', "shift: ");
 		
+		
+		
+		
+		currentThread.setQuantum(1000);
+		
+		
+		Nachos.scheduler.yieldThread();
 	    }
 	    
-	    else if(quantum > 0 && thisThread != lastThread) {
-		quantum = 1000;
-	    }
+	    ticks+=100;
 	    
-	    lastThread = thisThread;
+	  //  lastThread = thisThread;
 	    
 	    
 	}

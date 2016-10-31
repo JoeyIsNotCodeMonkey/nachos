@@ -19,6 +19,7 @@ import java.util.ArrayList;
 import nachos.Debug;
 import nachos.kernel.Nachos;
 import nachos.kernel.userprog.RR;
+import nachos.kernel.userprog.UserThread;
 import nachos.machine.CPU;
 import nachos.machine.Machine;
 import nachos.machine.NachosThread;
@@ -75,7 +76,7 @@ public class Scheduler {
      */
     public Scheduler(NachosThread firstThread) {
 	//if() {
-	    readyList = new RR<NachosThread>();
+	    readyList = RR.getInstance().getQueue();
 	//}
 	
 	//readyList = new FIFOQueue<NachosThread>();
@@ -382,7 +383,7 @@ public class Scheduler {
 	CPU.setLevel(CPU.IntOff);
 	NachosThread currentThread = NachosThread.currentThread();
 
-	Debug.println('t', "Finishing thread: " + currentThread.name);
+	Debug.println('+', "Finishing thread: " + currentThread.name);
 
 	// We have to make sure the thread has been set to the FINISHED state
 	// before making it the thread to be destroyed, because we don't want
@@ -452,9 +453,67 @@ public class Scheduler {
 	    // so that once the interrupt handler is done, it will appear as
 	    // if the interrupted thread called yield at the point it is
 	    // was interrupted.
-	    yieldOnReturn();
+	    
+	    
+	    
+	 //   NachosThread currentThread = NachosThread.currentThread();
+	   
+	    
+	    
+	   
+		yieldOnReturnRR();
+	   
+	    
+	    //yieldOnReturn();
 	}
 
+	
+	private void yieldOnReturnRR() {
+	    Debug.println('i', "Yield on interrupt return requested");
+	    CPU.setOnInterruptReturn(new Runnable() {
+		
+		public void run() {
+		    
+		    
+		    
+		    
+		    if (NachosThread.currentThread() != null) {
+			
+			UserThread currentThread = (UserThread)NachosThread.currentThread();
+			    
+			  currentThread.setQuantum(currentThread.getQuantum()-100);
+			    
+			    if(currentThread.getQuantum()==0 ) {
+
+				
+				Debug.println('+', "_____CurrentThread shift " + currentThread.name);
+				
+				currentThread.setQuantum(1000);
+	
+				Nachos.scheduler.yieldThread();
+			    }
+			    
+			    
+			
+			
+			
+			//Nachos.scheduler.yieldThread();
+			
+			
+			
+			
+		    } else {
+			Debug.println('i',
+				"No current thread on interrupt return, skipping yield");
+		    }
+		    
+		    
+		    
+		}
+	    });
+	}
+	
+	
 	/**
 	 * Called to cause a context switch (for example, on a time slice) in
 	 * the interrupted thread when the handler returns.
@@ -479,6 +538,10 @@ public class Scheduler {
 		}
 	    });
 	}
+	
+	
+	
+	
 	
 	
 

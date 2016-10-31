@@ -130,12 +130,12 @@ public class Nachos implements Runnable {
 	    ConsoleTest.start();
 	
 	
-	if(!PhysicalMemoryManager.getInstance().isEmpty()){
-	    
-	    Nachos.scheduler.yieldThread();	    
-	}
-	   consoleDriver.stop();
-	   scheduler.stop();
+//	if(!PhysicalMemoryManager.getInstance().isEmpty()){
+//	    
+//	    Nachos.scheduler.yieldThread();	    
+//	}
+//	   consoleDriver.stop();
+//	   scheduler.stop();
 	
 	// Terminate the first thread, its job is done.
 	// Alternatively, you could give this thread the responsibility

@@ -30,6 +30,10 @@ public class UserThread extends NachosThread {
 
     /** The context in which this thread will execute. */
     public final AddrSpace space;
+    
+    private int quantum = 1000;
+    
+
     private ConsoleDriver consoleDriver;
 
     private boolean isTopLevel;
@@ -74,7 +78,15 @@ public class UserThread extends NachosThread {
 	}
     }
     
-    
+    public int getQuantum() {
+        return quantum;
+    }
+
+
+    public void setQuantum(int quantum) {
+        this.quantum = quantum;
+    }
+
     public boolean isTopLevel() {
         return isTopLevel;
     }
