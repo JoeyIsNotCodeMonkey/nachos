@@ -10,12 +10,13 @@
 # 	to ld, in order for the routine "Start" to be loaded at location 0
 #
 
+
 # Change the following to point to where you have the MIPS cross-compiler
 # installed.
-GCCDIR = /Users/Joey/Documents/mips-gcc/
+GCCDIR = /cygdrive/c/Users/MC/Desktop/mips/
 
 # Change the following to point to where you have Java executables installed.
-JAVADIR = 
+JAVADIR = /cygdrive/c/Program\ Files/JAVA/jdk1.8.0_40/bin/
 
 # Uncomment the following when running on Windows.
 JAVA= $(JAVADIR)java -classpath '../machine.jar'
@@ -33,7 +34,7 @@ COFF2NOFF = $(JAVA) nachos.noff.Coff2Noff
 
 LDFLAGS = -T script -N
 ASFLAGS = -mips1
-CPPFLAGS = -I$(INCDIR) -B $(GCCDIR)
+CPPFLAGS = -I$(INCDIR)
 
 CFLAGS = -G 0 -I$(INCDIR) -B$(GCCDIR) -c -fno-builtin
 SFLAGS = -G 0 -I$(INCDIR) -B$(GCCDIR) -c -S -fno-builtin
@@ -60,7 +61,15 @@ halt: halt.o start.o
 	$(COFF2NOFF) halt.coff halt
 	rm halt.coff
 
-
+demo4Fork.s: demo4Fork.c
+	$(CC) $(SFLAGS) demo4Fork.c
+demo4Fork.o: demo4Fork.c
+	$(CC) $(CFLAGS) demo4Fork.c
+demo4Fork: demo4Fork.o start.o
+	$(LD) $(LDFLAGS) start.o demo4Fork.o -o demo4Fork.coff
+	rm demo4Fork.o
+	$(COFF2NOFF) demo4Fork.coff demo4Fork
+	rm demo4Fork.coff
 
 
 # If you are using gmake, the following rules should enable you to
