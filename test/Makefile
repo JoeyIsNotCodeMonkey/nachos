@@ -13,14 +13,17 @@
 
 # Change the following to point to where you have the MIPS cross-compiler
 # installed.
+<<<<<<< HEAD
 GCCDIR = /cygdrive/c/Users/MC/Desktop/mips/
+=======
+GCCDIR = /Users/MC/Desktop/mips/
+>>>>>>> branch 'HW2' of https://github.com/JoeyIsNotCodeMonkey/nachos.git
 
 # Change the following to point to where you have Java executables installed.
 JAVADIR = /cygdrive/c/Program\ Files/JAVA/jdk1.8.0_40/bin/
 
 # Uncomment the following when running on Windows.
-JAVA= $(JAVADIR)java -classpath '../machine.jar'
-
+JAVA= $(JAVADIR)java -classpath '..'
 
 # Uncomment the following when running on Unix.
 #JAVA= $(JAVADIR)java -classpath '..'
@@ -34,7 +37,11 @@ COFF2NOFF = $(JAVA) nachos.noff.Coff2Noff
 
 LDFLAGS = -T script -N
 ASFLAGS = -mips1
+<<<<<<< HEAD
 CPPFLAGS = -I$(INCDIR)
+=======
+CPPFLAGS = -I$(INCDIR) -B$(GCCDIR)
+>>>>>>> branch 'HW2' of https://github.com/JoeyIsNotCodeMonkey/nachos.git
 
 CFLAGS = -G 0 -I$(INCDIR) -B$(GCCDIR) -c -fno-builtin
 SFLAGS = -G 0 -I$(INCDIR) -B$(GCCDIR) -c -S -fno-builtin
@@ -60,6 +67,7 @@ halt: halt.o start.o
 	rm halt.o
 	$(COFF2NOFF) halt.coff halt
 	rm halt.coff
+<<<<<<< HEAD
 
 demo4Fork.s: demo4Fork.c
 	$(CC) $(SFLAGS) demo4Fork.c
@@ -71,6 +79,8 @@ demo4Fork: demo4Fork.o start.o
 	$(COFF2NOFF) demo4Fork.coff demo4Fork
 	rm demo4Fork.coff
 
+=======
+>>>>>>> branch 'HW2' of https://github.com/JoeyIsNotCodeMonkey/nachos.git
 
 # If you are using gmake, the following rules should enable you to
 # compile any of the test programs.  Otherwise, you have to copy the

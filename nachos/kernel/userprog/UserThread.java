@@ -57,14 +57,20 @@ public class UserThread extends NachosThread {
 	super(name, runObj);
 	space = addrSpace;
 	
-	if(!(runObj instanceof Task)) {
+	if(!(runObj instanceof Task)&&!(runObj instanceof ForkTask)) {
 	    consoleDriver = ConsoleManager.getInstance().getConsole();
 	    isTopLevel = true;
-	} else {
+	} else if(runObj instanceof Task){
 	    isTopLevel = false;
 	    Task t = (Task) runObj;
 	    UserThread parentThread = t.getParentThread();
 	    consoleDriver = parentThread.getConsoleDriver();
+	}else if (runObj instanceof ForkTask){
+	    isTopLevel = false;
+	    ForkTask t = (ForkTask) runObj;
+	    UserThread parentThread = t.getParentThread();
+	    consoleDriver = parentThread.getConsoleDriver();
+	    
 	}
     }
     

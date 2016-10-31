@@ -59,14 +59,14 @@ public class Lock {
      */
     public void acquire() {
 
-	Debug.printf('s', "Acquiring lock %s for thread %s\n",
-		name, NachosThread.currentThread().name);
+	//Debug.printf('s', "Acquiring lock %s for thread %s\n",
+//		name, NachosThread.currentThread().name);
 
 	sem.P();
 	owner = NachosThread.currentThread();
 
-	Debug.printf('s', "Acquired lock %s for thread %s\n",
-		name, NachosThread.currentThread().name);
+//	Debug.printf('s', "Acquired lock %s for thread %s\n",
+//		name, NachosThread.currentThread().name);
     }
 
     /**
@@ -78,14 +78,14 @@ public class Lock {
 	Debug.ASSERT((NachosThread.currentThread() == owner),
 		"A thread that doesn't own the lock tried to " +
 		"release it!\n");
-	Debug.printf('s', "Thread %s dropping lock %s\n",
-		NachosThread.currentThread().name, name);
+	//Debug.printf('s', "Thread %s dropping lock %s\n",
+	//	NachosThread.currentThread().name, name);
 
 	owner = null;
 	sem.V();
 
-	Debug.printf('s', "Thread %s dropped lock %s\n",
-		NachosThread.currentThread().name, name);
+	//Debug.printf('s', "Thread %s dropped lock %s\n",
+	//	NachosThread.currentThread().name, name);
     }
 
     /**
