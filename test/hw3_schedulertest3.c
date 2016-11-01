@@ -1,5 +1,8 @@
 #include "syscall.h"
 
+void PredictCPU(int ticks);
+
+
 int main(){
     
     int number1 = 0;
@@ -7,6 +10,8 @@ int main(){
     int outer_counter = 1000;
     int inner_counter = 1000;
     
+    PredictCPU(150);
+        
     while((outer_counter--)>0){
         
         while((inner_counter--)>0){
