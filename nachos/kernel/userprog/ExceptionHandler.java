@@ -138,8 +138,7 @@ public class ExceptionHandler implements nachos.machine.ExceptionHandler {
 		
 	    case Syscall.SC_PredictCPU:
 		int burstLen = CPU.readRegister(4);
-		UserThread currentThread = (UserThread)NachosThread.currentThread();
-		currentThread.setBurstLen(burstLen);
+		Syscall.PredictCPU(burstLen);
 		break;
 	    }
 

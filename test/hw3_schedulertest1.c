@@ -7,6 +7,8 @@ int main(){
     int outer_counter = 100;
     int inner_counter = 200;
     
+    PredictCPU(100);
+    
     while((outer_counter--)>0){
         
         while((inner_counter--)>0){
