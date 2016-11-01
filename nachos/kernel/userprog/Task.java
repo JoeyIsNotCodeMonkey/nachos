@@ -39,7 +39,7 @@ public class Task implements Runnable{
 	space.initRegisters();		// set the initial register values
 	space.restoreState();		// load page table register
 
-	CPU.runUserCode();			// jump to the user progam
+	CPU.runUserCode();		// jump to the user progam
 	Debug.ASSERT(false);		// machine->Run never returns;
     }
 
