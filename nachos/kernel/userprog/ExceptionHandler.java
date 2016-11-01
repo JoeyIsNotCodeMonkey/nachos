@@ -135,6 +135,12 @@ public class ExceptionHandler implements nachos.machine.ExceptionHandler {
 		System.arraycopy(Machine.mainMemory, ptr, buf, 0, len);
 		Syscall.write(buf, len, CPU.readRegister(6));
 		break;
+		
+	    case Syscall.SC_PredictCPU:
+		int burstLen = CPU.readRegister(4);
+		UserThread currentThread = (UserThread)NachosThread.currentThread();
+		currentThread.setBurstLen(burstLen);
+		break;
 	    }
 
 	    // Update the program counter to point to the next instruction

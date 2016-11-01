@@ -35,6 +35,16 @@ public class UserThread extends NachosThread {
     
 
     private ConsoleDriver consoleDriver;
+    
+    private int burstLen;
+
+    public int getBurstLen() {
+        return burstLen;
+    }
+
+    public void setBurstLen(int burstLen) {
+        this.burstLen = burstLen;
+    }
 
     private boolean isTopLevel;
 
@@ -60,6 +70,7 @@ public class UserThread extends NachosThread {
     public UserThread(String name, Runnable runObj, AddrSpace addrSpace) {
 	super(name, runObj);
 	space = addrSpace;
+	burstLen = 10 - space.getSpaceID();
 	
 	if(!(runObj instanceof Task)&&!(runObj instanceof ForkTask)) {
 	    consoleDriver = ConsoleManager.getInstance().getConsole();

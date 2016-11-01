@@ -19,6 +19,7 @@ import java.util.ArrayList;
 import nachos.Debug;
 import nachos.kernel.Nachos;
 import nachos.kernel.userprog.RR;
+import nachos.kernel.userprog.SPN;
 import nachos.kernel.userprog.UserThread;
 import nachos.machine.CPU;
 import nachos.machine.Machine;
@@ -76,10 +77,12 @@ public class Scheduler {
      */
     public Scheduler(NachosThread firstThread) {
 	//if() {
-	    readyList = RR.getInstance().getQueue();
+	    //readyList = RR.getInstance().getQueue();
 	//}
 	
-	//readyList = new FIFOQueue<NachosThread>();
+	readyList = new SPN();
+	
+	//readyList = new FIFOQueue<NachosThread>(); *********original************
 	cpuList = new FIFOQueue<CPU>();
 	
 

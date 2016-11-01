@@ -1,7 +1,7 @@
 #include "syscall.h"
 
 int main(){
-    
+        
     int number1 = 0;
     int number2 = 0;
     int outer_counter = 100;

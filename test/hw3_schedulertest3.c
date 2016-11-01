@@ -18,7 +18,6 @@ int main(){
         number2++;
         number2++;
         
-        Sleep(500);
     }
 
 }

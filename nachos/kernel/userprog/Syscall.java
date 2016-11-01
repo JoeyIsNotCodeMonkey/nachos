@@ -64,6 +64,8 @@ public class Syscall {
 
     /** Integer code identifying the "Remove" system call. */
     public static final byte SC_Remove = 11;
+    
+    public static final byte SC_PredictCPU = 12;
 
     
     private static Semaphore consoleLock= new Semaphore("console_lock",1);
@@ -347,6 +349,11 @@ public class Syscall {
      */
     public static void yield() {
 	Nachos.scheduler.yieldThread();
+    }
+    
+    public static void PredictCPU(int ticks) {
+	UserThread currentThread = (UserThread) NachosThread.currentThread();
+	currentThread.setBurstLen(ticks);
     }
 
 }
