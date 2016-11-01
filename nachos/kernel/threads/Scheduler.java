@@ -80,7 +80,7 @@ public class Scheduler {
 	    //readyList = RR.getInstance().getQueue();
 	//}
 	
-	readyList = new SPN();
+	readyList = new SPN<NachosThread>();
 	
 	//readyList = new FIFOQueue<NachosThread>(); *********original************
 	cpuList = new FIFOQueue<CPU>();
