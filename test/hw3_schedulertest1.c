@@ -18,5 +18,6 @@ int main(int num_of_loop){
         number2++;
         
     }
-
+	
+	Exit(0);
 }

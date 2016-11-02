@@ -21,4 +21,5 @@ int main(int num_of_loop){
         
     }
 
+	Exit(0);
 }

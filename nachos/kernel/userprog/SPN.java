@@ -5,6 +5,7 @@ import java.util.Collections;
 import java.util.Comparator;
 import java.util.LinkedList;
 
+import nachos.kernel.Nachos;
 import nachos.kernel.threads.Callout.CustomComparator;
 import nachos.machine.NachosThread;
 import nachos.util.FIFOQueue;
@@ -88,6 +89,10 @@ public class SPN<T> extends java.util.LinkedList<T> implements ReadyList<T>{
 	
 	
 	Collections.sort((FIFOQueue<UserThread>)queue, new CustomComparator());
+	UserThread t = (UserThread) NachosThread.currentThread();
+	if(queue.peek() != t) {
+	    Nachos.scheduler.yieldThread();
+	}
     }
     
     public static class CustomComparator implements Comparator<UserThread> {	  
