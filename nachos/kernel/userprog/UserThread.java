@@ -39,6 +39,18 @@ public class UserThread extends NachosThread {
     private int burstLen;
     
     private int remaingTime;
+    
+    private int waitingTime;
+    
+    private double responseRatio;
+
+    public int getWaitingTime() {
+        return waitingTime;
+    }
+
+    public void setWaitingTime(int waitingTime) {
+        this.waitingTime = waitingTime;
+    }
 
     public int getBurstLen() {
         return burstLen;
@@ -154,5 +166,13 @@ public class UserThread extends NachosThread {
 
     public void setRemaingTime(int remaingTime) {
 	this.remaingTime = remaingTime;
+    }
+
+    public double getResponseRatio() {
+	return responseRatio;
+    }
+
+    public void setResponseRatio(double responseRatio) {
+	this.responseRatio = responseRatio;
     }
 }

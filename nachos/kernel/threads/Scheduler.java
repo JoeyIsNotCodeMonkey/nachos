@@ -18,6 +18,7 @@ import java.util.ArrayList;
 
 import nachos.Debug;
 import nachos.kernel.Nachos;
+import nachos.kernel.userprog.HRRN;
 import nachos.kernel.userprog.RR;
 import nachos.kernel.userprog.SPN;
 import nachos.kernel.userprog.UserThread;
@@ -80,7 +81,8 @@ public class Scheduler {
 	    //readyList = RR.getInstance().getQueue();
 	//}
 	
-	readyList =   SPN.getInstance().getQueue();
+	//readyList =   SPN.getInstance().getQueue();
+	readyList = HRRN.getInstance().getQueue();
 	
 	//readyList = new FIFOQueue<NachosThread>(); *********original************
 	cpuList = new FIFOQueue<CPU>();
@@ -397,7 +399,11 @@ public class Scheduler {
 	
 	currentThread.setStatus(NachosThread.FINISHED);
 	
-	
+	for(int i=0; i<readyList.size(); i++) {
+	    if(readyList.poll() instanceof UserThread) {
+		
+	    }
+	}
 	
 	
 //	ArrayList<Object[]> list = callout.getCalloutList();
