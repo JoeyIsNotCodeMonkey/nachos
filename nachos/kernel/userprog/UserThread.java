@@ -37,6 +37,8 @@ public class UserThread extends NachosThread {
     private ConsoleDriver consoleDriver;
     
     private int burstLen;
+    
+    private int remaingTime;
 
     public int getBurstLen() {
         return burstLen;
@@ -44,6 +46,7 @@ public class UserThread extends NachosThread {
 
     public void setBurstLen(int burstLen) {
         this.burstLen = burstLen;
+        setRemaingTime(burstLen);
         SPN.getInstance().update();
     }
 
@@ -143,5 +146,13 @@ public class UserThread extends NachosThread {
 
 	// Restore state associated with the address space.
 	space.restoreState();
+    }
+
+    public int getRemaingTime() {
+	return remaingTime;
+    }
+
+    public void setRemaingTime(int remaingTime) {
+	this.remaingTime = remaingTime;
     }
 }

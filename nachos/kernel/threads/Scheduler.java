@@ -464,21 +464,50 @@ public class Scheduler {
 	    
 	    
 	   
-		yieldOnReturnRR();
+	    //yieldOnReturnRR();
 	   
-	    
+	    yieldOnReturnSRT();
 	    //yieldOnReturn();
 	}
 
 	
-	private void yieldOnReturnRR() {
+	private void yieldOnReturnSRT() {
 	    Debug.println('i', "Yield on interrupt return requested");
 	    CPU.setOnInterruptReturn(new Runnable() {
 		
 		public void run() {
 		    
+		    if (NachosThread.currentThread() != null) {
+			
+			UserThread currentThread = (UserThread)NachosThread.currentThread();
+			    
+			currentThread.setRemaingTime(currentThread.getRemaingTime()-100);
+			
+			UserThread head = (UserThread) SPN.getInstance().getQueue().peek();
+					    
+			if(currentThread.getRemaingTime()>head.getRemaingTime()){
+			    Nachos.scheduler.yieldThread();
+			}
+						
+			
+			
+		    } else {
+			Debug.println('i',
+				"No current thread on interrupt return, skipping yield");
+		    }
 		    
 		    
+		    
+		}
+	    });
+	    
+	}
+
+	private void yieldOnReturnRR() {
+	    Debug.println('i', "Yield on interrupt return requested");
+	    CPU.setOnInterruptReturn(new Runnable() {
+		
+		public void run() {
 		    
 		    if (NachosThread.currentThread() != null) {
 			

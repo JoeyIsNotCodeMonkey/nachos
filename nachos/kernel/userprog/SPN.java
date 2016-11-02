@@ -86,14 +86,21 @@ public class SPN<T> extends java.util.LinkedList<T> implements ReadyList<T>{
     
     public void update() {
 	
-	
-	
 	Collections.sort((FIFOQueue<UserThread>)queue, new CustomComparator());
 	UserThread t = (UserThread) NachosThread.currentThread();
-	if(queue.peek() != t) {
+	
+	
+	if(t.getBurstLen()>((UserThread)queue.peek()).getBurstLen()) {
 	    Nachos.scheduler.yieldThread();
 	}
+	
+	
+	
     }
+    
+    
+    
+    
     
     public static class CustomComparator implements Comparator<UserThread> {	  
 	    @Override
