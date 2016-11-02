@@ -96,7 +96,7 @@ public class Scheduler {
 	    cpuList.offer(cpu);
 	    if (Nachos.options.CPU_TIMERS) {
 		Timer timer = cpu.timer;
-		timer.setHandler(new TimerInterruptHandler(timer));
+			timer.setHandler(new TimerInterruptHandler(timer));
 		if (Nachos.options.RANDOM_YIELD)
 		    timer.setRandom(true);
 		timer.start();
