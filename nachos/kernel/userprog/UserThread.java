@@ -44,23 +44,7 @@ public class UserThread extends NachosThread {
     
     private double responseRatio;
 
-    public int getWaitingTime() {
-        return waitingTime;
-    }
 
-    public void setWaitingTime(int waitingTime) {
-        this.waitingTime = waitingTime;
-    }
-
-    public int getBurstLen() {
-        return burstLen;
-    }
-
-    public void setBurstLen(int burstLen) {
-        this.burstLen = burstLen;
-        setRemaingTime(burstLen);
-        SPN.getInstance().update();
-    }
 
     private boolean isTopLevel;
 
@@ -87,7 +71,8 @@ public class UserThread extends NachosThread {
 	super(name, runObj);
 	space = addrSpace;
 	burstLen = 0;
-	
+	waitingTime = 0;
+	responseRatio = 0;
 	if(!(runObj instanceof Task)&&!(runObj instanceof ForkTask)) {
 	    consoleDriver = ConsoleManager.getInstance().getConsole();
 	    isTopLevel = true;
@@ -166,6 +151,7 @@ public class UserThread extends NachosThread {
 
     public void setRemaingTime(int remaingTime) {
 	this.remaingTime = remaingTime;
+	updateResponseRatio();
     }
 
     public double getResponseRatio() {
@@ -175,4 +161,31 @@ public class UserThread extends NachosThread {
     public void setResponseRatio(double responseRatio) {
 	this.responseRatio = responseRatio;
     }
+    
+    private void updateResponseRatio() {
+	this.responseRatio = (getWaitingTime()+getRemaingTime())/getRemaingTime();	
+    }
+    
+    
+    public int getWaitingTime() {
+        return waitingTime;
+    }
+
+    public void setWaitingTime(int waitingTime) {
+        this.waitingTime = waitingTime;
+        updateResponseRatio();
+    }
+
+
+
+    public int getBurstLen() {
+        return burstLen;
+    }
+
+    public void setBurstLen(int burstLen) {
+        this.burstLen = burstLen;
+        setRemaingTime(burstLen);
+        SPN.getInstance().update();
+    }
+    
 }

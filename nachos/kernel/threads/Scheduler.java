@@ -400,8 +400,10 @@ public class Scheduler {
 	currentThread.setStatus(NachosThread.FINISHED);
 	
 	for(int i=0; i<readyList.size(); i++) {
-	    if(readyList.poll() instanceof UserThread) {
-		
+	    if(readyList.peek() instanceof UserThread && currentThread instanceof UserThread) {
+		UserThread t = (UserThread)readyList.poll();
+		t.setWaitingTime(t.getWaitingTime()+((UserThread)currentThread).getWaitingTime());
+		readyList.offer(t);
 	    }
 	}
 	
