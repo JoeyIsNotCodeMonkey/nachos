@@ -1,25 +1,22 @@
 #include "syscall.h"
 
-int main(){
+
+int main(int num_of_loop){
+        
+    
+    
         
     int number1 = 0;
     int number2 = 0;
-    int outer_counter = 100;
-    int inner_counter = 1000;
+    int inner_counter = 200;
     
-    
-    PredictCPU(100);
-    
-    
-    while((outer_counter--)>0){
+    PredictCPU(num_of_loop * 10);
+        
+    while((num_of_loop--)>0){
         
         while((inner_counter--)>0){
             number1++;
-            number1++;
-            number1++;
         }
-        number2++;
-        number2++;
         number2++;
         
     }

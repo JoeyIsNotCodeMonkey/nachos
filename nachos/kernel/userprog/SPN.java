@@ -1,5 +1,6 @@
 package nachos.kernel.userprog;
 
+import java.util.Collection;
 import java.util.Collections;
 import java.util.Comparator;
 import java.util.LinkedList;
@@ -10,11 +11,34 @@ import nachos.util.Queue;
 import nachos.util.ReadyList;
 
 public class SPN<T> extends java.util.LinkedList<T> implements ReadyList<T>{
+    /**
+     * 
+     */
+    private static final long serialVersionUID = 1L;
     private LinkedList<UserThread> queue;
+    private static SPN<?> spn;
     
+    public LinkedList<UserThread> getQueue() {
+        return queue;
+    }
+
+
+
+    public void setQueue(LinkedList<UserThread> queue) {
+        this.queue = queue;
+    }
+
+
+
     public SPN() {
 	queue = new LinkedList<UserThread>();
     }
+    
+    public static SPN<?> getInstance() {
+	if(spn == null) spn = new SPN();
+	return spn;
+    }
+   
     
     @Override
     public T poll(){
@@ -53,5 +77,24 @@ public class SPN<T> extends java.util.LinkedList<T> implements ReadyList<T>{
 	return true;
     }
     
+    public void update() {
+	Collections.sort(queue, new CustomComparator());
+    }
+    
+    public static class CustomComparator implements Comparator<UserThread> {	  
+	    @Override
+	    public int compare(UserThread o1, UserThread o2) {
+		
+		if(o1.getBurstLen() > o2.getBurstLen()) {
+		    return 1;
+		}
+		
+		if(o1.getBurstLen() == o2.getBurstLen()) {
+		    return 0;
+		}
+		
+		return -1;
+	    }
+}
     
 }

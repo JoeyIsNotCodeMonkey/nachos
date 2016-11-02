@@ -11,6 +11,8 @@ import nachos.kernel.Nachos;
 import nachos.kernel.devices.ConsoleManager;
 import nachos.kernel.threads.Semaphore;
 import nachos.kernel.threads.SpinLock;
+import nachos.machine.CPU;
+import nachos.machine.MIPS;
 import nachos.machine.Machine;
 import nachos.machine.NachosThread;
 import nachos.machine.Simulation;
@@ -130,6 +132,8 @@ public class Syscall {
 
 	
 	UserThread currentThread = (UserThread) NachosThread.currentThread();
+	
+	
 	Task task = new Task(name, currentThread);
 	AddrSpace addrSpace = new AddrSpace();
 	
@@ -145,6 +149,9 @@ public class Syscall {
 	UserThread userThread = new UserThread(name, task, addrSpace);
 	//Debug.println('+', "spaceID "+ ((UserThread) NachosThread.currentThread()).space.getSpaceID());
 	// it schedules the newly created process for execution on the CPU
+	
+	CPU.writeRegister(4, 10-addrSpace.getSpaceID());
+	
 	Nachos.scheduler.readyToRun(userThread);
 
 
