@@ -20,8 +20,8 @@ public class RR<T> extends java.util.LinkedList<T> implements ReadyList<T>{
 
     private Timer timer;
     private TimerInterruptHandler interruptHandler;
-    private static RR rr;
-    private static UserThread lastThread;
+    private static RR<NachosThread> rr;
+   
     
     private static int ticks =0;
     
@@ -29,17 +29,16 @@ public class RR<T> extends java.util.LinkedList<T> implements ReadyList<T>{
     public RR() {
 	
 	queue = new FIFOQueue<T>();
-	
-	
+
 	timer = Machine.getTimer(0);
 	interruptHandler = new TimerInterruptHandler(timer);
 	timer.setHandler(interruptHandler);
 	//timer.start();
     }
     
-    public static RR getInstance(){
+    public static RR<NachosThread> getInstance(){
 	if(rr==null){
-	    rr=new RR();	   
+	    rr=new RR<NachosThread>();	   
 	}
 	return rr;
     }

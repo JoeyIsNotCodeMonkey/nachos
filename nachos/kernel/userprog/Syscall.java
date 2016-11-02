@@ -150,7 +150,7 @@ public class Syscall {
 	//Debug.println('+', "spaceID "+ ((UserThread) NachosThread.currentThread()).space.getSpaceID());
 	// it schedules the newly created process for execution on the CPU
 	
-	CPU.writeRegister(4, 10-addrSpace.getSpaceID());
+	
 	
 	Nachos.scheduler.readyToRun(userThread);
 

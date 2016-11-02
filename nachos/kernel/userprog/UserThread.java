@@ -44,7 +44,7 @@ public class UserThread extends NachosThread {
 
     public void setBurstLen(int burstLen) {
         this.burstLen = burstLen;
-        ((SPN<?>) SPN.getInstance().getQueue()).update();
+        SPN.getInstance().update();
     }
 
     private boolean isTopLevel;

@@ -2,9 +2,7 @@
 
 
 int main(int num_of_loop){
-        
-    
-    
+ 
         
     int number1 = 0;
     int number2 = 0;

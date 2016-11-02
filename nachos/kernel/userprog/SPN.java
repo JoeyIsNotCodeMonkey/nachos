@@ -6,6 +6,7 @@ import java.util.Comparator;
 import java.util.LinkedList;
 
 import nachos.kernel.threads.Callout.CustomComparator;
+import nachos.machine.NachosThread;
 import nachos.util.FIFOQueue;
 import nachos.util.Queue;
 import nachos.util.ReadyList;
@@ -14,71 +15,79 @@ public class SPN<T> extends java.util.LinkedList<T> implements ReadyList<T>{
     /**
      * 
      */
-    private static final long serialVersionUID = 1L;
-    private LinkedList<UserThread> queue;
-    private static SPN<?> spn;
+
+    private Queue<T> queue;
+    private static SPN spn;
     
-    public LinkedList<UserThread> getQueue() {
+
+
+    public SPN() {
+	queue =  new FIFOQueue<T>();
+    }
+    
+    public static SPN<NachosThread> getInstance() {
+	if(spn == null) 
+	    spn = new SPN<NachosThread>();
+	return spn;
+    }
+   
+    
+    
+    public Queue<T> getQueue() {
         return queue;
     }
 
 
 
-    public void setQueue(LinkedList<UserThread> queue) {
+    public void setQueue(Queue<T> queue) {
         this.queue = queue;
     }
 
 
-
-    public SPN() {
-	queue = new LinkedList<UserThread>();
-    }
     
-    public static SPN<?> getInstance() {
-	if(spn == null) spn = new SPN();
-	return spn;
-    }
-   
     
-    @Override
-    public T poll(){
-	
-
-	if(queue.isEmpty())
-	    return null;
-	
-	return (T)queue.removeFirst();
-	
-	
-    }
-    @Override
-    public boolean offer(T e) {
-	UserThread thread = (UserThread) e;
-	
-	if(queue.isEmpty()) {
-	    queue.add(thread);
-	} else {
-	    for( int i =0; i<queue.size(); i++) {
-		if(queue.get(i).getBurstLen() > thread.getBurstLen() ) {
-		    queue.add(i, thread);
-		    break;
-		}
-		if(i==queue.size()-1){
-			queue.addLast(thread);
-			break;
-		  }
-	
-	    }
-	    
-	    
-	}
-	
-	//queue.add((UserThread) e);
-	return true;
-    }
+//    @Override
+//    public T poll(){
+//	
+//
+//	if(queue.isEmpty())
+//	    return null;
+//	
+//	return (T)queue.poll();
+//	
+//	
+//    }
+//    @Override
+//    public boolean offer(T e) {
+//	//UserThread thread = (UserThread) e;
+//	
+//	if(queue.isEmpty()) {
+//	    queue.offer(e)
+//	} else {
+//	    for( int i =0; i<queue.size(); i++) {
+//		if(((UserThread) queue.get(i)).getBurstLen() > ((UserThread)e).getBurstLen() ) {
+//		    queue.add(i, e);
+//		    break;
+//		}
+//		if(i==queue.size()-1){
+//			queue.offer(e);
+//			break;
+//		  }
+//	
+//	    }
+//	    
+//	    
+//	}
+//	
+//	//queue.add((UserThread) e);
+//	return true;
+//    }
     
     public void update() {
-	Collections.sort(queue, new CustomComparator());
+	
+	
+	
+	Collections.sort((FIFOQueue<UserThread>)queue, new CustomComparator());
     }
     
     public static class CustomComparator implements Comparator<UserThread> {	  
