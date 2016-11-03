@@ -153,7 +153,7 @@ public class UserThread extends NachosThread {
 
     public void setRemainingTime(int remainingTime) {
 	this.remainingTime = remainingTime;
-	updateResponseRatio();
+	
     }
 
     public double getResponseRatio() {

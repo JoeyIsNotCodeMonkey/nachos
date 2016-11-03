@@ -46,6 +46,7 @@ public class HRRN<T>   implements Queue<T>{
 		
 		return -1;
 	    }
+	    
     }
 
     public void update() {
@@ -63,21 +64,23 @@ public class HRRN<T>   implements Queue<T>{
     }
 
    
+    @SuppressWarnings("unchecked")
     @Override
     public T poll(){
 	
 	
 	
-	for(int i=0; i<queue.size(); i++) {
-	    
-		UserThread t = (UserThread)queue.poll();
-		t.updateResponseRatio();		
-		queue.offer((T)t);
-	    
-	}
+	if(initPredictCPU()){
 	
-	Collections.sort((LinkedList<NachosThread>)queue, new CustomComparator());
-
+        	for(int i=0; i<queue.size(); i++) {	    
+        		UserThread t = (UserThread)queue.poll();
+        		t.updateResponseRatio();		
+        		queue.offer((T)t);	    
+        	}
+        	
+        	
+        	Collections.sort((LinkedList<NachosThread>)queue, new CustomComparator());
+	}
 	
 	return queue.poll();
 	
@@ -88,7 +91,7 @@ public class HRRN<T>   implements Queue<T>{
         return queue;
     }
     public void setQueue(LinkedList<T> queue) {
-        this.queue = queue;
+        this.queue = queue; 
     }
 
 
@@ -111,7 +114,23 @@ public class HRRN<T>   implements Queue<T>{
 	
 	return queue.isEmpty();
     }
-
+    
+    //make sure every process has called predictCPU, then we can sort the list by ratio
+    private boolean initPredictCPU(){
+	
+	
+	
+	for(T t: queue){
+	   if(t instanceof UserThread){
+	       UserThread indexThread = (UserThread)t;
+	       if(indexThread.getBurstLen()==0){
+		   return false;
+	       }
+	   }
+	}
+	
+	return true;
+    }
 
 
 }
