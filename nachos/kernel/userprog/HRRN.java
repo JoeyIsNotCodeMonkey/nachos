@@ -4,6 +4,7 @@ import java.util.Collections;
 import java.util.Comparator;
 
 import nachos.Debug;
+import nachos.kernel.Nachos;
 import nachos.kernel.userprog.SPN.CustomComparator;
 import nachos.machine.Machine;
 import nachos.machine.NachosThread;
@@ -41,6 +42,14 @@ public class HRRN<T> extends java.util.LinkedList<T> implements ReadyList<T>{
     public T poll(){
 	
 
+	for(int i=0; i<queue.size(); i++) {
+	    
+		UserThread t = (UserThread)queue.poll();
+		t.updateResponseRatio();
+		
+		queue.offer((T)t);
+	    
+	}
 	
 	Collections.sort((FIFOQueue<UserThread>)queue, new CustomComparator());
 	
@@ -66,6 +75,16 @@ public class HRRN<T> extends java.util.LinkedList<T> implements ReadyList<T>{
 		
 		return -1;
 	    }
+    }
+
+    public void update() {
+	UserThread currentThread = (UserThread) queue.peek();
+	
+	
+	if(currentThread.getBurstLen() == 0) {
+	    Nachos.scheduler.yieldThread();
+	}
+	
     }
 
 }

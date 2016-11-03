@@ -38,7 +38,7 @@ public class UserThread extends NachosThread {
     
     private int burstLen;
     
-    private int remaingTime;
+    private int remainingTime;
     
     private int waitingTime;
     
@@ -71,6 +71,7 @@ public class UserThread extends NachosThread {
 	super(name, runObj);
 	space = addrSpace;
 	burstLen = 0;
+	remainingTime = 0;
 	waitingTime = 0;
 	responseRatio = 0;
 	if(!(runObj instanceof Task)&&!(runObj instanceof ForkTask)) {
@@ -145,12 +146,12 @@ public class UserThread extends NachosThread {
 	space.restoreState();
     }
 
-    public int getRemaingTime() {
-	return remaingTime;
+    public int getRemainingTime() {
+	return remainingTime;
     }
 
-    public void setRemaingTime(int remaingTime) {
-	this.remaingTime = remaingTime;
+    public void setRemainingTime(int remainingTime) {
+	this.remainingTime = remainingTime;
 	updateResponseRatio();
     }
 
@@ -162,8 +163,11 @@ public class UserThread extends NachosThread {
 	this.responseRatio = responseRatio;
     }
     
-    private void updateResponseRatio() {
-	this.responseRatio = (getWaitingTime()+getRemaingTime())/getRemaingTime();	
+    public void updateResponseRatio() {
+	if(getRemainingTime() > 0) {
+	    this.responseRatio = (getWaitingTime()+getRemainingTime())/getRemainingTime();	
+	}
+	
     }
     
     
@@ -173,7 +177,7 @@ public class UserThread extends NachosThread {
 
     public void setWaitingTime(int waitingTime) {
         this.waitingTime = waitingTime;
-        updateResponseRatio();
+        //updateResponseRatio();
     }
 
 
@@ -184,8 +188,11 @@ public class UserThread extends NachosThread {
 
     public void setBurstLen(int burstLen) {
         this.burstLen = burstLen;
-        setRemaingTime(burstLen);
-        SPN.getInstance().update();
+        setRemainingTime(burstLen);
+        //SPN.getInstance().update(); ******************this update is for spn, dont forget add it back mother fucker
+        HRRN.getInstance().update();
+        
+        
     }
     
 }

@@ -489,11 +489,11 @@ public class Scheduler {
 			
 			UserThread currentThread = (UserThread)NachosThread.currentThread();
 			    
-			currentThread.setRemaingTime(currentThread.getRemaingTime()-100);
+			currentThread.setRemainingTime(currentThread.getRemainingTime()-100);
 			
 			UserThread head = (UserThread) SPN.getInstance().getQueue().peek();
 					    
-			if(currentThread.getRemaingTime()>head.getRemaingTime()){
+			if(currentThread.getRemainingTime()>head.getRemainingTime()){
 			    Nachos.scheduler.yieldThread();
 			}
 						
