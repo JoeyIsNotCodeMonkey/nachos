@@ -82,7 +82,7 @@ public class Scheduler {
 	//}
 	
 	//readyList =   SPN.getInstance().getQueue();
-	readyList = HRRN.getInstance().getQueue();
+	readyList = new HRRN<NachosThread>();
 	
 	//readyList = new FIFOQueue<NachosThread>(); *********original************
 	cpuList = new FIFOQueue<CPU>();
@@ -399,13 +399,16 @@ public class Scheduler {
 	
 	currentThread.setStatus(NachosThread.FINISHED);
 	
-	for(int i=0; i<readyList.size(); i++) {
-	    if(readyList.peek() instanceof UserThread && currentThread instanceof UserThread) {
-		UserThread t = (UserThread)readyList.poll();
-		t.setWaitingTime(t.getWaitingTime()+((UserThread)currentThread).getWaitingTime());
-		readyList.offer(t);
-	    }
-	}
+	
+//	int listSize =((HRRN<NachosThread>)readyList).size();
+//	
+//	for(int i=0; i<listSize; i++) {
+//	    if(readyList.peek() instanceof UserThread && currentThread instanceof UserThread) {
+//		UserThread t = (UserThread)readyList.poll();
+//		t.setWaitingTime(t.getWaitingTime()+((UserThread)currentThread).getWaitingTime());
+//		readyList.offer(t);
+//	    }
+//	}
 	
 	
 //	ArrayList<Object[]> list = callout.getCalloutList();

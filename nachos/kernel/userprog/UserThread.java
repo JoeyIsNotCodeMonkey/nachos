@@ -190,7 +190,7 @@ public class UserThread extends NachosThread {
         this.burstLen = burstLen;
         setRemainingTime(burstLen);
         //SPN.getInstance().update(); ******************this update is for spn, dont forget add it back mother fucker
-        HRRN.getInstance().update();
+        //HRRN.getInstance().update();
         
         
     }

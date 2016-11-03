@@ -321,10 +321,6 @@ public class SynchronousQueue<T> implements Queue<T> {
 	
     }
 
-    @Override
-    public int size() {
-	// TODO Auto-generated method stub
-	return 0;
-    }
+   
 
 }

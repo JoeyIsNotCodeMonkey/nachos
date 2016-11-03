@@ -13,57 +13,34 @@ import nachos.util.FIFOQueue;
 import nachos.util.Queue;
 import nachos.util.ReadyList;
 
-public class HRRN<T> extends java.util.LinkedList<T> implements ReadyList<T>{
+public class HRRN<T>   extends java.util.LinkedList<T>  implements Queue<T>{
     
-    private Queue<T> queue;
+    private  Queue<T> queue;
     private static HRRN<NachosThread> hrrn;
-    private Timer timer;
     
-    public HRRN() {
-	queue = new FIFOQueue<T>();
-	
+    
+    
+    
+    public HRRN(){
+	queue =  new FIFOQueue<T>(); 
     }
-    
-    public static HRRN<NachosThread> getInstance() {
-	if(hrrn == null) 
-	    hrrn = new HRRN<NachosThread>();
+    public static HRRN<NachosThread> getInstance(){
+	if(hrrn==null){
+	    hrrn=new HRRN<NachosThread>();	   
+	}
 	return hrrn;
     }
-
-    public Queue<T> getQueue() {
-	return queue;
-    }
-
-    public void setQueue(Queue<T> queue) {
-	this.queue = queue;
-    }
     
-    @Override
-    public T poll(){
-	
-
-	for(int i=0; i<queue.size(); i++) {
-	    
-		UserThread t = (UserThread)queue.poll();
-		t.updateResponseRatio();
-		
-		queue.offer((T)t);
-	    
-	}
-	
-	Collections.sort((FIFOQueue<UserThread>)queue, new CustomComparator());
-	
-	if(queue.isEmpty())
-	    return null;
-	
-	return (T)queue.poll();
-	
-	
-    }
     
-    public static class CustomComparator implements Comparator<UserThread> {	  
+    
+    public static class CustomComparator implements Comparator<NachosThread> {	  
+
+
 	    @Override
-	    public int compare(UserThread o1, UserThread o2) {
+	    public int compare(NachosThread arg0, NachosThread arg1) {
+		
+		UserThread o1 = (UserThread)arg0;
+		UserThread o2 = (UserThread)arg1;
 		
 		if(o1.getResponseRatio() < o2.getResponseRatio()) {
 		    return 1;
@@ -86,5 +63,50 @@ public class HRRN<T> extends java.util.LinkedList<T> implements ReadyList<T>{
 	}
 	
     }
+
+   
+    @Override
+    public T poll(){
+	
+	
+	
+	
+	Debug.println('+', "sdfklas;kdljflaksdjf;");
+		
+	
+//	for(int i=0; i<queue.; i++) {
+//	    
+//		UserThread t = (UserThread)queue.poll();
+//		t.updateResponseRatio();		
+//		queue.offer((T)t);
+//	    
+//	}
+	
+//	Collections.sort((FIFOQueue<NachosThread>)queue, new CustomComparator());
+
+	
+	
+	NachosThread t = (NachosThread)queue.peek();
+	
+	return queue.poll();
+	
+	
+    }
+    
+    
+    
+    
+    
+    
+    
+    
+    public Queue<T> getQueue() {
+        return queue;
+    }
+    public void setQueue(Queue<T> queue) {
+        this.queue = queue;
+    }
+
+
 
 }
