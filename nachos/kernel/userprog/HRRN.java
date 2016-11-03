@@ -2,6 +2,7 @@ package nachos.kernel.userprog;
 
 import java.util.Collections;
 import java.util.Comparator;
+import java.util.LinkedList;
 
 import nachos.Debug;
 import nachos.kernel.Nachos;
@@ -13,26 +14,19 @@ import nachos.util.FIFOQueue;
 import nachos.util.Queue;
 import nachos.util.ReadyList;
 
-public class HRRN<T>   extends java.util.LinkedList<T>  implements Queue<T>{
+public class HRRN<T>   implements Queue<T>{
     
-    private  Queue<T> queue;
-    private static HRRN<NachosThread> hrrn;
+    private  LinkedList<T> queue = new LinkedList<T>();
+    private static HRRN hrrn;
     
-    
-    
-    
-    public HRRN(){
-	queue =  new FIFOQueue<T>(); 
-    }
-    public static HRRN<NachosThread> getInstance(){
+ 
+    public static HRRN getInstance(){
 	if(hrrn==null){
-	    hrrn=new HRRN<NachosThread>();	   
+	    hrrn=new HRRN();	   
 	}
 	return hrrn;
     }
-    
-    
-    
+   
     public static class CustomComparator implements Comparator<NachosThread> {	  
 
 
@@ -63,6 +57,10 @@ public class HRRN<T>   extends java.util.LinkedList<T>  implements Queue<T>{
 	}
 	
     }
+    
+    public int size(){
+	return queue.size();
+    }
 
    
     @Override
@@ -70,41 +68,48 @@ public class HRRN<T>   extends java.util.LinkedList<T>  implements Queue<T>{
 	
 	
 	
+	for(int i=0; i<queue.size(); i++) {
+	    
+		UserThread t = (UserThread)queue.poll();
+		t.updateResponseRatio();		
+		queue.offer((T)t);
+	    
+	}
 	
-	Debug.println('+', "sdfklas;kdljflaksdjf;");
-		
-	
-//	for(int i=0; i<queue.; i++) {
-//	    
-//		UserThread t = (UserThread)queue.poll();
-//		t.updateResponseRatio();		
-//		queue.offer((T)t);
-//	    
-//	}
-	
-//	Collections.sort((FIFOQueue<NachosThread>)queue, new CustomComparator());
+	Collections.sort((LinkedList<NachosThread>)queue, new CustomComparator());
 
-	
-	
-	NachosThread t = (NachosThread)queue.peek();
 	
 	return queue.poll();
 	
 	
     }
     
-    
-    
-    
-    
-    
-    
-    
-    public Queue<T> getQueue() {
+    public LinkedList<T> getQueue() {
         return queue;
     }
-    public void setQueue(Queue<T> queue) {
+    public void setQueue(LinkedList<T> queue) {
         this.queue = queue;
+    }
+
+
+    @Override
+    public boolean offer(T e) {
+	
+	return queue.offer(e);
+    }
+
+
+    @Override
+    public T peek() {
+	
+	return queue.peek();
+    }
+
+
+    @Override
+    public boolean isEmpty() {
+	
+	return queue.isEmpty();
     }
 
 

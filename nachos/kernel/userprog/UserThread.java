@@ -12,6 +12,7 @@ package nachos.kernel.userprog;
 
 import nachos.machine.MIPS;
 import nachos.machine.NachosThread;
+import nachos.kernel.Nachos;
 import nachos.kernel.devices.ConsoleDriver;
 import nachos.machine.CPU;
 import nachos.kernel.devices.ConsoleManager;
@@ -190,7 +191,8 @@ public class UserThread extends NachosThread {
         this.burstLen = burstLen;
         setRemainingTime(burstLen);
         //SPN.getInstance().update(); ******************this update is for spn, dont forget add it back mother fucker
-        //HRRN.getInstance().update();
+        
+        ((HRRN<NachosThread>)Nachos.scheduler.readyList).update();
         
         
     }
