@@ -71,7 +71,8 @@ public class HRRN<T>   implements Queue<T>{
 	
 	
 	if(initPredictCPU()){
-	
+	    
+	    Debug.println('+', "757575______________"+ NachosThread.currentThread().name);
         	for(int i=0; i<queue.size(); i++) {	    
         		UserThread t = (UserThread)queue.poll();
         		t.updateResponseRatio();		
