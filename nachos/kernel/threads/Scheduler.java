@@ -405,15 +405,15 @@ public class Scheduler {
 	currentThread.setStatus(NachosThread.FINISHED);
 	
 	
-	int listSize =((HRRN<NachosThread>)readyList).size();
-	
-	for(int i=0; i<listSize; i++) {
-	    if(readyList.peek() instanceof UserThread && currentThread instanceof UserThread) {
-		UserThread t = (UserThread)readyList.poll();
-		t.setWaitingTime(t.getWaitingTime()+((UserThread)currentThread).getWaitingTime());
-		readyList.offer(t);
-	    }
-	}
+//	int listSize =((HRRN<NachosThread>)readyList).size();
+//	
+//	for(int i=0; i<listSize; i++) {
+//	    if(readyList.peek() instanceof UserThread && currentThread instanceof UserThread) {
+//		UserThread t = (UserThread)readyList.poll();
+//		t.setWaitingTime(t.getWaitingTime()+((UserThread)currentThread).getWaitingTime());
+//		readyList.offer(t);
+//	    }
+//	}
 	
 	
 //	ArrayList<Object[]> list = callout.getCalloutList();

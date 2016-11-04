@@ -166,7 +166,7 @@ public class UserThread extends NachosThread {
     
     public void updateResponseRatio() {
 	if(getRemainingTime() > 0) {
-	    this.responseRatio = (getWaitingTime()+getRemainingTime())/getRemainingTime();	
+	    this.responseRatio = (double)(getWaitingTime()+getRemainingTime())/getRemainingTime();	
 	}
 	
     }
@@ -189,10 +189,9 @@ public class UserThread extends NachosThread {
 
     public void setBurstLen(int burstLen) {
         this.burstLen = burstLen;
-        setRemainingTime(burstLen);
         //SPN.getInstance().update(); ******************this update is for spn, dont forget add it back mother fucker
         
-        ((HRRN<NachosThread>)Nachos.scheduler.readyList).update();
+        ((HRRN<NachosThread>)Nachos.scheduler.readyList).iterate();
         
         
     }
