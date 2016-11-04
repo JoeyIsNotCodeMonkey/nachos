@@ -6,7 +6,6 @@ import java.util.LinkedList;
 
 import nachos.Debug;
 import nachos.kernel.Nachos;
-import nachos.kernel.userprog.SPN.CustomComparator;
 import nachos.machine.Machine;
 import nachos.machine.NachosThread;
 import nachos.machine.Timer;
@@ -14,7 +13,7 @@ import nachos.util.FIFOQueue;
 import nachos.util.Queue;
 import nachos.util.ReadyList;
 
-public class HRRN<T>   implements Queue<T>{
+public class HRRN<T> extends java.util.LinkedList<T>  implements Queue<T>{
     
     private  LinkedList<T> queue = new LinkedList<T>();
     private static HRRN hrrn;
@@ -92,25 +91,6 @@ public class HRRN<T>   implements Queue<T>{
     }
 
 
-    @Override
-    public boolean offer(T e) {
-	
-	return queue.offer(e);
-    }
-
-
-    @Override
-    public T peek() {
-	
-	return queue.peek();
-    }
-
-
-    @Override
-    public boolean isEmpty() {
-	
-	return queue.isEmpty();
-    }
 
 
 
