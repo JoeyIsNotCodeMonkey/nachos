@@ -45,7 +45,7 @@ public class UserThread extends NachosThread {
     
     private double responseRatio;
 
-
+    private int priority;
 
     private boolean isTopLevel;
 
@@ -75,6 +75,7 @@ public class UserThread extends NachosThread {
 	remainingTime = 0;
 	waitingTime = 0;
 	responseRatio = 0;
+	setPriority(0);
 	if(!(runObj instanceof Task)&&!(runObj instanceof ForkTask)) {
 	    consoleDriver = ConsoleManager.getInstance().getConsole();
 	    isTopLevel = true;
@@ -190,10 +191,18 @@ public class UserThread extends NachosThread {
     public void setBurstLen(int burstLen) {
         this.burstLen = burstLen;
         //SPN.getInstance().update(); ******************this update is for spn, dont forget add it back mother fucker
-        
+        //((SPN<NachosThread>)Nachos.scheduler.readyList).update();
         ((HRRN<NachosThread>)Nachos.scheduler.readyList).iterate();
         
         
+    }
+
+    public int getPriority() {
+	return priority;
+    }
+
+    public void setPriority(int priority) {
+	this.priority = priority;
     }
     
 }
