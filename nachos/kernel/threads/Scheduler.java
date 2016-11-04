@@ -29,6 +29,7 @@ import nachos.machine.Timer;
 import nachos.machine.InterruptHandler;
 import nachos.util.FIFOQueue;
 import nachos.util.Queue;
+import nachos.util.ReadyList;
 
 /**
  * The scheduler is responsible for maintaining a list of threads that are ready
@@ -78,10 +79,10 @@ public class Scheduler {
      */
     public Scheduler(NachosThread firstThread) {
 	//if() {
-	    //readyList = RR.getInstance().getQueue();
+	    //readyList = new RR<NachosThread>();
 	//}
 	
-	//readyList =   SPN.getInstance().getQueue();
+	//readyList =   new SPN<NachosThread>();
 	
 	
 	readyList = new HRRN<NachosThread>();
@@ -405,15 +406,15 @@ public class Scheduler {
 	currentThread.setStatus(NachosThread.FINISHED);
 	
 	
-	int listSize =((HRRN<NachosThread>)readyList).size();
-	
-	for(int i=0; i<listSize; i++) {
-	    if(readyList.peek() instanceof UserThread && currentThread instanceof UserThread) {
-		UserThread t = (UserThread)readyList.poll();
-		t.setWaitingTime(t.getWaitingTime()+((UserThread)currentThread).getWaitingTime());
-		readyList.offer(t);
-	    }
-	}
+//	int listSize =((HRRN<NachosThread>)readyList).size();
+//	
+//	for(int i=0; i<listSize; i++) {
+//	    if(readyList.peek() instanceof UserThread && currentThread instanceof UserThread) {
+//		UserThread t = (UserThread)readyList.poll();
+//		t.setWaitingTime(t.getWaitingTime()+((UserThread)currentThread).getWaitingTime());
+//		readyList.offer(t);
+//	    }
+//	}
 	
 	
 //	ArrayList<Object[]> list = callout.getCalloutList();
@@ -499,7 +500,7 @@ public class Scheduler {
 			    
 			currentThread.setRemainingTime(currentThread.getRemainingTime()-100);
 			
-			UserThread head = (UserThread) SPN.getInstance().getQueue().peek();
+			UserThread head = (UserThread) Nachos.scheduler.readyList.peek();
 					    
 			if(currentThread.getRemainingTime()>head.getRemainingTime()){
 			    Nachos.scheduler.yieldThread();
@@ -539,17 +540,10 @@ public class Scheduler {
 				currentThread.setQuantum(1000);
 	
 				Nachos.scheduler.yieldThread();
-			    }
-			    
-			    
-			
-			
+			    }			
 			
 			//Nachos.scheduler.yieldThread();
-			
-			
-			
-			
+		
 		    } else {
 			Debug.println('i',
 				"No current thread on interrupt return, skipping yield");

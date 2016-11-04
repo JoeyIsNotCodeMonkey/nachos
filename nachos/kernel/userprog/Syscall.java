@@ -360,7 +360,9 @@ public class Syscall {
     
     public static void PredictCPU(int ticks) {
 	UserThread currentThread = (UserThread) NachosThread.currentThread();
+	currentThread.setRemainingTime(ticks);
 	currentThread.setBurstLen(ticks);// this also set the remaining time for the process
+	
     }
 
 }

@@ -17,20 +17,14 @@ public class SPN<T> extends java.util.LinkedList<T> implements ReadyList<T>{
      * 
      */
 
-    private Queue<T> queue;
     private static SPN spn;
     
 
 
-    public SPN() {
-	queue =  new FIFOQueue<T>();
-    }
+    private Queue<T> queue =  new FIFOQueue<T>();
+   
     
-    public static SPN<NachosThread> getInstance() {
-	if(spn == null) 
-	    spn = new SPN<NachosThread>();
-	return spn;
-    }
+
    
     
     
