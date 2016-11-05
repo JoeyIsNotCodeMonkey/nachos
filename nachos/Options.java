@@ -146,7 +146,7 @@ public class Options {
      * NOTE: Once these are enabled, the simulation will run forever unless
      * explicitly stopped.
      */
-    public boolean CPU_TIMERS = false;
+    public static boolean CPU_TIMERS = false;
     
     /** Should the time-slicing timers be randomized? */
     public boolean RANDOM_YIELD = false;
@@ -188,6 +188,14 @@ public class Options {
     
     /** Should we run the network test? */
     public boolean NETWORK_TEST = false;
+    
+    /** CPU scheduling policies */
+    public static boolean RR = false;
+    public static boolean SPN = false;
+    public static boolean SRT = false;
+    public static boolean HRRN = false;
+    public static boolean FEEDBACK = false;
+    
     
     public Options(String[] args) {
 	argList = Arrays.asList(args);
@@ -318,7 +326,47 @@ public class Options {
 			    public void processOption(String flag, Object[] params) {
 				DISK_FILE_NAME = (String)params[0];
 			    }
-			 })
+			 }),
+		new Spec("-rr",  // enable pre-emptive scheduling using per-CPU scheduling timers
+			 new Class[] { },
+			 null,
+			 new Options.Action() {
+			    public void processOption(String flag, Object[] params) {
+				RR = true;
+			    }
+			 }),
+		new Spec("-spn",  // enable pre-emptive scheduling using per-CPU scheduling timers
+			 new Class[] { },
+			 null,
+			 new Options.Action() {
+			    public void processOption(String flag, Object[] params) {
+				SPN = true;
+			    }
+			 }),
+		new Spec("-srt",  // enable pre-emptive scheduling using per-CPU scheduling timers
+			 new Class[] { },
+			 null,
+			 new Options.Action() {
+			    public void processOption(String flag, Object[] params) {				
+				SRT = true;
+			    }
+			 }),
+		new Spec("-hrrn",  // enable pre-emptive scheduling using per-CPU scheduling timers
+			 new Class[] { },
+			 null,
+			 new Options.Action() {
+			    public void processOption(String flag, Object[] params) {
+				HRRN = true;
+			    }
+			 }),
+		new Spec("-feedback",  // enable pre-emptive scheduling using per-CPU scheduling timers
+			 new Class[] { },
+			 null,
+			 new Options.Action() {
+			    public void processOption(String flag, Object[] params) {
+				FEEDBACK = true;
+			    }
+			 }),
 	});
     }
     

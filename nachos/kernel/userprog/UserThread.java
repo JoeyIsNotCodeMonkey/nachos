@@ -192,7 +192,7 @@ public class UserThread extends NachosThread {
         this.burstLen = burstLen;
         //SPN.getInstance().update(); ******************this update is for spn, dont forget add it back mother fucker
         //((SPN<NachosThread>)Nachos.scheduler.readyList).update();
-        ((HRRN<NachosThread>)Nachos.scheduler.readyList).iterate();
+        //((HRRN<NachosThread>)Nachos.scheduler.readyList).iterate();
         
         
     }

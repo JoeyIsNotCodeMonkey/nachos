@@ -105,6 +105,6 @@ public class SPN<T> extends java.util.LinkedList<T> implements ReadyList<T>{
 		
 		return -1;
 	    }
-}
+    }
     
 }
