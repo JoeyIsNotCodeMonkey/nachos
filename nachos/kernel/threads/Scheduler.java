@@ -91,6 +91,8 @@ public class Scheduler {
 	
 	
 	//readyList = new FIFOQueue<NachosThread>(); *********original************
+	
+	
 	cpuList = new FIFOQueue<CPU>();
 	
 

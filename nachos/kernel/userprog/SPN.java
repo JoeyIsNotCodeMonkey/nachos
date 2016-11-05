@@ -22,12 +22,7 @@ public class SPN<T> extends java.util.LinkedList<T> implements ReadyList<T>{
 
 
     private Queue<T> queue =  new FIFOQueue<T>();
-   
-    
 
-   
-    
-    
     public Queue<T> getQueue() {
         return queue;
     }
