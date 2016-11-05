@@ -94,10 +94,10 @@ public class Syscall {
 
 	UserThread userThread = (UserThread) NachosThread.currentThread();
 
-	if (userThread.isTopLevel()) {
-	    ConsoleManager.getInstance()
-		    .freeConsole(userThread.getConsoleDriver());
-	}
+//	if (userThread.isTopLevel()) {
+//	    ConsoleManager.getInstance()
+//		    .freeConsole(userThread.getConsoleDriver());
+//	}
 
 	AddrSpace space = userThread.space;
 

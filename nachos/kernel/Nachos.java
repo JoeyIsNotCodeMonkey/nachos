@@ -42,6 +42,7 @@ import nachos.kernel.threads.test.SMPTest;
 import nachos.kernel.threads.test.SynchronousQueueTest;
 import nachos.kernel.threads.test.ThreadTest;
 import nachos.kernel.userprog.test.ProgTest;
+import nachos.kernel.userprog.test.testDriver;
 import nachos.kernel.filesys.test.FileSystemTest;
 
 /**
@@ -122,6 +123,8 @@ public class Nachos implements Runnable {
 	    ProgTest.start();
 	if(options.FILESYS_TEST)
 	    FileSystemTest.start();
+	if(options.testDriver)
+	    testDriver.start();
 	if(options.SERIAL_TEST)
 	    SerialTest.start();
 	if(options.NETWORK_TEST)

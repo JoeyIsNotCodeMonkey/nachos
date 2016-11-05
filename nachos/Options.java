@@ -175,7 +175,10 @@ public class Options {
     public boolean SMP_TEST = false;
 
     /** Should we run the user program test? */
-    public boolean PROG_TEST = true;
+    public boolean PROG_TEST = false;
+    
+    /** Should we run the user program test? */
+    public boolean testDriver = false;
     
     /** Should we run the console test? */
     public boolean CONSOLE_TEST = false;
@@ -253,6 +256,14 @@ public class Options {
 			 new Options.Action() {
 			    public void processOption(String flag, Object[] params) {
 				PROG_TEST = true;
+			    }
+			 }),
+		new Spec("-v",  // enable user program testDriver
+			 new Class[] { },
+			 null,
+			 new Options.Action() {
+			    public void processOption(String flag, Object[] params) {
+				testDriver = true;
 			    }
 			 }),
 		new Spec("-nt",  // enable network test

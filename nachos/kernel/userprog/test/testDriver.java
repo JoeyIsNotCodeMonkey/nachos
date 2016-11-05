@@ -40,9 +40,15 @@ public class testDriver implements Runnable {
      * @param filename The name of the program to execute.
      */
     public testDriver(String filename, int num) {
-	String name = "ProgTest"+ num + "(" + filename + ")";
+	int count = 0;
 	
-	Debug.println('+', "starting ProgTest: " + name);
+	
+	while(count <100){
+	    
+	    
+	String name = "testDriver"+ count + "(" + filename + ")";
+	
+	Debug.println('+', "starting testDriver: " + count);
 
 	execName = filename;
 	AddrSpace space = new AddrSpace();
@@ -50,6 +56,15 @@ public class testDriver implements Runnable {
 	
 	
 	Nachos.scheduler.readyToRun(t);
+	
+	
+	
+	
+	count++;
+	}
+	
+	
+	
     }
 
     /**
@@ -78,8 +93,11 @@ public class testDriver implements Runnable {
 	space.initRegisters();		// set the initial register values
 	space.restoreState();		// load page table register
 
-	
-	CPU.writeRegister(4, 10-space.getSpaceID());
+	double randNumber = Math.random();
+	double d  = randNumber *100;
+	int randomInt = (int)d+1;
+	Debug.println('+', "random for this thread is : " + randomInt);
+	CPU.writeRegister(4, randomInt );
 	
 	CPU.runUserCode();			// jump to the user progam
 	Debug.ASSERT(false);		// machine->Run never returns;
@@ -99,12 +117,12 @@ public class testDriver implements Runnable {
 	Nachos.options.processOptions
 		(new Options.Spec[] {
 			new Options.Spec
-				("-x",
+				("-v",
 				 new Class[] {String.class},
-				 "Usage: -x <executable file>",
+				 "Usage: -v <executable file>",
 				 new Options.Action() {
 				    public void processOption(String flag, Object[] params) {
-					new ProgTest((String)params[0], count[0]++);
+					new testDriver((String)params[0], count[0]++);
 				    }
 				 })
 		 });
