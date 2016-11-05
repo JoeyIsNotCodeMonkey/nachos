@@ -78,6 +78,9 @@ public class testDriver implements Runnable {
 	space.initRegisters();		// set the initial register values
 	space.restoreState();		// load page table register
 
+	
+	CPU.writeRegister(4, 10-space.getSpaceID());
+	
 	CPU.runUserCode();			// jump to the user progam
 	Debug.ASSERT(false);		// machine->Run never returns;
 	// the address space exits
