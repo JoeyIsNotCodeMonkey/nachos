@@ -17,14 +17,14 @@ public class HRRN<T> extends java.util.LinkedList<T> implements Queue<T> {
 
     private LinkedList<T> queue = new LinkedList<T>();
 
-    private static HRRN hrrn;
+    //private static HRRN hrrn;
 
-    public static HRRN getInstance() {
-	if (hrrn == null) {
-	    hrrn = new HRRN();
-	}
-	return hrrn;
-    }
+//    public static HRRN getInstance() {
+//	if (hrrn == null) {
+//	    hrrn = new HRRN();
+//	}
+//	return hrrn;
+//    }
 
     public static class CustomComparator implements Comparator<NachosThread> {
 

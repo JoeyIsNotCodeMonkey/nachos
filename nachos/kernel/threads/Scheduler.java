@@ -18,6 +18,7 @@ import java.util.ArrayList;
 
 import nachos.Debug;
 import nachos.kernel.Nachos;
+import nachos.kernel.userprog.Feedback;
 import nachos.kernel.userprog.HRRN;
 import nachos.kernel.userprog.RR;
 import nachos.kernel.userprog.SPN;
@@ -85,12 +86,38 @@ public class Scheduler {
 	//readyList =   new SPN<NachosThread>();
 	
 	
-	readyList = new HRRN<NachosThread>();
+	//readyList = new HRRN<NachosThread>();
 	
 	//readyList = h.getQueue();
 	
 	
 	//readyList = new FIFOQueue<NachosThread>(); *********original************
+	
+	if(nachos.Options.RR) {
+	    readyList = new RR<NachosThread>();
+	} 
+	
+	else if(nachos.Options.SPN) {
+	    readyList = new SPN<NachosThread>();
+	}
+	
+	//SRT = SPN with -ps
+	else if(nachos.Options.SPN && nachos.Options.CPU_TIMERS) {
+	    readyList = new SPN<NachosThread>();
+	}
+	
+	else if(nachos.Options.HRRN) {
+	    readyList = new HRRN<NachosThread>();
+	}
+	
+	else if(nachos.Options.FEEDBACK) {
+	    readyList = new Feedback<NachosThread>();
+	}
+	
+	else {
+	    readyList = new FIFOQueue<NachosThread>();
+	}
+	
 	cpuList = new FIFOQueue<CPU>();
 	
 
@@ -483,8 +510,18 @@ public class Scheduler {
 	   
 	    //yieldOnReturnRR();
 	   
-	    yieldOnReturnSRT();
+	    //yieldOnReturnSRT();
 	    //yieldOnReturn();
+	    
+	    if(nachos.Options.RR) {
+		yieldOnReturnRR();
+	    } else if(nachos.Options.SPN && nachos.Options.CPU_TIMERS) {
+		yieldOnReturnSRT();
+	    } else {
+		yieldOnReturn();
+	    }
+	    
+	    
 	}
 
 	

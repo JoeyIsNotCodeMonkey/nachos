@@ -66,13 +66,11 @@ public class Syscall {
 
     /** Integer code identifying the "Remove" system call. */
     public static final byte SC_Remove = 11;
-    
+
     public static final byte SC_PredictCPU = 12;
 
-    
-    private static Semaphore consoleLock= new Semaphore("console_lock",1);
-    
-    
+    private static Semaphore consoleLock = new Semaphore("console_lock", 1);
+
     /**
      * Stop Nachos, and print out performance stats.
      */
@@ -93,30 +91,23 @@ public class Syscall {
     public static void exit(int status) {
 	Debug.println('+', "User program exits with status=" + status + ": "
 		+ NachosThread.currentThread().name);
-	
-	
 
 	UserThread userThread = (UserThread) NachosThread.currentThread();
-	
-	if(userThread.isTopLevel()){
-	   ConsoleManager.getInstance().freeConsole(userThread.getConsoleDriver());
+
+	if (userThread.isTopLevel()) {
+	    ConsoleManager.getInstance()
+		    .freeConsole(userThread.getConsoleDriver());
 	}
-	
+
 	AddrSpace space = userThread.space;
-	
-	
-	
+
 	space.deAllocateAndZeroOut(space);
 
 	space.getPmm().awakeThread(space.getSpaceID());
-	//int parentSpaceID = space.getPmm().getParentTable().get(space.getSpaceID());
-	//space.getPmm().getSpaceByID(parentSpaceID).join_lock.V();
-	
-	
-	
-	
-	
-	
+	// int parentSpaceID =
+	// space.getPmm().getParentTable().get(space.getSpaceID());
+	// space.getPmm().getSpaceByID(parentSpaceID).join_lock.V();
+
 	Nachos.scheduler.finishThread();
     }
 
@@ -129,44 +120,37 @@ public class Syscall {
      */
     public static int exec(String name) {
 
-
-	
 	UserThread currentThread = (UserThread) NachosThread.currentThread();
-	
-	
+
 	Task task = new Task(name, currentThread);
 	AddrSpace addrSpace = new AddrSpace();
-	
-	
-	//UserThread userCurrentThread = (UserThread) NachosThread.currentThread();
-	//AddrSpace space = userCurrentThread.space;
-	
-	
-	//addrSpace.getPmm().registerParent(addrSpace.getSpaceID(), space.getSpaceID());
+
+	// UserThread userCurrentThread = (UserThread)
+	// NachosThread.currentThread();
+	// AddrSpace space = userCurrentThread.space;
+
+	// addrSpace.getPmm().registerParent(addrSpace.getSpaceID(),
+	// space.getSpaceID());
 
 	// creates a new process (i.e. user thread plus user address space)
-	
-	UserThread userThread = new UserThread(name, task, addrSpace);
-	//Debug.println('+', "spaceID "+ ((UserThread) NachosThread.currentThread()).space.getSpaceID());
-	// it schedules the newly created process for execution on the CPU
-	
-	
-	
-	Nachos.scheduler.readyToRun(userThread);
 
+	UserThread userThread = new UserThread(name, task, addrSpace);
+	// Debug.println('+', "spaceID "+ ((UserThread)
+	// NachosThread.currentThread()).space.getSpaceID());
+	// it schedules the newly created process for execution on the CPU
+
+	Nachos.scheduler.readyToRun(userThread);
 
 	// initializes the address space using the data from the NACHOS
 	// executable (initialized in task)
 
 	// ("SpaceId") that uniquely identifies the newly created process is
 	// returned to the caller
-	
-	
-	
+
 	return addrSpace.getSpaceID();
 
     }
-    
+
     /**
      * Fork a thread to run a procedure ("func") in the *same* address space as
      * the current thread.
@@ -176,18 +160,18 @@ public class Syscall {
      */
     public static void fork(int func) {
 	Debug.print('+', "Starting fork.\n");
-	
-	
+
 	UserThread currentThread = (UserThread) NachosThread.currentThread();
 	AddrSpace addrSpaceFork = new AddrSpace();
 	addrSpaceFork.allocateFork(currentThread.space, addrSpaceFork);
-	
-	ForkTask forkTask = new ForkTask(func,currentThread);
+
+	ForkTask forkTask = new ForkTask(func, currentThread);
 	// creates a new process (i.e. user thread plus user address space)
-	UserThread userThread = new UserThread("fork thread "+addrSpaceFork.getSpaceID(), forkTask, addrSpaceFork);
+	UserThread userThread = new UserThread(
+		"fork thread " + addrSpaceFork.getSpaceID(), forkTask,
+		addrSpaceFork);
 	Nachos.scheduler.readyToRun(userThread);
     }
-
 
     /**
      * Wait for the user program specified by "id" to finish, and return its
@@ -198,26 +182,23 @@ public class Syscall {
      * @return the exit status of the specified program.
      */
     public static int join(int id) {
-	Debug.print('+', "Starting Join- waiting for space ID: "+id+".\n");
-	
-	
-	
+	Debug.print('+', "Starting Join- waiting for space ID: " + id + ".\n");
+
 	UserThread userThread = (UserThread) NachosThread.currentThread();
-	//Debug.print('+', userThread.space.getSpaceID()+" currentspace_ \n");
+	// Debug.print('+', userThread.space.getSpaceID()+" currentspace_ \n");
 	AddrSpace s = userThread.space;
 	/*
-	Object [] temp = new Object[2];
-	temp[0] = s;				
-	temp[1] = s.getPmm().getSpaceByID(id); //waiting for this thread to be finished
-	*/ 
-	
-	s.getPmm().addJoinList(s,s.getPmm().getSpaceByID(id));
-	
+	 * Object [] temp = new Object[2]; temp[0] = s; temp[1] =
+	 * s.getPmm().getSpaceByID(id); //waiting for this thread to be finished
+	 */
+
+	s.getPmm().addJoinList(s, s.getPmm().getSpaceByID(id));
+
 	s.join_lock.P();
-	
-	Debug.print('+', "Finishing Join- space ID: "+id+".\n");
+
+	Debug.print('+', "Finishing Join- space ID: " + id + ".\n");
 	return 0;
-	
+
     }
 
     /*
@@ -282,16 +263,16 @@ public class Syscall {
      *            The OpenFileId of the file to which to write the data.
      */
     public static void write(byte buffer[], int size, int id) {
-	
+
 	consoleLock.P();
 	UserThread userThread = (UserThread) NachosThread.currentThread();
-	
+
 	if (id == ConsoleOutput) {
 	    for (int i = 0; i < size; i++) {
-		userThread.getConsoleDriver().putChar((char)buffer[i]);
+		userThread.getConsoleDriver().putChar((char) buffer[i]);
 	    }
 	}
-	
+
 	consoleLock.V();
     }
 
@@ -311,27 +292,26 @@ public class Syscall {
      * @return The actual number of bytes read.
      */
     public static int read(byte buffer[], int size, int id) {
-	
+
 	consoleLock.P();
 	UserThread userThread = (UserThread) NachosThread.currentThread();
-	
-	
-	int index=0;
-	
+
+	int index = 0;
+
 	if (id == ConsoleInput) {
 	    for (int i = 0; i < size; i++) {
-		
-		buffer[index++] = (byte) userThread.getConsoleDriver().getChar();
-		userThread.getConsoleDriver().putChar((char)buffer[index-1]);
-		if(buffer[index-1] == '\n') {
-		    
+
+		buffer[index++] = (byte) userThread.getConsoleDriver()
+			.getChar();
+		userThread.getConsoleDriver().putChar((char) buffer[index - 1]);
+		if (buffer[index - 1] == '\n') {
+
 		    break;
 		}
 	    }
 	}
 
-	    
-	consoleLock.V();  
+	consoleLock.V();
 	return index;
     }
 
@@ -349,7 +329,6 @@ public class Syscall {
      * to run within a user program.
      */
 
-
     /**
      * Yield the CPU to another runnable thread, whether in this address space
      * or not.
@@ -357,11 +336,32 @@ public class Syscall {
     public static void yield() {
 	Nachos.scheduler.yieldThread();
     }
-    
+
     public static void PredictCPU(int ticks) {
 	UserThread currentThread = (UserThread) NachosThread.currentThread();
-	currentThread.setRemainingTime(ticks);
-	currentThread.setBurstLen(ticks);// this also set the remaining time for the process
+	//currentThread.setRemainingTime(ticks);
+	
+	//currentThread.setBurstLen(ticks);// this also set the remaining time for the process
+	//((SPN<NachosThread>)Nachos.scheduler.readyList).update();
+	
+	//((HRRN<NachosThread>)Nachos.scheduler.readyList).iterate();
+	
+	//SPN: setBurstLen, update()
+	if(nachos.Options.SPN) {
+	    currentThread.setBurstLen(ticks);
+	    ((SPN<NachosThread>)Nachos.scheduler.readyList).update();
+	} 
+	
+	//SRT: setRemainingTime
+	else if(nachos.Options.SPN && nachos.Options.CPU_TIMERS) {
+	    currentThread.setRemainingTime(ticks);
+	}
+	
+	//HRRN: setBurstLen, iterate()
+	else if(nachos.Options.HRRN) {
+	    currentThread.setBurstLen(ticks);
+	    ((HRRN<NachosThread>)Nachos.scheduler.readyList).iterate();
+	}
 	
     }
 
