@@ -192,7 +192,7 @@ public class Options {
     /** CPU scheduling policies */
     public static boolean RR = false;
     public static boolean SPN = false;
-    //public static boolean SRT = false;
+    public static boolean SRT = false;
     public static boolean HRRN = false;
     public static boolean FEEDBACK = false;
     
@@ -347,9 +347,8 @@ public class Options {
 			 new Class[] { },
 			 null,
 			 new Options.Action() {
-			    public void processOption(String flag, Object[] params) {
-				SPN = true;
-				CPU_TIMERS = true;
+			    public void processOption(String flag, Object[] params) {				
+				SRT = true;
 			    }
 			 }),
 		new Spec("-hrrn",  // enable pre-emptive scheduling using per-CPU scheduling timers

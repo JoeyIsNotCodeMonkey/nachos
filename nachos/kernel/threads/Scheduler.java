@@ -22,6 +22,7 @@ import nachos.kernel.userprog.Feedback;
 import nachos.kernel.userprog.HRRN;
 import nachos.kernel.userprog.RR;
 import nachos.kernel.userprog.SPN;
+import nachos.kernel.userprog.SRT;
 import nachos.kernel.userprog.UserThread;
 import nachos.machine.CPU;
 import nachos.machine.Machine;
@@ -102,8 +103,8 @@ public class Scheduler {
 	}
 	
 	//SRT = SPN with -ps
-	else if(nachos.Options.SPN && nachos.Options.CPU_TIMERS) {
-	    readyList = new SPN<NachosThread>();
+	else if(nachos.Options.SRT) {
+	    readyList = new SRT<NachosThread>();
 	}
 	
 	else if(nachos.Options.HRRN) {
@@ -515,8 +516,6 @@ public class Scheduler {
 	    
 	    if(nachos.Options.RR) {
 		yieldOnReturnRR();
-	    } else if(nachos.Options.SPN && nachos.Options.CPU_TIMERS) {
-		yieldOnReturnSRT();
 	    } else {
 		yieldOnReturn();
 	    }
@@ -536,14 +535,6 @@ public class Scheduler {
 			UserThread currentThread = (UserThread)NachosThread.currentThread();
 			    
 			currentThread.setRemainingTime(currentThread.getRemainingTime()-100);
-			
-			UserThread head = (UserThread) Nachos.scheduler.readyList.peek();
-					    
-			if(currentThread.getRemainingTime()>head.getRemainingTime()){
-			    Nachos.scheduler.yieldThread();
-			}
-						
-			
 			
 		    } else {
 			Debug.println('i',

@@ -353,7 +353,7 @@ public class Syscall {
 	} 
 	
 	//SRT: setRemainingTime
-	else if(nachos.Options.SPN && nachos.Options.CPU_TIMERS) {
+	else if(nachos.Options.SRT) {
 	    currentThread.setRemainingTime(ticks);
 	}
 	
