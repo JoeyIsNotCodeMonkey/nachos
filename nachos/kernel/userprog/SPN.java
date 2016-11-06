@@ -79,7 +79,7 @@ public class SPN<T> extends java.util.LinkedList<T> implements ReadyList<T>{
 	UserThread t = (UserThread) NachosThread.currentThread();
 	
 	
-	if(t.getBurstLen()>((UserThread)queue.peek()).getBurstLen()) {
+	if(!queue.isEmpty() && t.getBurstLen()>((UserThread)queue.peek()).getBurstLen()) {
 	    Nachos.scheduler.yieldThread();
 	}
 	

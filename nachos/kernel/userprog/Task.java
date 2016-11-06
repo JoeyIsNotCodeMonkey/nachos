@@ -40,7 +40,7 @@ public class Task implements Runnable{
 	space.restoreState();		// load page table register
 	
 	
-	
+	//CPU.writeRegister(4, 30);
 	
 	
 	
