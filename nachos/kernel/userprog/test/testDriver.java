@@ -52,15 +52,32 @@ public class testDriver implements Runnable {
 
 	execName = filename;
 	AddrSpace space = new AddrSpace();
-	UserThread t = new UserThread(name, this, space);
+	UserThread t = new UserThread(name, this, space);	
 	
-	
-	Nachos.scheduler.readyToRun(t);
-	
-	
-	
+	Nachos.scheduler.readyToRun(t);	
 	
 	count++;
+	
+	//sleep
+	
+	int start = 1;
+	double randNumber = Math.random();
+	int ticks = 0;
+	
+	while(true) {
+	    if(randNumber < 0.1) {
+		ticks = start * 1000;
+		break;
+	    }
+	    
+	    start += 2;
+	    randNumber = Math.random();
+	}
+	
+	Debug.println('+', "This thread will sleep for: " + randNumber + " ticks");
+	Nachos.scheduler.sleepThread(ticks);
+	
+	
 	}
 	
 	
