@@ -78,7 +78,7 @@ public class ProgTest implements Runnable {
 	space.initRegisters();		// set the initial register values
 	space.restoreState();		// load page table register
 	
-	CPU.writeRegister(4, 10);
+	CPU.writeRegister(4, 1);
 	Debug.println('+', "Starting usercode");
 	CPU.runUserCode();			// jump to the user progam
 	Debug.ASSERT(false);		// machine->Run never returns;

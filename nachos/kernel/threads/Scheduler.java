@@ -585,6 +585,22 @@ public class Scheduler {
 	    });
 	}
 	
+	private void yieldOnReturnFeedback() {
+	    Debug.println('i', "Yield on interrupt return requested");
+	    CPU.setOnInterruptReturn(new Runnable() {
+		public void run() {
+		    if (NachosThread.currentThread() != null) {
+			Debug.println('t',
+				"Yielding current thread on interrupt return");
+			Nachos.scheduler.yieldThread();
+		    } else {
+			Debug.println('i',
+				"No current thread on interrupt return, skipping yield");
+		    }
+		}
+	    });
+	}
+	
 	
 	/**
 	 * Called to cause a context switch (for example, on a time slice) in

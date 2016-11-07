@@ -95,9 +95,21 @@ public class testDriver implements Runnable {
 
 	double randNumber = Math.random();
 	double d  = randNumber *100;
-	int randomInt = (int)d+1;
+	int randomInt = (int)d+1; //1-100
+	
+	int count = 0;
+	while(true) {
+	    if(randNumber < 0.1) {
+		randomInt = randomInt  + 100 * count;
+		break;
+	    }
+	    //Debug.println('+', "Random num is: " + randNumber);
+	    count++;
+	    randNumber = Math.random();
+	}
+	
 	Debug.println('+', "random for this thread is : " + randomInt);
-	CPU.writeRegister(4, randomInt );
+	CPU.writeRegister(4, randomInt);
 	
 	CPU.runUserCode();			// jump to the user progam
 	Debug.ASSERT(false);		// machine->Run never returns;

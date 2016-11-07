@@ -13,7 +13,7 @@ int main(int num_of_loop){
         
     while(num_of_loop>0){
         
-        
+        number1  =1;
         num_of_loop--;
     }
     
