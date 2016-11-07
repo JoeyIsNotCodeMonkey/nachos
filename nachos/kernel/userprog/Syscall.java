@@ -363,7 +363,7 @@ public class Syscall {
 	    ((HRRN<NachosThread>)Nachos.scheduler.readyList).iterate();
 	}
 	
-	Debug.println('+', "After preductCPU");
+	Debug.println('+', "After predictCPU");
 	
     }
 

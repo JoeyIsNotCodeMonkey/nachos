@@ -2,6 +2,7 @@ package nachos.kernel.userprog;
 
 import java.util.LinkedList;
 
+import nachos.Debug;
 import nachos.util.Queue;
 
 public class Feedback<T> extends java.util.LinkedList<T> implements Queue<T> {
@@ -29,9 +30,13 @@ public class Feedback<T> extends java.util.LinkedList<T> implements Queue<T> {
        
        if(e instanceof UserThread){
 	   
-	   queueManager.get(((UserThread)e).getPriority()).offer(e);	   
+	   queueManager.get(((UserThread)e).getPriority()).offer(e);	
+	   
+	   Debug.println('+', ((UserThread)e).space.getSpaceID() + "__________________" + ((UserThread)e).getPriority() );
+	   
 	   if(((UserThread)e).getPriority()<4){
 	       ((UserThread)e).setPriority(((UserThread)e).getPriority()+1);
+	       
 	   }
 	  	   
        }else{

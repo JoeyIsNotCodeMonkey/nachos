@@ -518,7 +518,11 @@ public class Scheduler {
 	    
 	    if(nachos.Options.RR) {
 		yieldOnReturnRR();
-	    } else {
+	    }else if(nachos.Options.SRT){
+		yieldOnReturnSRT();
+	    }else if(nachos.Options.FEEDBACK){
+		yieldOnReturnRR();
+	    }else{
 		yieldOnReturn();
 	    }
 	    
