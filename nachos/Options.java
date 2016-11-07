@@ -146,7 +146,7 @@ public class Options {
      * NOTE: Once these are enabled, the simulation will run forever unless
      * explicitly stopped.
      */
-    public static boolean CPU_TIMERS = false;
+    public static boolean CPU_TIMERS = true;
     
     /** Should the time-slicing timers be randomized? */
     public boolean RANDOM_YIELD = false;

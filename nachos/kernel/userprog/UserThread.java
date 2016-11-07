@@ -48,6 +48,12 @@ public class UserThread extends NachosThread {
     private int priority;
 
     private boolean isTopLevel;
+    
+    private int startTime;
+    
+    private int endTime;
+    
+    private int runningTime;
 
     // A thread running a user program actually has *two* sets of 
     // CPU registers -- one for its state while executing user code,
@@ -76,6 +82,10 @@ public class UserThread extends NachosThread {
 	waitingTime = 0;
 	responseRatio = 0;
 	setPriority(0);
+	startTime = 0;
+	endTime = 0;
+	runningTime = 0;
+	
 	if(!(runObj instanceof Task)&&!(runObj instanceof ForkTask)) {
 	    consoleDriver = ConsoleManager.getInstance().getConsole();
 	    isTopLevel = true;
@@ -115,6 +125,33 @@ public class UserThread extends NachosThread {
     }
 
 
+    
+
+    public int getStartTime() {
+        return startTime;
+    }
+
+    public void setStartTime(int startTime) {
+        this.startTime = startTime;
+    }
+
+    public int getEndTime() {
+        return endTime;
+    }
+
+    public void setEndTime(int endTime) {
+        this.endTime = endTime;
+    }
+    
+    
+
+    public int getRunningTime() {
+        return runningTime;
+    }
+
+    public void setRunningTime(int runningTime) {
+        this.runningTime = runningTime;
+    }
 
     /**
      * Save the CPU state of a user program on a context switch.

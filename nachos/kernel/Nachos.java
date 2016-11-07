@@ -71,6 +71,9 @@ public class Nachos implements Runnable {
 
     /** Access to serial ports. */
     public static SerialDriver serialDriver;
+    
+    /** Track system time */
+    public static int currentTick;
 
     /**
      * 	Nachos initialization -- performed by first Nachos thread.
@@ -123,8 +126,10 @@ public class Nachos implements Runnable {
 	    ProgTest.start();
 	if(options.FILESYS_TEST)
 	    FileSystemTest.start();
-	if(options.testDriver)
+	if(options.testDriver) {
+	    currentTick = 0;
 	    testDriver.start();
+	}	    	    
 	if(options.SERIAL_TEST)
 	    SerialTest.start();
 	if(options.NETWORK_TEST)

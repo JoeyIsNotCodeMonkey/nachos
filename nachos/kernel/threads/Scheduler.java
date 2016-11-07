@@ -191,6 +191,9 @@ public class Scheduler {
 
 	thread.setStatus(NachosThread.READY);
 	readyList.offer(thread);
+	if(thread instanceof UserThread) {
+	    ((UserThread) thread).setStartTime(Nachos.currentTick);
+	}
     }
 
     /**
@@ -423,6 +426,10 @@ public class Scheduler {
 	
 	currentThread.setStatus(NachosThread.FINISHED);
 	
+	if(currentThread instanceof UserThread) {
+	    ((UserThread) currentThread).setEndTime(Nachos.currentTick);
+	}
+	
 	
 //	int listSize =((HRRN<NachosThread>)readyList).size();
 //	
@@ -514,6 +521,11 @@ public class Scheduler {
 		yieldOnReturn();
 	    }
 	    
+	    Nachos.currentTick += 100;
+	    
+	    if(NachosThread.currentThread() instanceof UserThread) {
+		((UserThread)NachosThread.currentThread()).setRunningTime(((UserThread)NachosThread.currentThread()).getRunningTime() + 100);
+	    }
 	    
 	}
 
