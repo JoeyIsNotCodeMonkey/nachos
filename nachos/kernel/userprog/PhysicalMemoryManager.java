@@ -106,7 +106,7 @@ public class PhysicalMemoryManager {
 	
 	physicalPages[index] ++;
 	
-	Debug.println('+', "AllocateMemory PhysicAddress:" + index);
+	//Debug.println('+', "AllocateMemory PhysicAddress:" + index);
 	
 	
 	physicalPage_lock.V();

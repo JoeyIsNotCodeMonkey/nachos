@@ -40,15 +40,15 @@ public class testDriver implements Runnable {
      * @param filename The name of the program to execute.
      */
     public testDriver(String filename, int num) {
-	int count = 0;
+	int count = 1;
 	
 	
-	while(count <5){
+	while(count <=5){
 	    
 	    
 	String name = "testDriver"+ count + "(" + filename + ")";
 	
-	Debug.println('+', "starting testDriver: " + count);
+	Debug.println('+', "creating testDriver: " + count);
 
 	execName = filename;
 	AddrSpace space = new AddrSpace();
@@ -74,8 +74,8 @@ public class testDriver implements Runnable {
 	    randNumber = Math.random();
 	}
 	
-	Debug.println('+', "This thread will sleep for: " + randNumber + " ticks");
-	Nachos.scheduler.sleepThread(ticks);
+	//Debug.println('+', "This thread will sleep for: " + ticks + " ticks");
+	//Nachos.scheduler.sleepThread(ticks);
 	
 	
 	}

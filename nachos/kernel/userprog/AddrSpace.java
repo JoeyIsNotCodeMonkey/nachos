@@ -117,7 +117,7 @@ public class AddrSpace {
 	for (int i = 0; i < te.length; i++) {
 
 	    pmm.decreaseCounter(te[i].physicalPage);
-	    Debug.println('+', "DeAllocateMemory PhysicAddress:" + te[i].physicalPage );
+	   // Debug.println('+', "DeAllocateMemory PhysicAddress:" + te[i].physicalPage );
 
 	    if (pmm.getPhysicalPages()[te[i].physicalPage] == 0) {
 
@@ -127,7 +127,7 @@ public class AddrSpace {
 		    Machine.mainMemory[z] = (byte) 0;
 		}
 
-		Debug.println('+', "ZeroOut PhysicAddress:" + te[i].physicalPage);
+		//Debug.println('+', "ZeroOut PhysicAddress:" + te[i].physicalPage);
 	    }
 
 	}

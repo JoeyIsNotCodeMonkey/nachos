@@ -80,19 +80,7 @@ public class Scheduler {
      *            The first NachosThread to run.
      */
     public Scheduler(NachosThread firstThread) {
-	//if() {
-	    //readyList = new RR<NachosThread>();
-	//}
-	
-	//readyList =   new SPN<NachosThread>();
-	
-	
-	//readyList = new HRRN<NachosThread>();
-	
-	//readyList = h.getQueue();
-	
-	
-	//readyList = new FIFOQueue<NachosThread>(); *********original************
+
 	
 
 	if(nachos.Options.RR) {
@@ -560,7 +548,7 @@ public class Scheduler {
 		
 		public void run() {
 		    
-		    if (NachosThread.currentThread() != null) {
+		    if (NachosThread.currentThread() instanceof UserThread &&NachosThread.currentThread() != null) {
 			
 			UserThread currentThread = (UserThread)NachosThread.currentThread();
 			    
@@ -569,7 +557,7 @@ public class Scheduler {
 			    if(currentThread.getQuantum()==0 ) {
 
 				
-				Debug.println('+', "_____CurrentThread shift " + currentThread.name);
+				Debug.println('+', "_____CurrentThread shift away from space ID:  " + currentThread.space.getSpaceID());
 				
 				currentThread.setQuantum(1000);
 	

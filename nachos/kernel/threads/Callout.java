@@ -41,7 +41,7 @@ public class Callout {
 	timer = Machine.getTimer(0);
 	handleInterrupt = new HandleInterrupt(timer);
 	timer.setHandler(handleInterrupt);
-	//timer.start();
+	timer.start();
     }
     
     public ArrayList<Object[]> getCalloutList(){
@@ -103,11 +103,11 @@ public class Callout {
 	}
 
 	public void handleInterrupt() {
-	    Debug.println('+', "________________________Timer interrupt: " + timer.name);
+	   // Debug.println('+', "________________________Timer interrupt: " + timer.name);
 	    
 	    timePass += 100;
 	    
-	    if(timePass > 1000) {
+	    if(timePass > 1000000) {
 		timer.stop();
 	    }
 	    
