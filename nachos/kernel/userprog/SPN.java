@@ -5,6 +5,7 @@ import java.util.Collections;
 import java.util.Comparator;
 import java.util.LinkedList;
 
+import nachos.Debug;
 import nachos.kernel.Nachos;
 import nachos.kernel.threads.Callout.CustomComparator;
 import nachos.machine.NachosThread;
@@ -20,33 +21,22 @@ public class SPN<T> extends java.util.LinkedList<T> implements ReadyList<T>{
     private static SPN spn;
     
 
-
-    private Queue<T> queue =  new FIFOQueue<T>();
-
-    public Queue<T> getQueue() {
-        return queue;
-    }
-
-
-
-    public void setQueue(Queue<T> queue) {
-        this.queue = queue;
-    }
+    LinkedList<T> list = new LinkedList<T>();
 
 
     
-    
-//    @Override
-//    public T poll(){
-//	
+   
+    @Override
+    public T poll(){
+	
+//	this.poll
 //
-//	if(queue.isEmpty())
-//	    return null;
-//	
-//	return (T)queue.poll();
-//	
-//	
-//    }
+
+	Collections.sort((LinkedList<UserThread>)this, new CustomComparator());
+	return this.pollFirst();
+	
+	
+    }
 //    @Override
 //    public boolean offer(T e) {
 //	//UserThread thread = (UserThread) e;
@@ -75,11 +65,14 @@ public class SPN<T> extends java.util.LinkedList<T> implements ReadyList<T>{
     
     public void update() {
 	
-	Collections.sort((FIFOQueue<UserThread>)queue, new CustomComparator());
+	Collections.sort((LinkedList<UserThread>)this, new CustomComparator());
 	UserThread t = (UserThread) NachosThread.currentThread();
 	
 	
-	if(!queue.isEmpty() && t.getBurstLen()>((UserThread)queue.peek()).getBurstLen()) {
+	if(!this.isEmpty() && t.getBurstLen()>((UserThread)this.peek()).getBurstLen()) {
+//	   for(T ut : this){
+//	       Debug.println('+', "List: "+((UserThread)ut).getBurstLen());
+//	   }
 	    Nachos.scheduler.yieldThread();
 	}
 	
@@ -105,6 +98,14 @@ public class SPN<T> extends java.util.LinkedList<T> implements ReadyList<T>{
 		
 		return -1;
 	    }
+    }
+
+
+
+
+
+    public LinkedList<T> getList() {
+        return list;
     }
     
 }

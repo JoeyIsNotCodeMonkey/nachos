@@ -66,7 +66,7 @@ public class testDriver implements Runnable {
 	
 	while(true) {
 	    if(randNumber < 0.1) {
-		ticks = start * 1000;
+		ticks = start * 600;
 		break;
 	    }
 	    
@@ -74,8 +74,8 @@ public class testDriver implements Runnable {
 	    randNumber = Math.random();
 	}
 	
-	//Debug.println('+', "This thread will sleep for: " + ticks + " ticks");
-	//Nachos.scheduler.sleepThread(ticks);
+	Debug.println('+', "This thread will sleep for: " + ticks + " ticks");
+	Nachos.scheduler.sleepThread(ticks);
 	
 	
 	}

@@ -372,7 +372,7 @@ public class Scheduler {
 	
 	      
 	
-	Semaphore sem = new Semaphore("mutex", 0);
+	Semaphore sem = new Semaphore("mutex for sleep", 0);
 	  
 
 		callout.schedule(new Runnable() {
@@ -380,7 +380,7 @@ public class Scheduler {
 		    public void run() {
 			
 			 sem.V();
-			 Debug.println('t', "_____________________________________Out SleepThead Mode(In Runnable)");
+			 Debug.println('+', "_____________________________________Out SleepThead Mode(In Runnable)");
 			
 			 
 			 Nachos.scheduler.finishThread();
@@ -388,7 +388,7 @@ public class Scheduler {
 		    }
 		}, ticks);
 		
-		Debug.println('t', "_______________________Entering Sleep Mode");
+		Debug.println('+', "_______________________Entering Sleep Mode");
 		sem.P();
 	
     }
@@ -524,7 +524,7 @@ public class Scheduler {
 		
 		public void run() {
 		    
-		    if (NachosThread.currentThread() != null) {
+		    if (NachosThread.currentThread()instanceof UserThread &&NachosThread.currentThread() != null) {
 			
 			UserThread currentThread = (UserThread)NachosThread.currentThread();
 			    

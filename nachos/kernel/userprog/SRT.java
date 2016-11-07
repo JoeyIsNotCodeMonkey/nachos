@@ -4,6 +4,7 @@ import java.util.Collections;
 import java.util.Comparator;
 import java.util.LinkedList;
 
+import nachos.Debug;
 import nachos.kernel.Nachos;
 import nachos.kernel.userprog.HRRN.CustomComparator;
 import nachos.machine.NachosThread;
@@ -16,20 +17,44 @@ public class SRT<T> extends java.util.LinkedList<T> implements Queue<T> {
 
     @Override
     public boolean offer(T e) {
-	if (e instanceof UserThread) {
+	
+	
+	
+	
+	
+	if (e instanceof UserThread && !this.isEmpty()) {
 	    UserThread currentThread = (UserThread) NachosThread.currentThread();
+	    
+	    Debug.println('+', "***************Remaining Time for newly created Thread: "+((UserThread)e).getRemainingTime() ); 
+		Debug.println('+', "***************Remaining Time for current Thread: "+currentThread.getRemainingTime() ); 
+	
+	    
 	    if(((UserThread)e).getRemainingTime() < currentThread.getRemainingTime()) {
+		
+		
+		
+			
+		
+		
 		queue.addFirst(e);
 		Nachos.scheduler.yieldThread();
+		
+		
+		
+		
+		
 	    }
 	    
 	    //sort
-	    queue.offer(e);
-	    Collections.sort((LinkedList<UserThread>)queue, new CustomComparator());
+	    this.add(e);
+	    Collections.sort((LinkedList<UserThread>)this, new CustomComparator());
 	    return true;
 	}
 
-	queue.offer(e);
+	
+	
+	
+	this.add(e);
 
 	return true;
     }
