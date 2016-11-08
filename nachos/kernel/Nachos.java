@@ -76,6 +76,15 @@ public class Nachos implements Runnable {
     /** Track system time */
     public static int currentTick;
     
+    /** total num of process competing cpu */
+    public static int numOfProc = 0;
+    
+    /** interrupt counter */
+    public static int interruptCounter = 0;
+    
+    /** Load Ave */
+    public static double loadAve = 0;
+    
     
     public static Callout callout;
     /**

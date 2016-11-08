@@ -515,6 +515,17 @@ public class Scheduler {
 		((UserThread)NachosThread.currentThread()).setRunningTime(((UserThread)NachosThread.currentThread()).getRunningTime() + 100);
 	    }
 	    
+	    Nachos.numOfProc += Nachos.scheduler.readyList.size();
+	    
+	    Nachos.interruptCounter++;
+	    
+	    Nachos.loadAve = (double)Nachos.numOfProc / Nachos.interruptCounter;
+	    
+	    if(Nachos.currentTick % 100000 == 0) {
+		Debug.println('+', "******************************************current load average is: " + Nachos.loadAve);
+	    }
+	    
+	    
 	}
 
 	
