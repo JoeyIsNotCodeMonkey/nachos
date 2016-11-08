@@ -522,9 +522,10 @@ public class Scheduler {
 	    
 	    Nachos.loadAve = (double)Nachos.numOfProc / Nachos.interruptCounter;
 	    
-//	    if(Nachos.currentTick % 100000 == 0) {
-//		Debug.println('+', "******************************************current load average is: " + Nachos.loadAve);
-//	    }
+	    if(Nachos.currentTick % 100000 == 0) {
+		Debug.println('+', "******************************************current load average is: " + Nachos.loadAve);
+		Debug.println('+', "******************************************current queue size: " + Nachos.scheduler.readyList.size());
+	    }
 	    
 	    
 	}

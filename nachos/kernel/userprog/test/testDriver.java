@@ -43,7 +43,7 @@ public class testDriver implements Runnable {
 	int count = 1;
 	
 	
-	while(count <= 10){
+	while(count <= 100){
 	    
 	    
 	String name = "testDriver"+ count + "(" + filename + ")";
@@ -66,7 +66,7 @@ public class testDriver implements Runnable {
 	
 	while(true) {
 	    if(randNumber < 0.1) {
-		ticks = start * 800;
+		ticks = start * 500;
 		break;
 	    }
 	    
