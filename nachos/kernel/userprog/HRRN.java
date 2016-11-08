@@ -30,19 +30,24 @@ public class HRRN<T> extends java.util.LinkedList<T> implements Queue<T> {
 
 	@Override
 	public int compare(NachosThread arg0, NachosThread arg1) {
+	    if(arg0 instanceof UserThread && arg1 instanceof UserThread){
+		
+		    UserThread o1 = (UserThread) arg0;
+		    UserThread o2 = (UserThread) arg1;
 
-	    UserThread o1 = (UserThread) arg0;
-	    UserThread o2 = (UserThread) arg1;
+		    if (o1.getResponseRatio() < o2.getResponseRatio()) {
+			return 1;
+		    }
 
-	    if (o1.getResponseRatio() < o2.getResponseRatio()) {
-		return 1;
+		    if (o1.getResponseRatio() == o2.getResponseRatio()) {
+			return 0;
+		    }
+
+		    return -1;
+		
 	    }
+	    return 0;
 
-	    if (o1.getResponseRatio() == o2.getResponseRatio()) {
-		return 0;
-	    }
-
-	    return -1;
 	}
 
     }
@@ -67,7 +72,7 @@ public class HRRN<T> extends java.util.LinkedList<T> implements Queue<T> {
 
 	    for (T t : this) {
 		
-		if(t instanceof UserThread){
+		if(t instanceof UserThread && NachosThread.currentThread() instanceof UserThread){
 		    
 		    
 		UserThread indexThread = (UserThread) t;
@@ -79,12 +84,20 @@ public class HRRN<T> extends java.util.LinkedList<T> implements Queue<T> {
 		}
 
 	    }
-
+	    
 	    Collections.sort((LinkedList<NachosThread>) this, new CustomComparator());
 	    
-	    for (T t : this) {
-		Debug.println('+', "Ratio: "+((UserThread)t).getResponseRatio());
+	    for(T t : this){
+		if(t instanceof UserThread){
+		    Debug.println('+', "Ratio : " + ((UserThread) t).getResponseRatio());
+		}
+		
 	    }
+	    Debug.println('+', "---------------------------------------------------------------");
+	    
+	  
+	    
+
 	}
 
 	return this.pollFirst();

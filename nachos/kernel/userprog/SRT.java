@@ -19,30 +19,20 @@ public class SRT<T> extends java.util.LinkedList<T> implements Queue<T> {
     public boolean offer(T e) {
 	
 	
-	
-	
-	
-	if (e instanceof UserThread && !this.isEmpty()) {
+	//******* only firstThread calls offer**********
+	if (e instanceof UserThread && e instanceof UserThread && !this.isEmpty()) {
 	    UserThread currentThread = (UserThread) NachosThread.currentThread();
 	    
 	    Debug.println('+', "***************Remaining Time for newly created Thread: "+((UserThread)e).getRemainingTime() ); 
-		Debug.println('+', "***************Remaining Time for current Thread: "+currentThread.getRemainingTime() ); 
+	    Debug.println('+', "***************Remaining Time for current Thread: "+currentThread.getRemainingTime() ); 
 	
 	    
 	    if(((UserThread)e).getRemainingTime() < currentThread.getRemainingTime()) {
 		
 		
-		
-			
-		
-		
 		queue.addFirst(e);
 		Nachos.scheduler.yieldThread();
-		
-		
-		
-		
-		
+
 	    }
 	    
 	    //sort
@@ -51,13 +41,14 @@ public class SRT<T> extends java.util.LinkedList<T> implements Queue<T> {
 	    return true;
 	}
 
-	
-	
-	
 	this.add(e);
 
 	return true;
     }
+    
+    
+    
+    
     
     public static class CustomComparator implements Comparator<UserThread> {	  
 	    @Override

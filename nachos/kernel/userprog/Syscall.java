@@ -361,6 +361,7 @@ public class Syscall {
 	//HRRN: setBurstLen, iterate()
 	else if(nachos.Options.HRRN) {
 	    currentThread.setBurstLen(ticks);
+	    currentThread.setRemainingTime(ticks);
 	    ((HRRN<NachosThread>)Nachos.scheduler.readyList).iterate();
 	}
 	

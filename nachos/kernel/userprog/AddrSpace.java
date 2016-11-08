@@ -66,6 +66,9 @@ public class AddrSpace {
 
     Semaphore join_lock = new Semaphore(
 	    "join_lock for process " + spaceID, 0);
+    
+    Semaphore allocate_lock = new Semaphore(
+	    "allocate_lock for process " + spaceID, 1);
 
     private static Lock pmmLock = new Lock("pmmLock");
 
@@ -110,8 +113,8 @@ public class AddrSpace {
 
 
 	Debug.println('+', "DeAllocateMemory SpaceID:" + addrSpace.getSpaceID());
-
-	pmmLock.acquire();
+	allocate_lock.P();
+	//pmmLock.acquire();
 	TranslationEntry[] te = addrSpace.getPageTable();
 
 	for (int i = 0; i < te.length; i++) {
@@ -133,8 +136,8 @@ public class AddrSpace {
 	}
 
 	pmm.getProcessTable().remove(addrSpace.getSpaceID());
-
-	pmmLock.release();
+	allocate_lock.V();
+	//pmmLock.release();
     }
 
     /**
@@ -152,8 +155,8 @@ public class AddrSpace {
      */
     public int exec(OpenFile executable) {
 
-	pmmLock.acquire();
-
+//	pmmLock.acquire();
+	allocate_lock.P();
 	NoffHeader noffH;
 
 	if ((noffH = NoffHeader.readHeader(executable)) == null)
@@ -242,8 +245,8 @@ public class AddrSpace {
 		    noffH.initData.size);
 	}
 
-	pmmLock.release();
-
+//	pmmLock.release();
+	allocate_lock.V();
 	return (0);
     }
 

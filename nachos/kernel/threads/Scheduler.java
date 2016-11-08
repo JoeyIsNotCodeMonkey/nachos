@@ -225,6 +225,7 @@ public class Scheduler {
 	Debug.ASSERT(CPU.getLevel() == CPU.IntOff);
 	mutex.acquire();
 	NachosThread result = readyList.poll();
+	
 	mutex.release();
 	return result;
     }
@@ -521,9 +522,9 @@ public class Scheduler {
 	    
 	    Nachos.loadAve = (double)Nachos.numOfProc / Nachos.interruptCounter;
 	    
-	    if(Nachos.currentTick % 100000 == 0) {
-		Debug.println('+', "******************************************current load average is: " + Nachos.loadAve);
-	    }
+//	    if(Nachos.currentTick % 100000 == 0) {
+//		Debug.println('+', "******************************************current load average is: " + Nachos.loadAve);
+//	    }
 	    
 	    
 	}
@@ -568,7 +569,7 @@ public class Scheduler {
 			    if(currentThread.getQuantum()==0 ) {
 
 				
-				Debug.println('+', "_____CurrentThread shift away from space ID:  " + currentThread.space.getSpaceID());
+			//	Debug.println('+', "_____CurrentThread shift away from space ID:  " + currentThread.space.getSpaceID());
 				
 				currentThread.setQuantum(1000);
 	
