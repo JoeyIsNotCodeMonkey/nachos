@@ -66,7 +66,7 @@ public class testDriver implements Runnable {
 	
 	while(true) {
 	    if(randNumber < 0.1) {
-		ticks = start * 800;
+		ticks = start * 500;
 		break;
 	    }
 	    
