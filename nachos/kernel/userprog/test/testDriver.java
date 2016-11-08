@@ -75,7 +75,7 @@ public class testDriver implements Runnable {
 	}
 	
 	Debug.println('+', "This thread will sleep for: " + ticks + " ticks");
-	Nachos.scheduler.sleepThread(ticks);
+	Nachos.scheduler.sleepThread(2000);
 	
 	
 	}

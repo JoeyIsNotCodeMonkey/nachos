@@ -62,5 +62,17 @@ public class Feedback<T> extends java.util.LinkedList<T> implements Queue<T> {
    }
    
    
+   @Override
+   public boolean isEmpty(){
+       for(LinkedList l : queueManager){
+	   if(!l.isEmpty()){
+	       return false;
+	   }
+       }
+       return true;
+   }
+   
+   
+   
     
 }

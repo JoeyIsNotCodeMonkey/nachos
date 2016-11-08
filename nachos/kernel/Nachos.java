@@ -33,6 +33,7 @@ import nachos.kernel.devices.SerialDriver;
 import nachos.kernel.devices.test.ConsoleTest;
 import nachos.kernel.devices.test.NetworkTest;
 import nachos.kernel.devices.test.SerialTest;
+import nachos.kernel.threads.Callout;
 import nachos.kernel.threads.Scheduler;
 import nachos.kernel.userprog.ExceptionHandler;
 import nachos.kernel.userprog.PhysicalMemoryManager;
@@ -74,7 +75,9 @@ public class Nachos implements Runnable {
     
     /** Track system time */
     public static int currentTick;
-
+    
+    
+    public static Callout callout;
     /**
      * 	Nachos initialization -- performed by first Nachos thread.
      *	Initialize various subsystems, depending on configuration options.
@@ -99,6 +102,7 @@ public class Nachos implements Runnable {
 	    networkDriver = new NetworkDriver();
 	
 	// Initialize the filesystem.
+	callout = new Callout(Machine.getTimer(0));
 
 	if(options.FILESYS_STUB || options.FILESYS_REAL)
 	    fileSystem = FileSystem.init(diskDriver);

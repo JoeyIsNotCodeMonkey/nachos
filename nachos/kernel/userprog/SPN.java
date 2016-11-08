@@ -7,7 +7,6 @@ import java.util.LinkedList;
 
 import nachos.Debug;
 import nachos.kernel.Nachos;
-import nachos.kernel.threads.Callout.CustomComparator;
 import nachos.machine.NachosThread;
 import nachos.util.FIFOQueue;
 import nachos.util.Queue;

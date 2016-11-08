@@ -54,7 +54,7 @@ public class SynchronousQueue<T> implements Queue<T> {
      */
     public SynchronousQueue() { 
 	
-	callout = Nachos.scheduler.getCalloutList();
+//	callout = Nachos.scheduler.getCalloutList();
 	
 	buffer = new FIFOQueue<T>();
 	

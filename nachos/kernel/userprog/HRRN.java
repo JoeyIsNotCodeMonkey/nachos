@@ -15,7 +15,7 @@ import nachos.util.ReadyList;
 
 public class HRRN<T> extends java.util.LinkedList<T> implements Queue<T> {
 
-    private LinkedList<T> queue = new LinkedList<T>();
+
 
     //private static HRRN hrrn;
 
@@ -48,17 +48,15 @@ public class HRRN<T> extends java.util.LinkedList<T> implements Queue<T> {
     }
 
     public void iterate() {
-	UserThread currentThread = (UserThread) queue.peek();
+	UserThread currentThread = (UserThread) this.peek();
 
-	if (currentThread.getBurstLen() == 0) {
+	if (!this.isEmpty()&&currentThread.getBurstLen() == 0) {
 	    Nachos.scheduler.yieldThread();
 	}
 
     }
 
-    public int size() {
-	return queue.size();
-    }
+
 
     @SuppressWarnings("unchecked")
     @Override
@@ -67,33 +65,32 @@ public class HRRN<T> extends java.util.LinkedList<T> implements Queue<T> {
 
 	if (initPredictCPU()) {
 
-	    for (T t : queue) {
-
+	    for (T t : this) {
+		
+		if(t instanceof UserThread){
+		    
+		    
 		UserThread indexThread = (UserThread) t;
 		UserThread currentThread = (UserThread) NachosThread
 			.currentThread();
 		indexThread.setWaitingTime(currentThread.getBurstLen()
 			+ indexThread.getWaitingTime());
 		indexThread.updateResponseRatio();
+		}
 
 	    }
 
-	    Collections.sort((LinkedList<NachosThread>) queue,
-		    new CustomComparator());
-
+	    Collections.sort((LinkedList<NachosThread>) this, new CustomComparator());
+	    
+	    for (T t : this) {
+		Debug.println('+', "Ratio: "+((UserThread)t).getResponseRatio());
+	    }
 	}
 
-	return queue.poll();
+	return this.pollFirst();
 
     }
 
-    public LinkedList<T> getQueue() {
-	return queue;
-    }
-
-    public void setQueue(LinkedList<T> queue) {
-	this.queue = queue;
-    }
 
 
 
@@ -101,7 +98,7 @@ public class HRRN<T> extends java.util.LinkedList<T> implements Queue<T> {
     // by ratio
     private boolean initPredictCPU() {
 
-	for (T t : queue) {
+	for (T t : this) {
 	    if (t instanceof UserThread) {
 		UserThread indexThread = (UserThread) t;
 		if (indexThread.getBurstLen() == 0) {

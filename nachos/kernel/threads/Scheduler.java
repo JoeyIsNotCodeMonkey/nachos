@@ -70,7 +70,7 @@ public class Scheduler {
     /** Spin lock for mutually exclusive access to scheduler state. */
     private final SpinLock mutex = new SpinLock("scheduler mutex");
     
-    private Callout callout  = new Callout();
+//    private Callout callout  = new Callout();
 
     /**
      * Initialize the scheduler. Set the list of ready but not running threads
@@ -371,29 +371,17 @@ public class Scheduler {
     }
 
     public void sleepThread(int ticks) {
-//	SharedObject shared = new SharedObject();
-	
-	      
-	
-	Semaphore sem = new Semaphore("mutex for sleep", 0);
-	  
-
-		callout.schedule(new Runnable() {
-		    @Override 
+	NachosThread t = NachosThread.currentThread();
+	final Semaphore sem = new Semaphore("sleepThread: " + t.name, 0);
+	Nachos.callout.schedule
+		(new Runnable() {
 		    public void run() {
-			
-			 sem.V();
-			 Debug.println('+', "_____________________________________Out SleepThead Mode(In Runnable)");
-			
-			 
-			 Nachos.scheduler.finishThread();
-			 
+			//Debug.println('+', "Waking up Thread____");
+			sem.V();
 		    }
 		}, ticks);
-		
-		Debug.println('+', "_______________________Entering Sleep Mode");
-		sem.P();
-	
+	// Block until awakened by callout.
+	sem.P();
     }
 
     /**
@@ -407,9 +395,9 @@ public class Scheduler {
      */
     
     
-    public Callout getCalloutList(){
-	    return callout;
-	}
+//    public Callout getCalloutList(){
+//	    return callout;
+//	}
     
     public void finishThread() {
 	CPU.setLevel(CPU.IntOff);
