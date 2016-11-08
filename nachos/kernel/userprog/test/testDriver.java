@@ -43,7 +43,7 @@ public class testDriver implements Runnable {
 	int count = 1;
 	
 	
-	while(count <= 10){
+	while(count <= 100){
 	    
 	    
 	String name = "testDriver"+ count + "(" + filename + ")";

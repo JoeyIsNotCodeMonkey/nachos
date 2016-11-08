@@ -522,9 +522,9 @@ public class Scheduler {
 	    
 	    Nachos.loadAve = (double)Nachos.numOfProc / Nachos.interruptCounter;
 	    
-//	    if(Nachos.currentTick % 100000 == 0) {
-//		Debug.println('+', "******************************************current load average is: " + Nachos.loadAve);
-//	    }
+	    if(Nachos.currentTick % 100000 == 0) {
+		Debug.println('+', "******************************************current load average is: " + Nachos.loadAve);
+	    }
 	    
 	    
 	}
@@ -536,11 +536,17 @@ public class Scheduler {
 		
 		public void run() {
 		    
-		    if (NachosThread.currentThread()instanceof UserThread &&NachosThread.currentThread() != null) {
+		    if (NachosThread.currentThread()instanceof UserThread && NachosThread.currentThread() != null && Nachos.scheduler.readyList.peek() instanceof UserThread) {
 			
 			UserThread currentThread = (UserThread)NachosThread.currentThread();
 			    
 			currentThread.setRemainingTime(currentThread.getRemainingTime()-100);
+			
+			//check whether there is now thread come into queue.
+			if(currentThread.getRemainingTime() > ((UserThread)Nachos.scheduler.readyList.peek()).getRemainingTime()) {
+			    Nachos.scheduler.yieldThread();
+			}
+		
 			
 		    } else {
 			Debug.println('i',

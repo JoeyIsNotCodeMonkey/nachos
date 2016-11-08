@@ -20,28 +20,29 @@ public class SRT<T> extends java.util.LinkedList<T> implements Queue<T> {
 	
 	
 	//******* only firstThread calls offer**********
-	if (e instanceof UserThread && e instanceof UserThread && !this.isEmpty()) {
-	    UserThread currentThread = (UserThread) NachosThread.currentThread();
-	    
-	    Debug.println('+', "***************Remaining Time for newly created Thread: "+((UserThread)e).getRemainingTime() ); 
-	    Debug.println('+', "***************Remaining Time for current Thread: "+currentThread.getRemainingTime() ); 
-	
-	    
-	    if(((UserThread)e).getRemainingTime() < currentThread.getRemainingTime()) {
-		
-		
-		queue.addFirst(e);
-		Nachos.scheduler.yieldThread();
-
-	    }
-	    
-	    //sort
-	    this.add(e);
-	    Collections.sort((LinkedList<UserThread>)this, new CustomComparator());
-	    return true;
-	}
+//	if (e instanceof UserThread && e instanceof UserThread && !this.isEmpty()) {
+//	    UserThread currentThread = (UserThread) NachosThread.currentThread();
+//	    
+//	    Debug.println('+', "***************Remaining Time for newly created Thread: "+((UserThread)e).getRemainingTime() ); 
+//	    Debug.println('+', "***************Remaining Time for current Thread: "+currentThread.getRemainingTime() ); 
+//	
+//	    
+//	    if(((UserThread)e).getRemainingTime() < currentThread.getRemainingTime()) {
+//		
+//		
+//		queue.addFirst(e);
+//		Nachos.scheduler.yieldThread();
+//
+//	    }
+//	    
+//	    //sort
+//	    this.add(e);
+//	    Collections.sort((LinkedList<UserThread>)this, new CustomComparator());
+//	    return true;
+//	}
 
 	this.add(e);
+	Collections.sort((LinkedList<NachosThread>)this, new CustomComparator());
 
 	return true;
     }
@@ -50,17 +51,23 @@ public class SRT<T> extends java.util.LinkedList<T> implements Queue<T> {
     
     
     
-    public static class CustomComparator implements Comparator<UserThread> {	  
+    public static class CustomComparator implements Comparator<NachosThread> {	  
 	    @Override
-	    public int compare(UserThread o1, UserThread o2) {
+	    public int compare(NachosThread arg0, NachosThread arg1) {
 		
-		if(o1.getRemainingTime() > o2.getRemainingTime()) {
-		    return 1;
+		if(arg0 instanceof UserThread&&arg1 instanceof UserThread){
+		    UserThread o1 = (UserThread)arg0;
+		    UserThread o2 = (UserThread)arg1;
+		    if(o1.getRemainingTime() > o2.getRemainingTime()) {
+			    return 1;
+			}
+			
+			if(o1.getRemainingTime() == o2.getRemainingTime()) {
+			    return 0;
+			}
+		    
 		}
-		
-		if(o1.getRemainingTime() == o2.getRemainingTime()) {
-		    return 0;
-		}
+	
 		
 		return -1;
 	    }
