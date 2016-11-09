@@ -11,6 +11,7 @@
 package nachos.kernel.userprog;
 
 import nachos.machine.MIPS;
+import nachos.machine.Machine;
 import nachos.machine.NachosThread;
 import nachos.kernel.Nachos;
 import nachos.kernel.devices.ConsoleDriver;

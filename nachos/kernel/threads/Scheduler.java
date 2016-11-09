@@ -14,6 +14,10 @@
 
 package nachos.kernel.threads;
 
+import java.io.BufferedWriter;
+import java.io.File;
+import java.io.FileWriter;
+import java.io.IOException;
 import java.util.ArrayList;
 
 import nachos.Debug;
@@ -69,8 +73,8 @@ public class Scheduler {
 
     /** Spin lock for mutually exclusive access to scheduler state. */
     private final SpinLock mutex = new SpinLock("scheduler mutex");
-    
-//    private Callout callout  = new Callout();
+
+    // private Callout callout = new Callout();
 
     /**
      * Initialize the scheduler. Set the list of ready but not running threads
@@ -81,36 +85,32 @@ public class Scheduler {
      */
     public Scheduler(NachosThread firstThread) {
 
-	
-
-	if(nachos.Options.RR) {
+	if (nachos.Options.RR) {
 	    readyList = new RR<NachosThread>();
-	} 
-	
-	else if(nachos.Options.SPN) {
+	}
+
+	else if (nachos.Options.SPN) {
 	    readyList = new SPN<NachosThread>();
 	}
-	
-	//SRT = SPN with -ps
-	else if(nachos.Options.SRT) {
+
+	// SRT = SPN with -ps
+	else if (nachos.Options.SRT) {
 	    readyList = new SRT<NachosThread>();
 	}
-	
-	else if(nachos.Options.HRRN) {
+
+	else if (nachos.Options.HRRN) {
 	    readyList = new HRRN<NachosThread>();
 	}
-	
-	else if(nachos.Options.FEEDBACK) {
+
+	else if (nachos.Options.FEEDBACK) {
 	    readyList = new Feedback<NachosThread>();
 	}
-	
+
 	else {
 	    readyList = new FIFOQueue<NachosThread>();
 	}
 
-	
 	cpuList = new FIFOQueue<CPU>();
-	
 
 	Debug.println('t', "Initializing scheduler");
 
@@ -119,10 +119,11 @@ public class Scheduler {
 	// if we are using them.
 	for (int i = 0; i < Machine.NUM_CPUS; i++) {
 	    CPU cpu = Machine.getCPU(i);
+
 	    cpuList.offer(cpu);
 	    if (Nachos.options.CPU_TIMERS) {
 		Timer timer = cpu.timer;
-			timer.setHandler(new TimerInterruptHandler(timer));
+		timer.setHandler(new TimerInterruptHandler(timer));
 		if (Nachos.options.RANDOM_YIELD)
 		    timer.setRandom(true);
 		timer.start();
@@ -191,7 +192,7 @@ public class Scheduler {
 
 	thread.setStatus(NachosThread.READY);
 	readyList.offer(thread);
-	if(thread instanceof UserThread) {
+	if (thread instanceof UserThread) {
 	    ((UserThread) thread).setStartTime(Nachos.currentTick);
 	}
     }
@@ -225,7 +226,7 @@ public class Scheduler {
 	Debug.ASSERT(CPU.getLevel() == CPU.IntOff);
 	mutex.acquire();
 	NachosThread result = readyList.poll();
-	
+
 	mutex.release();
 	return result;
     }
@@ -374,13 +375,12 @@ public class Scheduler {
     public void sleepThread(int ticks) {
 	NachosThread t = NachosThread.currentThread();
 	final Semaphore sem = new Semaphore("sleepThread: " + t.name, 0);
-	Nachos.callout.schedule
-		(new Runnable() {
-		    public void run() {
-			//Debug.println('+', "Waking up Thread____");
-			sem.V();
-		    }
-		}, ticks);
+	Nachos.callout.schedule(new Runnable() {
+	    public void run() {
+		// Debug.println('+', "Waking up Thread____");
+		sem.V();
+	    }
+	}, ticks);
 	// Block until awakened by callout.
 	sem.P();
     }
@@ -394,12 +394,11 @@ public class Scheduler {
      * 
      * 
      */
-    
-    
-//    public Callout getCalloutList(){
-//	    return callout;
-//	}
-    
+
+    // public Callout getCalloutList(){
+    // return callout;
+    // }
+
     public void finishThread() {
 	CPU.setLevel(CPU.IntOff);
 	NachosThread currentThread = NachosThread.currentThread();
@@ -409,40 +408,66 @@ public class Scheduler {
 	// We have to make sure the thread has been set to the FINISHED state
 	// before making it the thread to be destroyed, because we don't want
 	// someone to try to destroy a thread that is not FINISHED.
-	
-	
-	//callout.setFinishedStatus(currentThread.name, true);
-	
+
+	// callout.setFinishedStatus(currentThread.name, true);
+
 	currentThread.setStatus(NachosThread.FINISHED);
-	
-	if(currentThread instanceof UserThread) {
+
+	if (currentThread instanceof UserThread) {
 	    ((UserThread) currentThread).setEndTime(Nachos.currentTick);
-	    int turnaround = ((UserThread) currentThread).getEndTime() - ((UserThread) currentThread).getStartTime();
+	    int turnaround = ((UserThread) currentThread).getEndTime()
+		    - ((UserThread) currentThread).getStartTime();
 	    int cpu_time = ((UserThread) currentThread).getRunningTime();
-	    double normalized_t = (double)turnaround/cpu_time;
+	    double normalized_t = (double) turnaround / cpu_time;
+	    
+	    Debug.println('+', "turnaround: " + Integer.toString(turnaround) + " cpu time: " + Integer.toString(cpu_time) + " nomalize: " + Double.toString(normalized_t));
+
+	    try {
+		
+		String line = Double.toString(normalized_t) + "," + Integer.toString(cpu_time);				
+
+		File file = new File("/Users/Joey/Desktop/CPU_data.csv");
+
+		// if file doesnt exists, then create it
+		if (!file.exists()) {
+		    file.createNewFile();
+		}
+
+		FileWriter fw = new FileWriter(file.getAbsoluteFile(),true);
+		BufferedWriter bw = new BufferedWriter(fw);
+		bw.write(line);
+		bw.newLine();
+		bw.flush();
+		bw.close();
+
+		System.out.println("Done");
+
+	    } catch (IOException e) {
+		e.printStackTrace();
+	    }
+
 	}
-	
-	
-//	int listSize =((HRRN<NachosThread>)readyList).size();
-//	
-//	for(int i=0; i<listSize; i++) {
-//	    if(readyList.peek() instanceof UserThread && currentThread instanceof UserThread) {
-//		UserThread t = (UserThread)readyList.poll();
-//		t.setWaitingTime(t.getWaitingTime()+((UserThread)currentThread).getWaitingTime());
-//		readyList.offer(t);
-//	    }
-//	}
-	
-	
-//	ArrayList<Object[]> list = callout.getCalloutList();
-//	for(Object[] element : list){
-//	    NachosThread temp =  (NachosThread)element[2];
-//	    String s=temp.name;
-//	    if(currentThread.name.equals(s)){
-//		element[3]= true;
-//	    }	    	    
-//	}
-	
+
+	// int listSize =((HRRN<NachosThread>)readyList).size();
+	//
+	// for(int i=0; i<listSize; i++) {
+	// if(readyList.peek() instanceof UserThread && currentThread instanceof
+	// UserThread) {
+	// UserThread t = (UserThread)readyList.poll();
+	// t.setWaitingTime(t.getWaitingTime()+((UserThread)currentThread).getWaitingTime());
+	// readyList.offer(t);
+	// }
+	// }
+
+	// ArrayList<Object[]> list = callout.getCalloutList();
+	// for(Object[] element : list){
+	// NachosThread temp = (NachosThread)element[2];
+	// String s=temp.name;
+	// if(currentThread.name.equals(s)){
+	// element[3]= true;
+	// }
+	// }
+
 	// Delete the carcass of any thread that died previously.
 	// This ensures that there is at most one dead thread ever waiting
 	// to be cleaned up.
@@ -472,6 +497,9 @@ public class Scheduler {
 	/** The Timer device this is a handler for. */
 	private final Timer timer;
 
+	private final Semaphore interruptLock = new Semaphore("interruptLock",
+		0);
+
 	/**
 	 * Initialize an interrupt handler for a specified Timer device.
 	 * 
@@ -490,117 +518,140 @@ public class Scheduler {
 	    // so that once the interrupt handler is done, it will appear as
 	    // if the interrupted thread called yield at the point it is
 	    // was interrupted.
-	    
-	    
-	    
-	 //   NachosThread currentThread = NachosThread.currentThread();
-	   
-	    
-	    
-	   
-	    //yieldOnReturnRR();
-	   
-	    //yieldOnReturnSRT();
-	    //yieldOnReturn();
-	    
-	    if(nachos.Options.RR) {
+
+	    // NachosThread currentThread = NachosThread.currentThread();
+
+	    // yieldOnReturnRR();
+
+	    // yieldOnReturnSRT();
+	    // yieldOnReturn();
+
+	    if (nachos.Options.RR) {
 		yieldOnReturnRR();
-	    }else if(nachos.Options.SRT){
+	    } else if (nachos.Options.SRT) {
 		yieldOnReturnSRT();
-	    }else if(nachos.Options.FEEDBACK){
+	    } else if (nachos.Options.FEEDBACK) {
 		yieldOnReturnRR();
-	    }else{
+	    } else {
 		yieldOnReturn();
 	    }
-	    
-	    Nachos.currentTick += 100;
-	    
-	    if(NachosThread.currentThread() instanceof UserThread) {
-		((UserThread)NachosThread.currentThread()).setRunningTime(((UserThread)NachosThread.currentThread()).getRunningTime() + 100);
-	    }
-	    
-	    Nachos.numOfProc += Nachos.scheduler.readyList.size();
-	    
-	    Nachos.interruptCounter++;
-	    
-	    Nachos.loadAve = (double)Nachos.numOfProc / Nachos.interruptCounter;
-	    
-//	    if(Nachos.currentTick % 100000 == 0) {
-//		Debug.println('+', "******************************************current load average is: " + Nachos.loadAve);
-//
-//	    }
-	    
-	    
+
+	    processData();
+
 	}
 
-	
-	private void yieldOnReturnSRT() {
+	private void processData() {
 	    Debug.println('i', "Yield on interrupt return requested");
 	    CPU.setOnInterruptReturn(new Runnable() {
-		
+
 		public void run() {
-		    
-		    if (NachosThread.currentThread()instanceof UserThread && NachosThread.currentThread() != null && Nachos.scheduler.readyList.peek() instanceof UserThread) {
-			
-			UserThread currentThread = (UserThread)NachosThread.currentThread();
-			    
-			currentThread.setRemainingTime(currentThread.getRemainingTime()-100);
-			Debug.println('+', "******************************************in" );
-			
-			//check whether there is now thread come into queue.
-			if(currentThread.getRemainingTime() > ((UserThread)Nachos.scheduler.readyList.peek()).getRemainingTime()) {
-			    Debug.println('+', "******************************************switched" );
+		    Nachos.currentTick = (Nachos.currentTick + 100);
+		    NachosThread t = NachosThread.currentThread();
+		    if ( t instanceof UserThread) {
+			((UserThread) NachosThread.currentThread()).setRunningTime(
+				((UserThread) NachosThread.currentThread())
+					.getRunningTime() + 100);
+		    }
+
+		    Nachos.numOfProc += Nachos.scheduler.readyList.size();
+
+		    Nachos.interruptCounter++;
+
+		    Nachos.loadAve = (double) Nachos.numOfProc
+			    / Nachos.interruptCounter;
+
+		    if (Nachos.currentTick % 100000 == 0) {
+			Debug.println('+',
+				"******************************************current load average is: "
+					+ Nachos.loadAve);
+
+		    }
+
+
+		}
+	    });
+
+	}	private void yieldOnReturnSRT() {
+	    Debug.println('i', "Yield on interrupt return requested");
+	    CPU.setOnInterruptReturn(new Runnable() {
+
+		public void run() {
+
+		    if (NachosThread.currentThread() instanceof UserThread
+			    && Nachos.scheduler.readyList
+				    .peek() instanceof UserThread) {
+
+			UserThread currentThread = (UserThread) NachosThread
+				.currentThread();
+
+			currentThread.setRemainingTime(
+				currentThread.getRemainingTime() - 100);
+			Debug.println('+',
+				"******************************************in");
+
+			// check whether there is now thread come into queue.
+			if (currentThread
+				.getRemainingTime() > ((UserThread) Nachos.scheduler.readyList
+					.peek()).getRemainingTime()) {
+
+			    Debug.println('+', "**currentThread: "
+				    + currentThread.getRemainingTime());
+
+			    Debug.println('+', "**Lis[0]"
+				    + ((UserThread) Nachos.scheduler.readyList
+					    .peek()).getRemainingTime());
+			    Debug.println('+',
+				    "******************************************switched");
 			    Nachos.scheduler.yieldThread();
 			}
-		
-			
+
 		    } else {
 			Debug.println('i',
 				"No current thread on interrupt return, skipping yield");
 		    }
-		    
-		    
-		    
+
 		}
 	    });
-	    
+
 	}
 
 	private void yieldOnReturnRR() {
 	    Debug.println('i', "Yield on interrupt return requested");
 	    CPU.setOnInterruptReturn(new Runnable() {
-		
-		public void run() {
-		    
-		    if (NachosThread.currentThread() instanceof UserThread &&NachosThread.currentThread() != null) {
-			
-			UserThread currentThread = (UserThread)NachosThread.currentThread();
-			    
-			  currentThread.setQuantum(currentThread.getQuantum()-100);
-			    
-			    if(currentThread.getQuantum()==0 ) {
 
-				
-			//	Debug.println('+', "_____CurrentThread shift away from space ID:  " + currentThread.space.getSpaceID());
-				
-				currentThread.setQuantum(1000);
-	
-				Nachos.scheduler.yieldThread();
-			    }			
-			
-			//Nachos.scheduler.yieldThread();
-		
+		public void run() {
+
+		    if (NachosThread.currentThread() instanceof UserThread
+			    && NachosThread.currentThread() != null) {
+
+			UserThread currentThread = (UserThread) NachosThread
+				.currentThread();
+
+			currentThread
+				.setQuantum(currentThread.getQuantum() - 100);
+
+			if (currentThread.getQuantum() == 0) {
+
+			    // Debug.println('+', "_____CurrentThread shift away
+			    // from space ID: " +
+			    // currentThread.space.getSpaceID());
+
+			    currentThread.setQuantum(1000);
+
+			    Nachos.scheduler.yieldThread();
+			}
+
+			// Nachos.scheduler.yieldThread();
+
 		    } else {
 			Debug.println('i',
 				"No current thread on interrupt return, skipping yield");
 		    }
-		    
-		    
-		    
+
 		}
 	    });
 	}
-	
+
 	private void yieldOnReturnFeedback() {
 	    Debug.println('i', "Yield on interrupt return requested");
 	    CPU.setOnInterruptReturn(new Runnable() {
@@ -616,8 +667,7 @@ public class Scheduler {
 		}
 	    });
 	}
-	
-	
+
 	/**
 	 * Called to cause a context switch (for example, on a time slice) in
 	 * the interrupted thread when the handler returns.
@@ -642,14 +692,7 @@ public class Scheduler {
 		}
 	    });
 	}
-	
-	
-	
-	
-	
-	
 
     }
-
 
 }
