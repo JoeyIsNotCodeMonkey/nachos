@@ -72,6 +72,15 @@ public class Feedback<T> extends java.util.LinkedList<T> implements Queue<T> {
        return true;
    }
    
+   @Override
+   public int size(){
+       int count = 0;
+       for(LinkedList l : queueManager){
+	   count += l.size();
+       }
+       return count;
+   }
+   
    
    
     
