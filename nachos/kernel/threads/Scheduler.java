@@ -417,6 +417,9 @@ public class Scheduler {
 	
 	if(currentThread instanceof UserThread) {
 	    ((UserThread) currentThread).setEndTime(Nachos.currentTick);
+	    int turnaround = ((UserThread) currentThread).getEndTime() - ((UserThread) currentThread).getStartTime();
+	    int cpu_time = ((UserThread) currentThread).getRunningTime();
+	    double normalized_t = (double)turnaround/cpu_time;
 	}
 	
 	
