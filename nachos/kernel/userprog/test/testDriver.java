@@ -40,7 +40,7 @@ public class testDriver implements Runnable {
      * @param filename The name of the program to execute.
      */
     public testDriver(String filename, int num) {
-	int count = 1;
+	int count = 1;			//decide number of processes to be created***********************
 	
 	int temp = 0;
 	while(count <= 100){
