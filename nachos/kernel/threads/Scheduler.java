@@ -418,7 +418,13 @@ public class Scheduler {
 	    int turnaround = ((UserThread) currentThread).getEndTime()
 		    - ((UserThread) currentThread).getStartTime();
 	    int cpu_time = ((UserThread) currentThread).getRunningTime();
-	    double normalized_t = (double) turnaround / cpu_time;
+	    double normalized_t = 0;
+	    if(cpu_time == 0) {
+		normalized_t = (double) turnaround / 1; //to avoid infinity for turnaround time
+	    } else {
+		normalized_t = (double) turnaround / cpu_time;
+	    }
+	    
 	    
 	    Debug.println('+', "turnaround: " + Integer.toString(turnaround) + " cpu time: " + Integer.toString(cpu_time) + " nomalize: " + Double.toString(normalized_t));
 
