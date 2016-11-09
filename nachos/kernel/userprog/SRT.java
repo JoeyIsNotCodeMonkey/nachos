@@ -52,14 +52,14 @@ public class SRT<T> extends java.util.LinkedList<T> implements Queue<T> {
 	Collections.sort((LinkedList<NachosThread>) this,
 		new CustomComparator());
 	
-	Debug.println('+', "******************************************************");
-	for(T u : this) {
-	    if(u instanceof UserThread) {
-		Debug.println('+', "Remaining Time: " + ((UserThread)u).getRemainingTime());
-	    }
-	    
-	}
-	Debug.println('+', "******************************************************");
+//	Debug.println('+', "******************************************************");
+//	for(T u : this) {
+//	    if(u instanceof UserThread) {
+//		Debug.println('+', "Remaining Time: " + ((UserThread)u).getRemainingTime());
+//	    }
+//	    
+//	}
+//	Debug.println('+', "******************************************************");
 
 	return true;
     }

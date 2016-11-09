@@ -32,7 +32,7 @@ public class Feedback<T> extends java.util.LinkedList<T> implements Queue<T> {
 	   
 	   queueManager.get(((UserThread)e).getPriority()).offer(e);	
 	   
-	   Debug.println('+', ((UserThread)e).space.getSpaceID() + "__________________" + ((UserThread)e).getPriority() );
+	   //Debug.println('+', "Space ID: "+((UserThread)e).space.getSpaceID() + "has priority of " + ((UserThread)e).getPriority() );
 	   
 	   if(((UserThread)e).getPriority()<4){
 	       ((UserThread)e).setPriority(((UserThread)e).getPriority()+1);

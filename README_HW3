@@ -38,6 +38,7 @@ Feedback    - consists of 4 FIFO queue and the 5th is a RR queue. During every t
 
 To run our program configuration: -v flag file_name -scheduling method 
 and in the testDriver class, change variable "count" to create the desired number of process
+for every 100,000 ticks we display the instantaneous load average up to that point 
 
 for example, running file name test using round round would be -v test -rr
 
@@ -47,3 +48,6 @@ SRT 			-srt
 HRRN 			-hrrn
 Feedback 		-feedback
 FIFO			default, no flag needed
+
+We think most of our graphs were close to the graph in Stalling's textbook but the feedback's graph was off from what's in the book.
+For each graph, we generate them based on the result of 200 processes and saved them in .xlsx format and plot the graph based on collected data.

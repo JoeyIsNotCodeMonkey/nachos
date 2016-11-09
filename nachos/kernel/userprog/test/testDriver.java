@@ -76,7 +76,7 @@ public class testDriver implements Runnable {
 	}
 	
 //	if(temp>5){
-	Debug.println('+', "Will sleep for :" + ticks);
+//	Debug.println('+', "Will sleep for :" + ticks);
 	Nachos.scheduler.sleepThread(ticks);
 	//}
 	
@@ -127,7 +127,7 @@ public class testDriver implements Runnable {
 	    randNumber = Math.random();
 	}
 	
-	Debug.println('+', "random for this thread is : " + randomInt);
+//	Debug.println('+', "random for this thread is : " + randomInt);
 	CPU.writeRegister(4, randomInt);
 	
 	CPU.runUserCode();			// jump to the user progam

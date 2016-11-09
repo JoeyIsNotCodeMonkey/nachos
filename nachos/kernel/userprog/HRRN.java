@@ -89,7 +89,7 @@ public class HRRN<T> extends java.util.LinkedList<T> implements Queue<T> {
 	    
 	    for(T t : this){
 		if(t instanceof UserThread){
-		    Debug.println('+', "Ratio : " + ((UserThread) t).getResponseRatio());
+		    Debug.println('+', "Sorted Ratio : " + ((UserThread) t).getResponseRatio());
 		}
 		
 	    }

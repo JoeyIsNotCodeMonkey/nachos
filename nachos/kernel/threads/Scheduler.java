@@ -112,7 +112,7 @@ public class Scheduler {
 
 	cpuList = new FIFOQueue<CPU>();
 
-	Debug.println('t', "Initializing scheduler");
+	//ebug.println('t', "Initializing scheduler");
 
 	// Add all the CPUs to the idle CPU list, and start their time-slice
 	// timers,
@@ -426,7 +426,7 @@ public class Scheduler {
 	    }
 	    
 	    
-	    Debug.println('+', "turnaround: " + Integer.toString(turnaround) + " cpu time: " + Integer.toString(cpu_time) + " nomalize: " + Double.toString(normalized_t));
+	  //  Debug.println('+', "turnaround: " + Integer.toString(turnaround) + " cpu time: " + Integer.toString(cpu_time) + " nomalize: " + Double.toString(normalized_t));
 
 	    try {
 		
@@ -447,7 +447,7 @@ public class Scheduler {
 		bw.close();
 		//
 
-		System.out.println("Done");
+//		System.out.println("Done");
 		
 		//
 
@@ -592,14 +592,14 @@ public class Scheduler {
 			if (!Nachos.scheduler.readyList.isEmpty()&&currentThread.getRemainingTime() 
 				> ((UserThread) Nachos.scheduler.readyList.peek()).getRemainingTime()) {
 
-			    Debug.println('+', "**currentThread: "
-				    + currentThread.getRemainingTime());
-
-			    Debug.println('+', "**Lis[0]"
-				    + ((UserThread) Nachos.scheduler.readyList
-					    .peek()).getRemainingTime());
-			    Debug.println('+',
-				    "******************************************switched");
+//			    Debug.println('+', "**currentThread: "
+//				    + currentThread.getRemainingTime());
+//
+//			    Debug.println('+', "**Lis[0]"
+//				    + ((UserThread) Nachos.scheduler.readyList
+//					    .peek()).getRemainingTime());
+//			    Debug.println('+',
+//				    "******************************************switched");
 			    Nachos.scheduler.yieldThread();
 			}
 
@@ -632,16 +632,13 @@ public class Scheduler {
 
 			if (currentThread.getQuantum() == 0) {
 
-			    // Debug.println('+', "_____CurrentThread shift away
-			    // from space ID: " +
-			    // currentThread.space.getSpaceID());
-
+		        //Debug.println('+', "CurrentThread shift away from space ID: " +  currentThread.space.getSpaceID());
 			    currentThread.setQuantum(1000);
 
 			    Nachos.scheduler.yieldThread();
 			}
 
-			// Nachos.scheduler.yieldThread();
+			
 
 		    } else {
 			Debug.println('i',

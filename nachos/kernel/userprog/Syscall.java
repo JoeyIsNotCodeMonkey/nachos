@@ -348,7 +348,7 @@ public class Syscall {
 	
 	//SPN: setBurstLen, update()
 	if(nachos.Options.SPN) {
-	    Debug.println('+', "SpaceID: "+ currentThread.space.getSpaceID()+" has CPU burst: "+ticks);
+	    
 	    currentThread.setBurstLen(ticks);
 	    ((SPN<NachosThread>)Nachos.scheduler.readyList).update();
 	} 
@@ -365,7 +365,6 @@ public class Syscall {
 	    ((HRRN<NachosThread>)Nachos.scheduler.readyList).iterate();
 	}
 	
-	Debug.println('+', "After predictCPU");
 	
     }
 
