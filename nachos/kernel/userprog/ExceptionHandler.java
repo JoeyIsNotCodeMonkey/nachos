@@ -153,7 +153,7 @@ public class ExceptionHandler implements nachos.machine.ExceptionHandler {
 
 	System.out.println(
 		"Unexpected user mode exception " + which + ", " + type);
-	Debug.ASSERT(false);
+	//Debug.ASSERT(false);
 
     }
 }
