@@ -377,7 +377,7 @@ public class Scheduler {
 	final Semaphore sem = new Semaphore("sleepThread: " + t.name, 0);
 	Nachos.callout.schedule(new Runnable() {
 	    public void run() {
-		 Debug.println('+', "Waking up Thread____");
+		//Debug.println('+', "Waking up Thread____");
 		sem.V();
 	    }
 	}, ticks);
@@ -583,13 +583,14 @@ public class Scheduler {
 
 			currentThread.setRemainingTime(
 				currentThread.getRemainingTime() - 100);
-			Debug.println('+',
-				"******************************************in");
+//			Debug.println('+',
+//				"******************************************in");
 
 			// check whether there is now thread come into queue.
-			if (currentThread
-				.getRemainingTime() > ((UserThread) Nachos.scheduler.readyList
-					.peek()).getRemainingTime()) {
+			
+		
+			if (!Nachos.scheduler.readyList.isEmpty()&&currentThread.getRemainingTime() 
+				> ((UserThread) Nachos.scheduler.readyList.peek()).getRemainingTime()) {
 
 			    Debug.println('+', "**currentThread: "
 				    + currentThread.getRemainingTime());
