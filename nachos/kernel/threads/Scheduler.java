@@ -70,6 +70,8 @@ public class Scheduler {
     /** Spin lock for mutually exclusive access to scheduler state. */
     private final SpinLock mutex = new SpinLock("scheduler mutex");
     
+    
+    
 //    private Callout callout  = new Callout();
 
     /**
@@ -119,6 +121,7 @@ public class Scheduler {
 	// if we are using them.
 	for (int i = 0; i < Machine.NUM_CPUS; i++) {
 	    CPU cpu = Machine.getCPU(i);
+	   
 	    cpuList.offer(cpu);
 	    if (Nachos.options.CPU_TIMERS) {
 		Timer timer = cpu.timer;
@@ -128,7 +131,8 @@ public class Scheduler {
 		timer.start();
 	    }
 	}
-
+	
+	
 	// Dispatch firstThread on the first CPU.
 	CPU firstCPU = cpuList.poll();
 	firstCPU.dispatch(firstThread);
@@ -416,7 +420,7 @@ public class Scheduler {
 	currentThread.setStatus(NachosThread.FINISHED);
 	
 	if(currentThread instanceof UserThread) {
-	    ((UserThread) currentThread).setEndTime(Nachos.currentTick);
+	    ((UserThread) currentThread).setEndTime(Nachos.currentTick/Machine.NUM_CPUS);
 	}
 	
 	
@@ -468,6 +472,7 @@ public class Scheduler {
 
 	/** The Timer device this is a handler for. */
 	private final Timer timer;
+	private final Semaphore interruptLock = new Semaphore("interruptLock",0);
 
 	/**
 	 * Initialize an interrupt handler for a specified Timer device.
@@ -500,6 +505,8 @@ public class Scheduler {
 	    //yieldOnReturnSRT();
 	    //yieldOnReturn();
 	    
+	    
+	    
 	    if(nachos.Options.RR) {
 		yieldOnReturnRR();
 	    }else if(nachos.Options.SRT){
@@ -510,7 +517,12 @@ public class Scheduler {
 		yieldOnReturn();
 	    }
 	    
-	    Nachos.currentTick += 100;
+	    
+	    
+	    
+	    Nachos.currentTick = (Nachos.currentTick+100);
+	    
+
 	    
 	    if(NachosThread.currentThread() instanceof UserThread) {
 		((UserThread)NachosThread.currentThread()).setRunningTime(((UserThread)NachosThread.currentThread()).getRunningTime() + 100);
@@ -522,10 +534,10 @@ public class Scheduler {
 	    
 	    Nachos.loadAve = (double)Nachos.numOfProc / Nachos.interruptCounter;
 	    
-//	    if(Nachos.currentTick % 100000 == 0) {
-//		Debug.println('+', "******************************************current load average is: " + Nachos.loadAve);
-//
-//	    }
+	    if(Nachos.currentTick % 100000 == 0) {
+		Debug.println('+', "******************************************current load average is: " + Nachos.loadAve);
+
+	    }
 	    
 	    
 	}
@@ -536,8 +548,8 @@ public class Scheduler {
 	    CPU.setOnInterruptReturn(new Runnable() {
 		
 		public void run() {
-		    
-		    if (NachosThread.currentThread()instanceof UserThread && NachosThread.currentThread() != null && Nachos.scheduler.readyList.peek() instanceof UserThread) {
+		  
+		    if (NachosThread.currentThread()instanceof UserThread && Nachos.scheduler.readyList.peek() instanceof UserThread) {
 			
 			UserThread currentThread = (UserThread)NachosThread.currentThread();
 			    
@@ -546,6 +558,11 @@ public class Scheduler {
 			
 			//check whether there is now thread come into queue.
 			if(currentThread.getRemainingTime() > ((UserThread)Nachos.scheduler.readyList.peek()).getRemainingTime()) {
+			    
+
+			    Debug.println('+', "**currentThread: " +currentThread.getRemainingTime());
+
+			    Debug.println('+', "**Lis[0]"+  ((UserThread)Nachos.scheduler.readyList.peek()).getRemainingTime());
 			    Debug.println('+', "******************************************switched" );
 			    Nachos.scheduler.yieldThread();
 			}
@@ -647,6 +664,8 @@ public class Scheduler {
 	
 
     }
+    
+  
 
 
 }

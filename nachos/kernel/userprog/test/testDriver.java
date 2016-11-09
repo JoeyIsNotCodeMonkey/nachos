@@ -42,7 +42,7 @@ public class testDriver implements Runnable {
     public testDriver(String filename, int num) {
 	int count = 1;
 	
-	
+	int temp = 0;
 	while(count <= 100){
 	    
 	    
@@ -67,6 +67,7 @@ public class testDriver implements Runnable {
 	while(true) {
 	    if(randNumber < 0.1) {
 		ticks = start * 500;
+		temp++;
 		break;
 	    }
 	    
@@ -74,9 +75,10 @@ public class testDriver implements Runnable {
 	    randNumber = Math.random();
 	}
 	
+	if(temp>5){
 	Debug.println('+', "Will sleep for :" + ticks);
 	Nachos.scheduler.sleepThread(ticks);
-	
+	}
 	
 	}
 	
