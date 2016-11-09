@@ -377,7 +377,7 @@ public class Scheduler {
 	final Semaphore sem = new Semaphore("sleepThread: " + t.name, 0);
 	Nachos.callout.schedule(new Runnable() {
 	    public void run() {
-		// Debug.println('+', "Waking up Thread____");
+		 Debug.println('+', "Waking up Thread____");
 		sem.V();
 	    }
 	}, ticks);
@@ -426,7 +426,7 @@ public class Scheduler {
 		
 		String line = Double.toString(normalized_t) + "," + Integer.toString(cpu_time);				
 
-		File file = new File("/Users/Joey/Desktop/CPU_data.csv");
+		File file = new File("CPU_data.csv");
 
 		// if file doesnt exists, then create it
 		if (!file.exists()) {
@@ -500,8 +500,7 @@ public class Scheduler {
 	/** The Timer device this is a handler for. */
 	private final Timer timer;
 
-	private final Semaphore interruptLock = new Semaphore("interruptLock",
-		0);
+	private final Semaphore interruptLock = new Semaphore("interruptLock",0);
 
 	/**
 	 * Initialize an interrupt handler for a specified Timer device.
@@ -539,46 +538,35 @@ public class Scheduler {
 		yieldOnReturn();
 	    }
 
-	    processData();
+	    Nachos.currentTick = (Nachos.currentTick + 100);
+	    
+	    Nachos.numOfProc += Nachos.scheduler.readyList.size();
+
+	    Nachos.interruptCounter++;
+
+	    Nachos.loadAve = (double) Nachos.numOfProc / Nachos.interruptCounter;
+
+	    if (Nachos.currentTick % 100000 == 0) {
+		Debug.println('+',
+			"******************************************current load average is: "
+				+ Nachos.loadAve);
+
+	    }
+	    
+	    
+	   // processData();
 
 	}
 
-	private void processData() {
+	private void yieldOnReturnSRT() {
 	    Debug.println('i', "Yield on interrupt return requested");
 	    CPU.setOnInterruptReturn(new Runnable() {
 
 		public void run() {
-		    Nachos.currentTick = (Nachos.currentTick + 100);
-		    NachosThread t = NachosThread.currentThread();
-		    if ( t instanceof UserThread) {
-			((UserThread) NachosThread.currentThread()).setRunningTime(
-				((UserThread) NachosThread.currentThread())
-					.getRunningTime() + 100);
-		    }
-
-		    Nachos.numOfProc += Nachos.scheduler.readyList.size();
-
-		    Nachos.interruptCounter++;
-
-		    Nachos.loadAve = (double) Nachos.numOfProc
-			    / Nachos.interruptCounter;
-
-		    if (Nachos.currentTick % 100000 == 0) {
-			Debug.println('+',
-				"******************************************current load average is: "
-					+ Nachos.loadAve);
-
-		    }
-
-
-		}
-	    });
-
-	}	private void yieldOnReturnSRT() {
-	    Debug.println('i', "Yield on interrupt return requested");
-	    CPU.setOnInterruptReturn(new Runnable() {
-
-		public void run() {
+		    
+		    
+		    processData();
+		    
 
 		    if (NachosThread.currentThread() instanceof UserThread
 			    && Nachos.scheduler.readyList
@@ -623,6 +611,8 @@ public class Scheduler {
 	    CPU.setOnInterruptReturn(new Runnable() {
 
 		public void run() {
+		    
+		    processData();
 
 		    if (NachosThread.currentThread() instanceof UserThread
 			    && NachosThread.currentThread() != null) {
@@ -684,7 +674,17 @@ public class Scheduler {
 	    Debug.println('i', "Yield on interrupt return requested");
 	    CPU.setOnInterruptReturn(new Runnable() {
 		public void run() {
+		    
+		    
+		    
 		    if (NachosThread.currentThread() != null) {
+			
+			
+			
+			processData();
+			
+			
+			
 			Debug.println('t',
 				"Yielding current thread on interrupt return");
 			Nachos.scheduler.yieldThread();
@@ -694,6 +694,16 @@ public class Scheduler {
 		    }
 		}
 	    });
+	}
+	
+	
+	private void processData(){
+
+		  NachosThread t = NachosThread.currentThread();
+		    if ( t instanceof UserThread) {
+			((UserThread) NachosThread.currentThread()).setRunningTime(
+				((UserThread) NachosThread.currentThread())
+					.getRunningTime() + 100);}
 	}
 
     }

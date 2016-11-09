@@ -75,7 +75,7 @@ public class testDriver implements Runnable {
 	    randNumber = Math.random();
 	}
 	
-	//if(temp>5){
+//	if(temp>5){
 	Debug.println('+', "Will sleep for :" + ticks);
 	Nachos.scheduler.sleepThread(ticks);
 	//}
