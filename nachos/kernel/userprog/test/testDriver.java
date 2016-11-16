@@ -43,7 +43,7 @@ public class testDriver implements Runnable {
 	int count = 1;			//decide number of processes to be created***********************
 	
 	int temp = 0;
-	while(count <= 200){
+	while(count <= 5){
 	    
 	    
 	String name = "testDriver"+ count + "(" + filename + ")";
@@ -77,7 +77,7 @@ public class testDriver implements Runnable {
 	
 //	if(temp>5){
 //	Debug.println('+', "Will sleep for :" + ticks);
-	Nachos.scheduler.sleepThread(ticks);
+	//Nachos.scheduler.sleepThread(ticks);
 	//}
 	
 	}
