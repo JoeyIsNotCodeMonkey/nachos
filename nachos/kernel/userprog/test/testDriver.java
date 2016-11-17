@@ -43,7 +43,7 @@ public class testDriver implements Runnable {
 	int count = 1;			//decide number of processes to be created***********************
 	
 	int temp = 0;
-	while(count <= 5){
+	while(count <= 3){
 	    
 	    
 	String name = "testDriver"+ count + "(" + filename + ")";
