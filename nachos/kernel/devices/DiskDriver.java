@@ -117,6 +117,7 @@ public class DiskDriver {
 	    workQueue.offer(entry);
 	}
 
+	
 	semaphore.P(); // wait for interrupt
 	lock.release();
     }
@@ -163,10 +164,14 @@ public class DiskDriver {
 	    if (first) {
 		semaphore.V();
 		first = false;
+		
+		byte data[] = new byte[1000];
+		disk.readRequest(0, data, 1);
+		
 	    }
 
 	    else {
-		
+
 		IORB entry = workQueue.poll();
 
 		// read
@@ -183,6 +188,8 @@ public class DiskDriver {
 
 		entry.getSemaphore().V();
 	    }
+
+	    
 
 	}
     }
