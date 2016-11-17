@@ -20,11 +20,13 @@ package nachos.kernel.devices;
 
 import nachos.Debug;
 import nachos.machine.Machine;
+import nachos.machine.NachosThread;
 import nachos.util.FIFOQueue;
 import nachos.util.Queue;
 import nachos.machine.Disk;
 import nachos.machine.InterruptHandler;
 import nachos.kernel.threads.Semaphore;
+import nachos.kernel.Nachos;
 import nachos.kernel.threads.Lock;
 
 
@@ -59,7 +61,7 @@ public class DiskDriver {
     private Queue<IORB> workQueue;
     
     private boolean first = true;
-    
+    private boolean processing = false;
     Semaphore semaphoreFirst;
     /**
      * Initialize the synchronous interface to the physical disk, in turn
@@ -74,6 +76,7 @@ public class DiskDriver {
 	lock = new Lock("synch disk lock");
 	disk = Machine.getDisk(unit);
 	disk.setHandler(new DiskIntHandler());
+	
     }
 
     /**
@@ -106,7 +109,6 @@ public class DiskDriver {
 	Debug.ASSERT(0 <= sectorNumber && sectorNumber < getNumSectors());
 	
 	
-	
 	//queue work entry
 	semaphore = new Semaphore("synch disk"+count, 0);
 	IORB e = new IORB(sectorNumber,0,data,index,semaphore);
@@ -114,17 +116,24 @@ public class DiskDriver {
 	count++;
 	
 	
-	if(first){
-	    lock.acquire();			// only one disk I/O at a time
+	if(first&& !processing){
+	    processing = true;
+	    lock.acquire();
 	    byte[] data2 = new byte[1000];
-	    disk.writeRequest(0, data2, 0);
+	    disk.readRequest(0, data2, 0);
+	    Debug.println('+', "Fist Locked "+ NachosThread.currentThread().name);
 	    semaphoreFirst.P();			// wait for interrupt
 	    lock.release();
-	    Debug.print('+', "Lock Released*********");
+	   
 	}
 	
 	semaphore.P();
-	
+	Debug.println('+', "hereeee");
+	lock.acquire();			// only one disk I/O at a time
+	disk.readRequest(sectorNumber, data, index);
+	semaphore.P();			// wait for interrupt
+	lock.release();
+	Debug.println('+', "done");
     }
 
     /**
@@ -156,11 +165,16 @@ public class DiskDriver {
 	 
 	public void handleInterrupt() {
 	    
+	   
+	 
 	    if(first){
+		processing = false;
 		first=false;
 		semaphoreFirst.V();
+		    Debug.println('+', "Fist Freed");
 	    }else{
 		nextToRun.getSemaphore().V();
+		 Debug.println('+', "normal freed: " + nextToRun.getSemaphore().name);
 	    }
 	    
 	    nextToRun = workQueue.poll();
@@ -169,26 +183,15 @@ public class DiskDriver {
 		first=true;
 		return;
 	    }
-	    if(nextToRun.getFlag()==0){
+	    
+	    
+	 	   
+	    nextToRun.getSemaphore().V();
 		
-		lock.acquire();			
-		disk.readRequest(nextToRun.getSectorNumber(),nextToRun.getData(),nextToRun.getIndex());
-		nextToRun.getSemaphore().P();			
-		lock.release();
-		
-		
-	    }else if(nextToRun.getFlag()==1){
-		
-		lock.acquire();			
-		disk.writeRequest(nextToRun.getSectorNumber(),nextToRun.getData(),nextToRun.getIndex());
-		nextToRun.getSemaphore().P();			
-		lock.release();
-		
-		
-	    }
 	    
 	    
 	    
+	 
 	    
 	}
     }

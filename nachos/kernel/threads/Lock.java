@@ -59,14 +59,14 @@ public class Lock {
      */
     public void acquire() {
 
-	Debug.printf('+', "Acquiring lock %s for thread %s\n",
-		name, NachosThread.currentThread().name);
+//	Debug.printf('+', "Acquiring lock %s for thread %s\n",
+//		name, NachosThread.currentThread().name);
 
 	sem.P();
 	owner = NachosThread.currentThread();
 
-	Debug.printf('+', "Acquired lock %s for thread %s\n",
-		name, NachosThread.currentThread().name);
+//	Debug.printf('+', "Acquired lock %s for thread %s\n",
+//		name, NachosThread.currentThread().name);
     }
 
     /**
