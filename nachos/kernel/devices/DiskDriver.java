@@ -136,7 +136,7 @@ public class DiskDriver {
 	    
 	    lock.release();
 	    disk.readRequest(first.getSectorNumber(), first.getData(), first.getIndex());
-	    semaphore.P();
+	    //semaphore.P();
 	    lock.acquire();
 	}
 
