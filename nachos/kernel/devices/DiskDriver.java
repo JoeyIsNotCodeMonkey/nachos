@@ -20,6 +20,7 @@ package nachos.kernel.devices;
 
 import nachos.Debug;
 import nachos.machine.Machine;
+import nachos.machine.NachosThread;
 import nachos.util.FIFOQueue;
 import nachos.util.Queue;
 import nachos.machine.CPU;
@@ -62,7 +63,6 @@ public class DiskDriver {
     private boolean busy = false;
 
     /* Count of the number of threads waiting for queue space. */
-    private int waitingThreads = 0;
 
     // IORB nextToRun;
 
@@ -82,10 +82,7 @@ public class DiskDriver {
 	lock = new Lock("synch disk lock");
 	disk = Machine.getDisk(unit);
 	disk.setHandler(new DiskIntHandler());
-    }
 
-    public Lock getLock() {
-	return lock;
     }
 
     /**
@@ -125,25 +122,18 @@ public class DiskDriver {
 
 	// queue work entry
 	semaphore = new Semaphore("synch disk" + count, 0);
-	count++;
 	IORB e = new IORB(sectorNumber, 0, data, index, semaphore);
-
 	workQueue.offer(e);
-	
-	if(!busy) {
-	    //busy = true;
+	count++;
+
+	if (!busy) {
+	    // busy = true;
 	    IORB first = workQueue.poll();
-	    
-	    lock.release();
-	    disk.readRequest(first.getSectorNumber(), first.getData(), first.getIndex());
-	    //semaphore.P();
-	    lock.acquire();
+
 	}
 
 	CPU.setLevel(oldLevel); // Enable bottom half.
 	lock.release(); // Allow other threads in top half.
-	
-	
 
     }
 
@@ -176,50 +166,49 @@ public class DiskDriver {
 	 */
 
 	public void handleInterrupt() {
-	    if(!busy) {
+	    if (!busy) {
 		busy = true;
-		return;
-	    }
-	    
-	    
-	    //startOutput();
-	    // Debug.println('+', "back");
-	    // if (!busy) {
-	    // busy = true;
-	    // }
-	    //
-	    // nextToRun.getSemaphore().V();
-	    //
-	    // nextToRun = workQueue.poll();
-	    //
-	    // if (nextToRun == null) {
-	    // busy = true;
-	    // return;
-	    // }
-	    // if (nextToRun.getFlag() == 0) {
-	    //
-	    // // Nachos.diskDriver.getLock().acquire();
-	    // // lock.acquire();
-	    // disk.readRequest(nextToRun.getSectorNumber(),
-	    // nextToRun.getData(), nextToRun.getIndex());
-	    // Debug.println('+', "here");
-	    // // nextToRun.getSemaphore().P();
-	    // // lock.release();
-	    // // Nachos.diskDriver.getLock().release();
-	    //
-	    // }
-	    //
-	    // else if (nextToRun.getFlag() == 1) {
-	    //
-	    // // Nachos.diskDriver.getLock().acquire();
-	    // disk.writeRequest(nextToRun.getSectorNumber(),
-	    // nextToRun.getData(), nextToRun.getIndex());
-	    // // nextToRun.getSemaphore().P();
-	    // // Nachos.diskDriver.getLock().release();
-	    //
-	    // }
 
+		// startOutput();
+		// Debug.println('+', "back");
+		// if (!busy) {
+		// busy = true;
+		// }
+		//
+		// nextToRun.getSemaphore().V();
+		//
+		// nextToRun = workQueue.poll();
+		//
+		// if (nextToRun == null) {
+		// busy = true;
+		// return;
+		// }
+		// if (nextToRun.getFlag() == 0) {
+		//
+		// // Nachos.diskDriver.getLock().acquire();
+		// // lock.acquire();
+		// disk.readRequest(nextToRun.getSectorNumber(),
+		// nextToRun.getData(), nextToRun.getIndex());
+		// Debug.println('+', "here");
+		// // nextToRun.getSemaphore().P();
+		// // lock.release();
+		// // Nachos.diskDriver.getLock().release();
+		//
+		// }
+		//
+		// else if (nextToRun.getFlag() == 1) {
+		//
+		// // Nachos.diskDriver.getLock().acquire();
+		// disk.writeRequest(nextToRun.getSectorNumber(),
+		// nextToRun.getData(), nextToRun.getIndex());
+		// // nextToRun.getSemaphore().P();
+		// // Nachos.diskDriver.getLock().release();
+		//
+		// }
+
+	    }
 	}
+
     }
 
 }
