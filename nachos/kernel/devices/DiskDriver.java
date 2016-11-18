@@ -128,7 +128,10 @@ public class DiskDriver {
 
 	if (!busy) {
 	    // busy = true;
+
 	    IORB first = workQueue.poll();
+	    disk.readRequest(first.getSectorNumber(), first.getData(),
+		    first.getIndex());
 
 	}
 
@@ -169,44 +172,45 @@ public class DiskDriver {
 	    if (!busy) {
 		busy = true;
 
-		// startOutput();
-		// Debug.println('+', "back");
-		// if (!busy) {
-		// busy = true;
-		// }
-		//
-		// nextToRun.getSemaphore().V();
-		//
-		// nextToRun = workQueue.poll();
-		//
-		// if (nextToRun == null) {
-		// busy = true;
-		// return;
-		// }
-		// if (nextToRun.getFlag() == 0) {
-		//
-		// // Nachos.diskDriver.getLock().acquire();
-		// // lock.acquire();
-		// disk.readRequest(nextToRun.getSectorNumber(),
-		// nextToRun.getData(), nextToRun.getIndex());
-		// Debug.println('+', "here");
-		// // nextToRun.getSemaphore().P();
-		// // lock.release();
-		// // Nachos.diskDriver.getLock().release();
-		//
-		// }
-		//
-		// else if (nextToRun.getFlag() == 1) {
-		//
-		// // Nachos.diskDriver.getLock().acquire();
-		// disk.writeRequest(nextToRun.getSectorNumber(),
-		// nextToRun.getData(), nextToRun.getIndex());
-		// // nextToRun.getSemaphore().P();
-		// // Nachos.diskDriver.getLock().release();
-		//
-		// }
-
 	    }
+
+	    // startOutput();
+	    // Debug.println('+', "back");
+	    // if (!busy) {
+	    // busy = true;
+	    // }
+	    //
+	    // nextToRun.getSemaphore().V();
+	    //
+	    // nextToRun = workQueue.poll();
+	    //
+	    // if (nextToRun == null) {
+	    // busy = true;
+	    // return;
+	    // }
+	    // if (nextToRun.getFlag() == 0) {
+	    //
+	    // // Nachos.diskDriver.getLock().acquire();
+	    // // lock.acquire();
+	    // disk.readRequest(nextToRun.getSectorNumber(),
+	    // nextToRun.getData(), nextToRun.getIndex());
+	    // Debug.println('+', "here");
+	    // // nextToRun.getSemaphore().P();
+	    // // lock.release();
+	    // // Nachos.diskDriver.getLock().release();
+	    //
+	    // }
+	    //
+	    // else if (nextToRun.getFlag() == 1) {
+	    //
+	    // // Nachos.diskDriver.getLock().acquire();
+	    // disk.writeRequest(nextToRun.getSectorNumber(),
+	    // nextToRun.getData(), nextToRun.getIndex());
+	    // // nextToRun.getSemaphore().P();
+	    // // Nachos.diskDriver.getLock().release();
+	    //
+	    // }
+
 	}
 
     }
