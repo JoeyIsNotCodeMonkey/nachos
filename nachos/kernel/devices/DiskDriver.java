@@ -22,23 +22,23 @@ import nachos.Debug;
 import nachos.machine.Machine;
 import nachos.util.FIFOQueue;
 import nachos.util.Queue;
+import nachos.machine.CPU;
 import nachos.machine.Disk;
 import nachos.machine.InterruptHandler;
 import nachos.kernel.threads.Semaphore;
 import nachos.kernel.Nachos;
 import nachos.kernel.threads.Lock;
 
-
 /**
- * This class defines a "synchronous" disk abstraction.
- * As with other I/O devices, the raw physical disk is an asynchronous
- * device -- requests to read or write portions of the disk return immediately,
- * and an interrupt occurs later to signal that the operation completed.
- * (Also, the physical characteristics of the disk device assume that
- * only one operation can be requested at a time).
+ * This class defines a "synchronous" disk abstraction. As with other I/O
+ * devices, the raw physical disk is an asynchronous device -- requests to read
+ * or write portions of the disk return immediately, and an interrupt occurs
+ * later to signal that the operation completed. (Also, the physical
+ * characteristics of the disk device assume that only one operation can be
+ * requested at a time).
  *
- * This driver provides the abstraction of "synchronous I/O":  any request
- * blocks the calling thread until the requested operation has finished.
+ * This driver provides the abstraction of "synchronous I/O": any request blocks
+ * the calling thread until the requested operation has finished.
  * 
  * @author Thomas Anderson (UC Berkeley), original C++ version
  * @author Peter Druschel (Rice University), Java translation
@@ -56,31 +56,36 @@ public class DiskDriver {
     private Lock lock;
 
     private int count;
-    
+
     private Queue<IORB> workQueue;
-    
-    private boolean first = true;
-    
-    Semaphore semaphoreFirst;
-    
+
+    private boolean busy = false;
+
+    /* Count of the number of threads waiting for queue space. */
+    private int waitingThreads = 0;
+
+    // IORB nextToRun;
+
+    // Semaphore semaphoreFirst;
+
     /**
      * Initialize the synchronous interface to the physical disk, in turn
      * initializing the physical disk.
      * 
-     * @param unit  The disk unit to be handled by this driver.
+     * @param unit
+     *            The disk unit to be handled by this driver.
      */
     public DiskDriver(int unit) {
 	workQueue = new FIFOQueue<IORB>();
-	count =0;
-	semaphoreFirst = new Semaphore("synch disk"+count, 0);
+	count = 0;
+	// semaphoreFirst = new Semaphore("synch disk"+count, 0);
 	lock = new Lock("synch disk lock");
 	disk = Machine.getDisk(unit);
 	disk.setHandler(new DiskIntHandler());
     }
-    
-    
+
     public Lock getLock() {
-        return lock;
+	return lock;
     }
 
     /**
@@ -102,52 +107,62 @@ public class DiskDriver {
     }
 
     /**
-     * Read the contents of a disk sector into a buffer.  Return only
-     *	after the data has been read.
+     * Read the contents of a disk sector into a buffer. Return only after the
+     * data has been read.
      *
-     * @param sectorNumber The disk sector to read.
-     * @param data The buffer to hold the contents of the disk sector.
-     * @param index Offset in the buffer at which to place the data.
+     * @param sectorNumber
+     *            The disk sector to read.
+     * @param data
+     *            The buffer to hold the contents of the disk sector.
+     * @param index
+     *            Offset in the buffer at which to place the data.
      */
     public void readSector(int sectorNumber, byte[] data, int index) {
 	Debug.ASSERT(0 <= sectorNumber && sectorNumber < getNumSectors());
-	
-	
-	
-	//queue work entry
-	semaphore = new Semaphore("synch disk"+count, 0);
-	IORB e = new IORB(sectorNumber,0,data,index,semaphore);
-	workQueue.offer(e);
+
+	lock.acquire();
+	int oldLevel = CPU.setLevel(CPU.IntOff); // Disable bottom half
+
+	// queue work entry
+	semaphore = new Semaphore("synch disk" + count, 0);
 	count++;
+	IORB e = new IORB(sectorNumber, 0, data, index, semaphore);
+
+	workQueue.offer(e);
 	
-	
-	if(first){
-	    lock.acquire();			// only one disk I/O at a time
-	    byte[] data2 = new byte[1000];
-	    disk.readRequest(0, data2, 0);
-	    semaphoreFirst.P();			// wait for interrupt
+	if(!busy) {
+	    //busy = true;
+	    IORB first = workQueue.poll();
+	    
 	    lock.release();
-	    Debug.print('+', "Lock Released*********");
+	    disk.readRequest(first.getSectorNumber(), first.getData(), first.getIndex());
+	    semaphore.P();
+	    lock.acquire();
 	}
 
+	CPU.setLevel(oldLevel); // Enable bottom half.
+	lock.release(); // Allow other threads in top half.
 	
-	semaphore.P();
 	
+
     }
 
     /**
-     * Write the contents of a buffer into a disk sector.  Return only
-     *	after the data has been written.
+     * Write the contents of a buffer into a disk sector. Return only after the
+     * data has been written.
      *
-     * @param sectorNumber The disk sector to be written.
-     * @param data The new contents of the disk sector.
-     * @param index Offset in the buffer from which to get the data.
+     * @param sectorNumber
+     *            The disk sector to be written.
+     * @param data
+     *            The new contents of the disk sector.
+     * @param index
+     *            Offset in the buffer from which to get the data.
      */
     public void writeSector(int sectorNumber, byte[] data, int index) {
 	Debug.ASSERT(0 <= sectorNumber && sectorNumber < getNumSectors());
-	lock.acquire();			// only one disk I/O at a time
+	lock.acquire(); // only one disk I/O at a time
 	disk.writeRequest(sectorNumber, data, index);
-	semaphore.P();			// wait for interrupt
+	semaphore.P(); // wait for interrupt
 	lock.release();
     }
 
@@ -156,55 +171,53 @@ public class DiskDriver {
      */
     private class DiskIntHandler implements InterruptHandler {
 	/**
-	 * When the disk interrupts, just wake up the thread that issued
-	 * the request that just finished.
+	 * When the disk interrupts, just wake up the thread that issued the
+	 * request that just finished.
 	 */
-	
-	IORB nextToRun;
-	 
+
 	public void handleInterrupt() {
-
-	    Debug.println('+', "back");
-	    if(first){
-		first=false;
-		semaphoreFirst.V();
-	    }else{
-		nextToRun.getSemaphore().V();
-	    }
-
-	    
-	    nextToRun = workQueue.poll();
-	    
-	    if(nextToRun==null){
-		first=true;
+	    if(!busy) {
+		busy = true;
 		return;
 	    }
-	    if(nextToRun.getFlag()==0){
-		
-		Nachos.diskDriver.getLock().acquire();
-		//lock.acquire();
-		disk.readRequest(nextToRun.getSectorNumber(),nextToRun.getData(),nextToRun.getIndex());
-		Debug.println('+', "here");
-		//nextToRun.getSemaphore().P();			
-		//lock.release();
-		Nachos.diskDriver.getLock().release();
-		
-		
-	    }
-	    
-	    else if(nextToRun.getFlag()==1){
-		
-		Nachos.diskDriver.getLock().acquire();		
-		disk.writeRequest(nextToRun.getSectorNumber(),nextToRun.getData(),nextToRun.getIndex());
-		//nextToRun.getSemaphore().P();			
-		Nachos.diskDriver.getLock().release();
-		
-		
-	    }
+	    //startOutput();
+	    // Debug.println('+', "back");
+	    // if (!busy) {
+	    // busy = true;
+	    // }
+	    //
+	    // nextToRun.getSemaphore().V();
+	    //
+	    // nextToRun = workQueue.poll();
+	    //
+	    // if (nextToRun == null) {
+	    // busy = true;
+	    // return;
+	    // }
+	    // if (nextToRun.getFlag() == 0) {
+	    //
+	    // // Nachos.diskDriver.getLock().acquire();
+	    // // lock.acquire();
+	    // disk.readRequest(nextToRun.getSectorNumber(),
+	    // nextToRun.getData(), nextToRun.getIndex());
+	    // Debug.println('+', "here");
+	    // // nextToRun.getSemaphore().P();
+	    // // lock.release();
+	    // // Nachos.diskDriver.getLock().release();
+	    //
+	    // }
+	    //
+	    // else if (nextToRun.getFlag() == 1) {
+	    //
+	    // // Nachos.diskDriver.getLock().acquire();
+	    // disk.writeRequest(nextToRun.getSectorNumber(),
+	    // nextToRun.getData(), nextToRun.getIndex());
+	    // // nextToRun.getSemaphore().P();
+	    // // Nachos.diskDriver.getLock().release();
+	    //
+	    // }
 
-	   	    
 	}
     }
-
 
 }
