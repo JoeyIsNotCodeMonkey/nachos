@@ -279,6 +279,7 @@ loadave, 0.16175
 0.0,0
 0.0,0
 0.0,0
+<<<<<<< HEAD
 0.0,0
 0.0,0
 0.0,0
@@ -308,3 +309,5 @@ loadave, 0.16175
 0.0,0
 0.0,0
 0.0,0
+=======
+>>>>>>> branch 'HW4' of https://github.com/JoeyIsNotCodeMonkey/nachos.git
