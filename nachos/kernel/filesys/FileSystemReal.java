@@ -117,6 +117,8 @@ class FileSystemReal extends FileSystem {
 
   /** "Root" directory -- list of file names, represented as a file. */
   private final OpenFile directoryFile;
+  
+  public static FileHeader fileHeaderTable[] = new FileHeader[10];
 
   /**
    * Initialize the file system.  If format = true, the disk has
@@ -280,6 +282,8 @@ class FileSystemReal extends FileSystem {
 	  hdr.writeBack(sector); 		
 	  directory.writeBack(directoryFile);
 	  freeMap.writeBack(freeMapFile);
+	  
+	  //add to File Head table
 	}
       }
     }

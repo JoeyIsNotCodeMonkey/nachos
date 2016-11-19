@@ -62,6 +62,9 @@ class OpenFileReal implements OpenFile {
     OpenFileReal(int sector, FileSystemReal filesystem) { 
 	hdr = new FileHeader(filesystem);
 	hdr.fetchFrom(sector);
+	
+	//add to File header table
+	
 	seekPosition = 0;
 	this.filesystem = filesystem;
 	diskSectorSize = filesystem.diskSectorSize;

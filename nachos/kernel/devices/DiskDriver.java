@@ -67,6 +67,8 @@ public class DiskDriver {
     int waitingThread = 0;
 
     private Queue<IORB> workQueue = new FIFOQueue<IORB>();
+    
+    private boolean wait = false;
 
     /**
      * Initialize the synchronous interface to the physical disk, in turn
@@ -141,7 +143,12 @@ public class DiskDriver {
 	IORB work = new IORB(sectorNumber, 0, data, index,
 		new Semaphore("work" + count++, 0));
 	workQueue.offer(work);
-	Collections.sort((LinkedList<IORB>) workQueue, new CustomComparator());
+	if(!wait) {
+	    Collections.sort((LinkedList<IORB>) workQueue, new CustomComparator());
+	}
+	
+	if(sectorNumber == disk.geometry.NumSectors - 1) wait = true;
+	
 
 	Debug.println('+', "workQueue size: " + workQueue.size());
 	
@@ -171,11 +178,13 @@ public class DiskDriver {
 	    return;
 	}
 	    
-	   
+	   	
 
 	//Debug.println('+', "Not null********");
 	disk.readRequest(t.getSectorNumber(), t.getData(), t.getIndex());
 	busy = true;
+	
+	if(t.getSectorNumber() == disk.geometry.NumSectors - 1) wait = false;
     }
 
     public static class CustomComparator implements Comparator<IORB> {
@@ -183,7 +192,7 @@ public class DiskDriver {
 	@Override
 	public int compare(IORB o1, IORB o2) {
 
-	    return o1.getCylinder() - o2.getCylinder();
+	    return o1.getSectorNumber() - o2.getSectorNumber();
 	}
 
     }
