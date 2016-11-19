@@ -4,6 +4,7 @@ import nachos.kernel.threads.Semaphore;
 
 public class IORB {
     private int sectorNumber;
+    private int cylinder;
     private int flag; // 0->read, 1->write
     private byte[] data;
     private int index;
@@ -12,6 +13,7 @@ public class IORB {
     public IORB(int sectorNumber, int flag, byte[] data, int index,
 	    Semaphore semaphore) {
 	this.sectorNumber = sectorNumber;
+	cylinder = sectorNumber % 32;
 	this.flag = flag;
 	this.data = data;
 	this.index = index;
@@ -58,5 +60,9 @@ public class IORB {
         this.semaphore = semaphore;
     }
     
+    public int getCylinder() {
+        return cylinder;
+    }
+
     
 }

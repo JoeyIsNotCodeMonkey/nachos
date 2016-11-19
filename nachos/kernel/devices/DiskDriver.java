@@ -18,6 +18,10 @@
 
 package nachos.kernel.devices;
 
+import java.util.Collections;
+import java.util.Comparator;
+import java.util.LinkedList;
+
 import nachos.Debug;
 import nachos.machine.Machine;
 import nachos.machine.NachosThread;
@@ -27,7 +31,8 @@ import nachos.machine.CPU;
 import nachos.machine.Disk;
 import nachos.machine.InterruptHandler;
 import nachos.kernel.threads.Semaphore;
-import nachos.kernel.Nachos;
+import nachos.kernel.userprog.UserThread;
+import nachos.kernel.userprog.SPN.CustomComparator;
 import nachos.kernel.threads.Lock;
 
 /**
@@ -50,23 +55,21 @@ public class DiskDriver {
     /** Raw disk device. */
     private Disk disk;
 
+    IORB t;
+
     /** To synchronize requesting thread with the interrupt handler. */
     private Semaphore semaphore;
 
     /** Only one read/write request can be sent to the disk at a time. */
     private Lock lock;
 
-    private int count;
-
-    private Queue<IORB> workQueue;
-
     private boolean busy = false;
 
-    /* Count of the number of threads waiting for queue space. */
+    int count = 0;
 
-    // IORB nextToRun;
+    int waitingThread = 0;
 
-    // Semaphore semaphoreFirst;
+    private Queue<IORB> workQueue = new FIFOQueue<IORB>();
 
     /**
      * Initialize the synchronous interface to the physical disk, in turn
@@ -76,9 +79,9 @@ public class DiskDriver {
      *            The disk unit to be handled by this driver.
      */
     public DiskDriver(int unit) {
-	workQueue = new FIFOQueue<IORB>();
-	count = 0;
-	// semaphoreFirst = new Semaphore("synch disk"+count, 0);
+
+	semaphore = new Semaphore("synch disk", 0);
+
 	lock = new Lock("synch disk lock");
 	disk = Machine.getDisk(unit);
 	disk.setHandler(new DiskIntHandler());
@@ -104,43 +107,6 @@ public class DiskDriver {
     }
 
     /**
-     * Read the contents of a disk sector into a buffer. Return only after the
-     * data has been read.
-     *
-     * @param sectorNumber
-     *            The disk sector to read.
-     * @param data
-     *            The buffer to hold the contents of the disk sector.
-     * @param index
-     *            Offset in the buffer at which to place the data.
-     */
-    public void readSector(int sectorNumber, byte[] data, int index) {
-	Debug.ASSERT(0 <= sectorNumber && sectorNumber < getNumSectors());
-
-	lock.acquire();
-	int oldLevel = CPU.setLevel(CPU.IntOff); // Disable bottom half
-
-	// queue work entry
-	semaphore = new Semaphore("synch disk" + count, 0);
-	IORB e = new IORB(sectorNumber, 0, data, index, semaphore);
-	workQueue.offer(e);
-	count++;
-
-	if (!busy) {
-	    // busy = true;
-
-	    IORB first = workQueue.poll();
-	    disk.readRequest(first.getSectorNumber(), first.getData(),
-		    first.getIndex());
-
-	}
-
-	CPU.setLevel(oldLevel); // Enable bottom half.
-	lock.release(); // Allow other threads in top half.
-
-    }
-
-    /**
      * Write the contents of a buffer into a disk sector. Return only after the
      * data has been written.
      *
@@ -160,6 +126,71 @@ public class DiskDriver {
     }
 
     /**
+     * Read the contents of a disk sector into a buffer. Return only after the
+     * data has been read.
+     *
+     * @param sectorNumber
+     *            The disk sector to read.
+     * @param data
+     *            The buffer to hold the contents of the disk sector.
+     * @param index
+     *            Offset in the buffer at which to place the data.
+     */
+    public void readSector(int sectorNumber, byte[] data, int index) {
+	Debug.ASSERT(0 <= sectorNumber && sectorNumber < getNumSectors());
+	lock.acquire();
+	int oldLevel = CPU.setLevel(CPU.IntOff);
+
+	IORB work = new IORB(sectorNumber, 0, data, index,
+		new Semaphore("work" + count++, 0));
+
+	workQueue.offer(work);
+	Collections.sort((LinkedList<IORB>) workQueue, new CustomComparator());
+
+	Debug.println('+', "workQueue size: " + workQueue.size());
+
+	if (busy) {
+	    // Debug.println('+', "inside busy");
+	    lock.release();
+	    work.getSemaphore().P();
+	    lock.acquire();
+	}
+
+	startOutput();
+
+	CPU.setLevel(oldLevel);
+	lock.release();
+    }
+
+    private void startOutput() {
+	if (busy)
+	    return;
+
+	if (t != null)
+	    t.getSemaphore().V();
+
+	t = workQueue.poll();
+	if (t == null) {
+	    Debug.println('+', "t is null********");
+	    return;
+	}
+
+	// Debug.println('+', "Not null********");
+	disk.readRequest(t.getSectorNumber(), t.getData(), t.getIndex());
+	busy = true;
+    }
+
+    public static class CustomComparator implements Comparator<IORB> {
+
+	@Override
+	public int compare(IORB o1, IORB o2) {
+
+	    return o1.getCylinder() - o2.getCylinder();
+	}
+
+    }
+
+    /**
      * DiskDriver interrupt handler class.
      */
     private class DiskIntHandler implements InterruptHandler {
@@ -167,50 +198,10 @@ public class DiskDriver {
 	 * When the disk interrupts, just wake up the thread that issued the
 	 * request that just finished.
 	 */
-
 	public void handleInterrupt() {
-	    if (!busy) {
-		busy = true;
-
-	    }
-
-	    // startOutput();
-	    // Debug.println('+', "back");
-	    // if (!busy) {
-	    // busy = true;
-	    // }
-	    //
-	    // nextToRun.getSemaphore().V();
-	    //
-	    // nextToRun = workQueue.poll();
-	    //
-	    // if (nextToRun == null) {
-	    // busy = true;
-	    // return;
-	    // }
-	    // if (nextToRun.getFlag() == 0) {
-	    //
-	    // // Nachos.diskDriver.getLock().acquire();
-	    // // lock.acquire();
-	    // disk.readRequest(nextToRun.getSectorNumber(),
-	    // nextToRun.getData(), nextToRun.getIndex());
-	    // Debug.println('+', "here");
-	    // // nextToRun.getSemaphore().P();
-	    // // lock.release();
-	    // // Nachos.diskDriver.getLock().release();
-	    //
-	    // }
-	    //
-	    // else if (nextToRun.getFlag() == 1) {
-	    //
-	    // // Nachos.diskDriver.getLock().acquire();
-	    // disk.writeRequest(nextToRun.getSectorNumber(),
-	    // nextToRun.getData(), nextToRun.getIndex());
-	    // // nextToRun.getSemaphore().P();
-	    // // Nachos.diskDriver.getLock().release();
-	    //
-	    // }
-
+	    busy = false;
+	    // Debug.println('+', "herererererererererer");
+	    startOutput();
 	}
 
     }
