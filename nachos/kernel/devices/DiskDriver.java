@@ -118,9 +118,31 @@ public class DiskDriver {
      */
     public void writeSector(int sectorNumber, byte[] data, int index) {
 	Debug.ASSERT(0 <= sectorNumber && sectorNumber < getNumSectors());
-	lock.acquire(); // only one disk I/O at a time
-	disk.writeRequest(sectorNumber, data, index);
-	semaphore.P(); // wait for interrupt
+	lock.acquire();
+	int oldLevel = CPU.setLevel(CPU.IntOff);
+
+	IORB work = new IORB(sectorNumber, 0, data, index,
+		new Semaphore("work" + count++, 0));
+	workQueue.offer(work);
+	if(!wait) {
+	    Collections.sort((LinkedList<IORB>) workQueue, new CustomComparator());
+	}
+	
+	if(sectorNumber == disk.geometry.NumSectors - 1) wait = true;
+	
+
+	Debug.println('+', "workQueue size: " + workQueue.size());
+	
+	if (busy) {
+	    //Debug.println('+', "inside busy");
+	    lock.release();
+	    work.getSemaphore().P();
+	    lock.acquire();
+	}
+
+	startOutput();
+
+	CPU.setLevel(oldLevel);
 	lock.release();
     }
 
@@ -181,7 +203,12 @@ public class DiskDriver {
 	   	
 
 	//Debug.println('+', "Not null********");
-	disk.readRequest(t.getSectorNumber(), t.getData(), t.getIndex());
+	if(t.getFlag() == 0) {
+	    disk.readRequest(t.getSectorNumber(), t.getData(), t.getIndex());
+	} else {
+	    disk.writeRequest(t.getSectorNumber(), t.getData(), t.getIndex());
+	}
+	
 	busy = true;
 	
 	if(t.getSectorNumber() == disk.geometry.NumSectors - 1) wait = false;

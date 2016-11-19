@@ -11,6 +11,7 @@
 package nachos.kernel.filesys;
 
 import nachos.Debug;
+import nachos.kernel.threads.Semaphore;
 
 /**
  * This class defines the Nachos "file header" (in UNIX terms,  
@@ -66,6 +67,12 @@ class FileHeader {
 
     /** Disk sector size for the underlying filesystem. */
     private final int diskSectorSize;
+    
+    private Semaphore sem;
+
+    
+
+
 
     /**
      * Allocate a new "in-core" file header.
@@ -84,6 +91,18 @@ class FileHeader {
 	for(int i = 0; i < NumDirect; i++)
 	    dataSectors[i] = -1;
     }
+    
+    public Semaphore getSem() {
+        return sem;
+    }
+
+
+
+    public void setSem(Semaphore sem) {
+        this.sem = sem;
+    }
+    
+    
 
     // the following methods deal with conversion between the on-disk and
     // the in-memory representation of a DirectoryEnry.

@@ -11,6 +11,7 @@
 package nachos.kernel.filesys;
 
 import nachos.Debug;
+import nachos.kernel.threads.Semaphore;
 
 /**
  * This is a class for managing an open Nachos file.  As in UNIX, a
@@ -49,6 +50,8 @@ class OpenFileReal implements OpenFile {
 
     /** Current position within the file. */
     private int seekPosition;
+    
+    private int currentSector;
 
     /**
      * Open a Nachos file for reading and writing.  Bring the file header
@@ -63,8 +66,8 @@ class OpenFileReal implements OpenFile {
 	hdr = new FileHeader(filesystem);
 	hdr.fetchFrom(sector);
 	
-	//add to File header table
-	
+	currentSector = sector;
+		
 	seekPosition = 0;
 	this.filesystem = filesystem;
 	diskSectorSize = filesystem.diskSectorSize;
@@ -93,8 +96,13 @@ class OpenFileReal implements OpenFile {
      * @return The number of bytes actually read (0 if error).
      */
     public int read(byte[] into, int index, int numBytes) {
+	FileSystemReal.fileHeaderTable.get(currentSector).getSem().P();
+	
 	int result = readAt(into, index, numBytes, seekPosition);
 	seekPosition += result;
+	
+	FileSystemReal.fileHeaderTable.get(currentSector).getSem().V();
+	
 	return result;
     }
 
@@ -111,8 +119,13 @@ class OpenFileReal implements OpenFile {
      * @return The number of bytes actually written (0 if error).
      */
     public int write(byte[] from, int index, int numBytes) {
+	FileSystemReal.fileHeaderTable.get(currentSector).getSem().P();
+	
 	int result = writeAt(from, index, numBytes, seekPosition);
 	seekPosition += result;
+	
+	FileSystemReal.fileHeaderTable.get(currentSector).getSem().V();
+	
 	return result;
     }
 
