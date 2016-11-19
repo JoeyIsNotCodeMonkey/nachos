@@ -24,15 +24,12 @@ import java.util.LinkedList;
 
 import nachos.Debug;
 import nachos.machine.Machine;
-import nachos.machine.NachosThread;
 import nachos.util.FIFOQueue;
 import nachos.util.Queue;
 import nachos.machine.CPU;
 import nachos.machine.Disk;
 import nachos.machine.InterruptHandler;
 import nachos.kernel.threads.Semaphore;
-import nachos.kernel.userprog.UserThread;
-import nachos.kernel.userprog.SPN.CustomComparator;
 import nachos.kernel.threads.Lock;
 
 /**
@@ -143,14 +140,13 @@ public class DiskDriver {
 
 	IORB work = new IORB(sectorNumber, 0, data, index,
 		new Semaphore("work" + count++, 0));
-
 	workQueue.offer(work);
 	Collections.sort((LinkedList<IORB>) workQueue, new CustomComparator());
 
 	Debug.println('+', "workQueue size: " + workQueue.size());
-
+	
 	if (busy) {
-	    // Debug.println('+', "inside busy");
+	    //Debug.println('+', "inside busy");
 	    lock.release();
 	    work.getSemaphore().P();
 	    lock.acquire();
@@ -170,12 +166,14 @@ public class DiskDriver {
 	    t.getSemaphore().V();
 
 	t = workQueue.poll();
-	if (t == null) {
+	if (t == null){
 	    Debug.println('+', "t is null********");
 	    return;
 	}
+	    
+	   
 
-	// Debug.println('+', "Not null********");
+	//Debug.println('+', "Not null********");
 	disk.readRequest(t.getSectorNumber(), t.getData(), t.getIndex());
 	busy = true;
     }
@@ -200,7 +198,7 @@ public class DiskDriver {
 	 */
 	public void handleInterrupt() {
 	    busy = false;
-	    // Debug.println('+', "herererererererererer");
+	    //Debug.println('+', "herererererererererer");
 	    startOutput();
 	}
 
