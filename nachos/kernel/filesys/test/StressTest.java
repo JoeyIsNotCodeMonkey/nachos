@@ -1,12 +1,3 @@
-// FileSystemTest.java
-//	Simple test routines for the file system.  
-//
-// Copyright (c) 1992-1993 The Regents of the University of California.
-// Copyright (c) 1998 Rice University.
-// Copyright (c) 2003 State University of New York at Stony Brook.
-// All rights reserved.  See the COPYRIGHT file for copyright notice and 
-// limitation of liability and disclaimer of warranty provisions.
-
 package nachos.kernel.filesys.test;
 
 import java.io.File;
@@ -14,25 +5,12 @@ import java.io.FileInputStream;
 import java.io.IOException;
 
 import nachos.Debug;
-import nachos.Options;
-import nachos.machine.NachosThread;
-import nachos.machine.Simulation;
 import nachos.kernel.Nachos;
 import nachos.kernel.filesys.OpenFile;
+import nachos.machine.NachosThread;
+import nachos.machine.Simulation;
 
-/**
- * This class implements some simple test routines for the file system. We
- * implement: Copy -- copy a file from UNIX to Nachos; Print -- cat the contents
- * of a Nachos file; Perftest -- a stress test for the Nachos file system read
- * and write a really large file in tiny chunks (won't work on baseline
- * system!).
- *
- * @author Thomas Anderson (UC Berkeley), original C++ version
- * @author Peter Druschel (Rice University), Java translation
- * @author Eugene W. Stark (Stony Brook University)
- */
-public class FileSystemTest implements Runnable {
-
+public class StressTest implements Runnable{
     /** Transfer data in small chunks, just to be difficult. */
     private static final int TransferSize = 10;
 
@@ -137,17 +115,7 @@ public class FileSystemTest implements Runnable {
 	Simulation.stats.print();
     }
     
-    private void stressTest() {
-//	for(int i=0; i<10; i++) {
-//	    Nachos.fileSystem.create("ttttest"+i, 256);
-//	    Debug.println('+', "creating...");
-//	}
-	
-	
-	
-	
-	
-    }
+
 
     /** Name of the file to create for the performance test. */
     private static final String FileName = "TestFile";
@@ -238,87 +206,28 @@ public class FileSystemTest implements Runnable {
 		return false;
 	return true;
     }
-
-    /**
-     * Entry point for the filesystem test thread. What the test actually does
-     * is controlled by program arguments: -cp <hostfile> <nachosfile> copy a
-     * file from the host system to Nachos -p <nachosfile> print a Nachos file
-     * -r <nachosfile> remove a Nachos file -l list Nachos directory -D print
-     * entire filesystem contents -t performance test
-     * 
-     * Note also that the -f argument is used by the Nachos filesystem to
-     * determine whether the disk should be formatted as part of filesystem
-     * initialization.
-     */
+    @Override
     public void run() {
-	Nachos.options
-		.processOptions(new Options.Spec[] { new Options.Spec("-cp", // copy
-									     // from
-									     // UNIX
-									     // to
-									     // Nachos
-			new Class[] { String.class, String.class },
-			"Usage: -cp <filename1> <filename2>",
-			new Options.Action() {
-			    public void processOption(String flag,
-				    Object[] params) {
-				copy((String) params[0], (String) params[1]);
-			    }
-			}),
-			new Options.Spec("-p", // print a Nachos file
-				new Class[] { String.class },
-				"Usage: -p <filename>", new Options.Action() {
-				    public void processOption(String flag,
-					    Object[] params) {
-					print((String) params[0]);
-				    }
-				}),
-			new Options.Spec("-r", // remove a Nachos file
-				new Class[] { String.class },
-				"Usage: -p <filename>", new Options.Action() {
-				    public void processOption(String flag,
-					    Object[] params) {
-					Nachos.fileSystem
-						.remove((String) params[0]);
-				    }
-				}),
-			new Options.Spec("-l", // list Nachos directory
-				new Class[] {}, null, new Options.Action() {
-				    public void processOption(String flag,
-					    Object[] params) {
-					Nachos.fileSystem.list();
-				    }
-				}),
-			new Options.Spec("-D", // print entire filesystem
-				new Class[] {}, null, new Options.Action() {
-				    public void processOption(String flag,
-					    Object[] params) {
-					Nachos.fileSystem.print();
-				    }
-				}),
-			new Options.Spec("-t", // performance test
-				new Class[] {}, null, new Options.Action() {
-				    public void processOption(String flag,
-					    Object[] params) {
-					performanceTest();
-				    }
-				}),
-			new Options.Spec("-s", // stress test
-				new Class[] {}, null, new Options.Action() {
-				    public void processOption(String flag,
-					    Object[] params) {
-					stressTest();
-				    }
-				}) });
+	// TODO Auto-generated method stub
+	performanceTest();
 	Nachos.scheduler.finishThread();
+	
+    }
+    
+    public static void start() {
+	NachosThread thread1 = new NachosThread("Stress test1",
+		new StressTest());	
+	NachosThread thread2 = new NachosThread("Stress test2",
+		new StressTest());
+//	NachosThread thread3 = new NachosThread("Stress test3",
+//		new StressTest());
+//	NachosThread thread4 = new NachosThread("Stress test4",
+//		new StressTest());
+//	
+	Nachos.scheduler.readyToRun(thread1);
+	Nachos.scheduler.readyToRun(thread2);
+//	Nachos.scheduler.readyToRun(thread3);
+//	Nachos.scheduler.readyToRun(thread4);
     }
 
-    /**
-     * Entry point for the FileSystem test.
-     */
-    public static void start() {
-	NachosThread thread = new NachosThread("Filesystem test",
-		new FileSystemTest());
-	Nachos.scheduler.readyToRun(thread);
-    }
 }
