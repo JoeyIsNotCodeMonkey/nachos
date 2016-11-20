@@ -376,6 +376,8 @@ class FileSystemReal extends FileSystem {
 
 	freeMap.writeBack(freeMapFile); // flush to disk
 	directory.writeBack(directoryFile); // flush to disk
+	
+	fileHeaderTable.remove(sector);
 	return true;
     }
 
