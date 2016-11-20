@@ -121,9 +121,12 @@ public class DiskDriver {
 	lock.acquire();
 	int oldLevel = CPU.setLevel(CPU.IntOff);
 
-	IORB work = new IORB(sectorNumber, 0, data, index,
+	IORB work = new IORB(sectorNumber, 1, data, index,
 		new Semaphore("work" + count++, 0));
 	workQueue.offer(work);
+	
+	
+	
 	if(!wait) {
 	    Collections.sort((LinkedList<IORB>) workQueue, new CustomComparator());
 	}
@@ -131,10 +134,10 @@ public class DiskDriver {
 	if(sectorNumber == disk.geometry.NumSectors - 1) wait = true;
 	
 
-	Debug.println('+', "workQueue size: " + workQueue.size());
+	//Debug.println('+', "workQueue size: " + workQueue.size());
 	
 	if (busy) {
-	    //Debug.println('+', "inside busy");
+	   // Debug.println('+', "inside busy- write");
 	    lock.release();
 	    work.getSemaphore().P();
 	    lock.acquire();
@@ -165,6 +168,8 @@ public class DiskDriver {
 	IORB work = new IORB(sectorNumber, 0, data, index,
 		new Semaphore("work" + count++, 0));
 	workQueue.offer(work);
+	
+	
 	if(!wait) {
 	    Collections.sort((LinkedList<IORB>) workQueue, new CustomComparator());
 	}
@@ -175,12 +180,13 @@ public class DiskDriver {
 	//Debug.println('+', "workQueue size: " + workQueue.size());
 	
 	if (busy) {
-	    //Debug.println('+', "inside busy");
+	 //   Debug.println('+', "inside busy");
 	    lock.release();
 	    work.getSemaphore().P();
 	    lock.acquire();
 	}
-
+	
+	
 	startOutput();
 
 	CPU.setLevel(oldLevel);

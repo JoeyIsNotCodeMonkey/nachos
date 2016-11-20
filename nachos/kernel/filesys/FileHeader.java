@@ -180,7 +180,11 @@ class FileHeader {
      */
     void fetchFrom(int sector) {
 	byte buffer[] = new byte[diskSectorSize];
+	
+	
+	
 	filesystem.readSector(sector, buffer, 0);
+	//Debug.println('+', "***************readSector" + sector);
 	internalize(buffer, 0);
     }
 
@@ -192,7 +196,10 @@ class FileHeader {
     void writeBack(int sector) {
 	byte buffer[] = new byte[diskSectorSize];
 	externalize(buffer, 0);
+	
+	
 	filesystem.writeSector(sector, buffer, 0); 
+	//Debug.println('+', "**************writeSector" + sector);
     }
 
     /**

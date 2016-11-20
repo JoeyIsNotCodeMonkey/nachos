@@ -15,6 +15,7 @@ import java.util.ArrayList;
 import nachos.Debug;
 import nachos.kernel.devices.DiskDriver;
 import nachos.kernel.threads.Semaphore;
+import nachos.machine.Disk;
 
 /**
  * This class manages the overall operation of the file system. It implements
@@ -111,7 +112,7 @@ class FileSystemReal extends FileSystem {
     private final OpenFile directoryFile;
 
     // public static FileHeader fileHeaderTable[] = new FileHeader[10];
-    public static ArrayList<FileHeader> fileHeaderTable = new ArrayList<FileHeader>();
+    public static FileHeader[] fileHeaderTable;
 
     /**
      * Initialize the file system. If format = true, the disk has nothing on it,
@@ -135,6 +136,8 @@ class FileSystemReal extends FileSystem {
 	FreeMapFileSize = (numDiskSectors / BitMap.BitsInByte);
 	DirectoryFileSize = (DirectoryEntry.sizeOf() * NumDirEntries);
 
+	fileHeaderTable = new FileHeader[numDiskSectors];
+	
 	if (format) {
 	    BitMap freeMap = new BitMap(numDiskSectors);
 	    Directory directory = new Directory(NumDirEntries, this);
@@ -202,13 +205,14 @@ class FileSystemReal extends FileSystem {
 	hdr.fetchFrom(FreeMapSector);
 	hdr.setSem(new Semaphore(
 		"fileHeaderLock" + FreeMapSector, 1));
-	fileHeaderTable.add(FreeMapSector, hdr);
+	fileHeaderTable[FreeMapSector] = hdr;
 
 	hdr = new FileHeader(this);
 	hdr.fetchFrom(DirectorySector);
 	hdr.setSem(new Semaphore(
 		"fileHeaderLock" + DirectorySector, 1));
-	fileHeaderTable.add(DirectorySector, hdr);
+	fileHeaderTable[DirectorySector] = hdr;
+	
     }
 
     /**
@@ -301,7 +305,8 @@ class FileSystemReal extends FileSystem {
 
 		    // add to File Head table
 		    hdr.setSem(new Semaphore("fileHeaderLock"+ sector, 1));
-		    fileHeaderTable.add(sector, hdr);
+		
+		    fileHeaderTable[sector] = hdr;
 		}
 	    }
 	}
@@ -324,12 +329,13 @@ class FileSystemReal extends FileSystem {
 	directory.fetchFrom(directoryFile);
 	sector = directory.find(name);
 	if (sector >= 0) {
-	    if(fileHeaderTable.get(sector) == null) {
+	    if(fileHeaderTable[sector] == null) {
 		// add to File Head table
 		FileHeader hdr = new FileHeader(this);
 		hdr.fetchFrom(sector);
 		hdr.setSem(new Semaphore("fileHeaderLock"+ sector, 1));
-		fileHeaderTable.add(sector, hdr);
+
+		 fileHeaderTable[sector] = hdr;
 	    }
 	    
 	    
@@ -377,7 +383,7 @@ class FileSystemReal extends FileSystem {
 	freeMap.writeBack(freeMapFile); // flush to disk
 	directory.writeBack(directoryFile); // flush to disk
 	
-	fileHeaderTable.remove(sector);
+	fileHeaderTable[sector] = null;
 	return true;
     }
 

@@ -96,12 +96,12 @@ class OpenFileReal implements OpenFile {
      * @return The number of bytes actually read (0 if error).
      */
     public int read(byte[] into, int index, int numBytes) {
-	FileSystemReal.fileHeaderTable.get(currentSector).getSem().P();
+	FileSystemReal.fileHeaderTable[currentSector].getSem().P();
 	
 	int result = readAt(into, index, numBytes, seekPosition);
 	seekPosition += result;
 	
-	FileSystemReal.fileHeaderTable.get(currentSector).getSem().V();
+	FileSystemReal.fileHeaderTable[currentSector].getSem().V();
 	
 	return result;
     }
@@ -119,12 +119,12 @@ class OpenFileReal implements OpenFile {
      * @return The number of bytes actually written (0 if error).
      */
     public int write(byte[] from, int index, int numBytes) {
-	FileSystemReal.fileHeaderTable.get(currentSector).getSem().P();
+	FileSystemReal.fileHeaderTable[currentSector].getSem().P();
 	
 	int result = writeAt(from, index, numBytes, seekPosition);
 	seekPosition += result;
 	
-	FileSystemReal.fileHeaderTable.get(currentSector).getSem().V();
+	FileSystemReal.fileHeaderTable[currentSector].getSem().V();
 	
 	return result;
     }
