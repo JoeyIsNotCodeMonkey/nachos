@@ -126,15 +126,15 @@ public class DiskDriver {
 	workQueue.offer(work);
 	
 	
-	
-	if(!wait) {
-	    Collections.sort((LinkedList<IORB>) workQueue, new CustomComparator());
-	}
-	
-	if(sectorNumber == disk.geometry.NumSectors - 1) wait = true;
+//	
+//	if(!wait) {
+//	    Collections.sort((LinkedList<IORB>) workQueue, new CustomComparator());
+//	}
+//	
+//	if(sectorNumber == disk.geometry.NumSectors - 1) wait = true;
 	
 
-	//Debug.println('+', "workQueue size: " + workQueue.size());
+	Debug.println('+', "workQueue size: " + workQueue.size());
 	
 	if (busy) {
 	   // Debug.println('+', "inside busy- write");
@@ -170,14 +170,24 @@ public class DiskDriver {
 	workQueue.offer(work);
 	
 	
-	if(!wait) {
-	    Collections.sort((LinkedList<IORB>) workQueue, new CustomComparator());
-	}
+//	if(!wait) {
+//	    Collections.sort((LinkedList<IORB>) workQueue, new CustomComparator());
+//	    
+//	}
 	
-	if(sectorNumber == disk.geometry.NumSectors - 1) wait = true;
+	
+//	LinkedList<IORB> list = (LinkedList<IORB>) workQueue;
+//	for(IORB i  : list){
+//	
+//	    Debug.println('+', "" +i.getSectorNumber());
+//	    
+//	}
+	
+	
+//	if(sectorNumber == disk.geometry.NumSectors - 1) wait = true;
 	
 
-	//Debug.println('+', "workQueue size: " + workQueue.size());
+	Debug.println('+', "workQueue size: " + workQueue.size());
 	
 	if (busy) {
 	 //   Debug.println('+', "inside busy");
@@ -208,7 +218,9 @@ public class DiskDriver {
 	    
 	   	
 
-	//Debug.println('+', "Not null********");
+//	Debug.println('+', "start Request********");
+
+	
 	if(t.getFlag() == 0) {
 	    disk.readRequest(t.getSectorNumber(), t.getData(), t.getIndex());
 	} else {
@@ -217,7 +229,7 @@ public class DiskDriver {
 	
 	busy = true;
 	
-	if(t.getSectorNumber() == disk.geometry.NumSectors - 1) wait = false;
+//	if(t.getSectorNumber() == disk.geometry.NumSectors - 1) wait = false;
     }
 
     public static class CustomComparator implements Comparator<IORB> {
@@ -225,7 +237,7 @@ public class DiskDriver {
 	@Override
 	public int compare(IORB o1, IORB o2) {
 
-	    return o1.getSectorNumber() - o2.getSectorNumber();
+	    return o2.getSectorNumber() - o1.getSectorNumber();
 	}
 
     }
@@ -240,7 +252,7 @@ public class DiskDriver {
 	 */
 	public void handleInterrupt() {
 	    busy = false;
-	    //Debug.println('+', "herererererererererer");
+//	    Debug.println('+', "End Request");
 	    startOutput();
 	}
 
