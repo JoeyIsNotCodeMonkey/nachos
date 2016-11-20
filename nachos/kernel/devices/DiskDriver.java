@@ -134,7 +134,7 @@ public class DiskDriver {
 //	if(sectorNumber == disk.geometry.NumSectors - 1) wait = true;
 	
 
-	Debug.println('+', "workQueue size: " + workQueue.size());
+//	Debug.println('+', "workQueue size: " + workQueue.size());
 	
 	if (busy) {
 	   // Debug.println('+', "inside busy- write");
@@ -187,7 +187,7 @@ public class DiskDriver {
 //	if(sectorNumber == disk.geometry.NumSectors - 1) wait = true;
 	
 
-	Debug.println('+', "workQueue size: " + workQueue.size());
+//	Debug.println('+', "workQueue size: " + workQueue.size());
 	
 	if (busy) {
 	 //   Debug.println('+', "inside busy");

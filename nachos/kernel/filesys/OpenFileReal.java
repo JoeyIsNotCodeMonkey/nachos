@@ -100,7 +100,7 @@ class OpenFileReal implements OpenFile {
 	
 	int result = readAt(into, index, numBytes, seekPosition);
 	seekPosition += result;
-	
+	//Debug.println('+', "Releasing  Sector: "+ currentSector);
 	FileSystemReal.fileHeaderTable[currentSector].getSem().V();
 	
 	return result;

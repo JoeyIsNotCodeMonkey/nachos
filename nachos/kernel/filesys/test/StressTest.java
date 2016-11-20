@@ -93,7 +93,22 @@ public class StressTest implements Runnable{
 
 	return;
     }
+    
+    
+    /** Name of the file to create for the performance test. */
+    private static final String FileName = "TestFile";
+    private static final String FileName2 = "TestFile2";
+    /** Test data to be written to the file in the performance test. */
+    private static final String ContentString = "1234567890";
 
+    /** Length of the test data. */
+    private static final int ContentSize = ContentString.length();
+
+    /** Bytes in the test data. */
+    private static final byte Contents[] = ContentString.getBytes();
+
+    /** Total size of the test file. */
+    private static final int FileSize = ContentSize * 300;
     /**
      * Stress the Nachos file system by creating a large file, writing it out a
      * bit at a time, reading it back a bit at a time, and then deleting the
@@ -107,7 +122,9 @@ public class StressTest implements Runnable{
 	Debug.print('+', "Starting file system performance test:\n");
 	Simulation.stats.print();
 	fileWrite();
+	Debug.print('+', "Writingggg:\n");
 	fileRead();
+	Debug.print('+', "Readinging:\n");
 	if (!Nachos.fileSystem.remove(FileName)) {
 	    Debug.printf('+', "Perf test: unable to remove %s\n", FileName);
 	    return;
@@ -117,20 +134,7 @@ public class StressTest implements Runnable{
     
 
 
-    /** Name of the file to create for the performance test. */
-    private static final String FileName = "TestFile";
 
-    /** Test data to be written to the file in the performance test. */
-    private static final String ContentString = "1234567890";
-
-    /** Length of the test data. */
-    private static final int ContentSize = ContentString.length();
-
-    /** Bytes in the test data. */
-    private static final byte Contents[] = ContentString.getBytes();
-
-    /** Total size of the test file. */
-    private static final int FileSize = ContentSize * 300;
 
     /**
      * Write the test file for the performance test.
@@ -186,7 +190,74 @@ public class StressTest implements Runnable{
     }
     
     
+    private void performanceTest2() {
+	Debug.print('+', "Starting file system performance test2:\n");
+	Simulation.stats.print();
+	fileWrite2();
+	fileRead2();
+	if (!Nachos.fileSystem.remove(FileName2)) {
+	    Debug.printf('+', "Perf test: unable to remove %s\n", FileName2);
+	    return;
+	}
+	Simulation.stats.print();
+    }
+    
 
+
+
+
+    /**
+     * Write the test file for the performance test.
+     */
+    private void fileWrite2() {
+	OpenFile openFile;
+	int i, numBytes;
+
+	Debug.printf('+',
+		"Sequential write of %d byte file, in %d byte chunks\n",
+		new Integer(FileSize), new Integer(ContentSize));
+	if (!Nachos.fileSystem.create(FileName2, FileSize)) {
+	    Debug.printf('+', "Perf test: can't create %s\n", FileName2);
+	    return;
+	}
+	openFile = Nachos.fileSystem.open(FileName2);
+	if (openFile == null) {
+	    Debug.printf('+', "Perf test: unable to open %s\n", FileName2);
+	    return;
+	}
+	for (i = 0; i < FileSize; i += ContentSize) {
+	    numBytes = openFile.write(Contents, 0, ContentSize);
+	    if (numBytes < 10) {
+		Debug.printf('+', "Perf test: unable to write %s\n", FileName2);
+		return;
+	    }
+	}
+    }
+
+    /**
+     * Read and verify the file for the performance test.
+     */
+    private void fileRead2() {
+	OpenFile openFile;
+	byte buffer[] = new byte[ContentSize];
+	int i, numBytes;
+
+	Debug.printf('+',
+		"Sequential read of %d byte file, in %d byte chunks\n",
+		new Integer(FileSize), new Integer(ContentSize));
+
+	if ((openFile = Nachos.fileSystem.open(FileName2)) == null) {
+	    Debug.printf('+', "Perf test: unable to open file %s\n", FileName2);
+	    return;
+	}
+	for (i = 0; i < FileSize; i += ContentSize) {
+	    numBytes = openFile.read(buffer, 0, ContentSize);
+	    if ((numBytes < 10) || !byteCmp(buffer, Contents, ContentSize)) {
+		Debug.printf('+', "Perf test: unable to read %s\n", FileName2);
+		return;
+	    }
+	}
+    }
 
     /**
      * Compare two byte arrays to see if they agree up to a specified length.
@@ -209,7 +280,11 @@ public class StressTest implements Runnable{
     @Override
     public void run() {
 	// TODO Auto-generated method stub
-	performanceTest();
+	if(NachosThread.currentThread().name.equalsIgnoreCase("Stress test1")){
+	    performanceTest();
+	}else{
+	    performanceTest2();
+	}
 	Nachos.scheduler.finishThread();
 	
     }
