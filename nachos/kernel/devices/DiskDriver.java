@@ -30,6 +30,7 @@ import nachos.machine.CPU;
 import nachos.machine.Disk;
 import nachos.machine.InterruptHandler;
 import nachos.kernel.threads.Semaphore;
+import nachos.kernel.Nachos;
 import nachos.kernel.threads.Lock;
 
 /**
@@ -126,13 +127,15 @@ public class DiskDriver {
 	workQueue.offer(work);
 	
 	
-//	
-//	if(!wait) {
-//	    Collections.sort((LinkedList<IORB>) workQueue, new CustomComparator());
-//	}
-//	
-//	if(sectorNumber == disk.geometry.NumSectors - 1) wait = true;
+if(Nachos.options.CSCAN){
+	if(!wait) {
+	    Collections.sort((LinkedList<IORB>) workQueue, new CustomComparator());
+	}
 	
+	if(sectorNumber == disk.geometry.NumSectors - 1) wait = true;
+    
+    
+}	
 
 //	Debug.println('+', "workQueue size: " + workQueue.size());
 	
@@ -161,6 +164,7 @@ public class DiskDriver {
      *            Offset in the buffer at which to place the data.
      */
     public void readSector(int sectorNumber, byte[] data, int index) {
+	
 	Debug.ASSERT(0 <= sectorNumber && sectorNumber < getNumSectors());
 	lock.acquire();
 	int oldLevel = CPU.setLevel(CPU.IntOff);
@@ -169,24 +173,14 @@ public class DiskDriver {
 		new Semaphore("work" + count++, 0));
 	workQueue.offer(work);
 	
+	if(Nachos.options.CSCAN){	
+	if(!wait) {
+	    Collections.sort((LinkedList<IORB>) workQueue, new CustomComparator());
+	    
+	}	
+	if(sectorNumber == disk.geometry.NumSectors - 1) wait = true;
 	
-//	if(!wait) {
-//	    Collections.sort((LinkedList<IORB>) workQueue, new CustomComparator());
-//	    
-//	}
-	
-	
-//	LinkedList<IORB> list = (LinkedList<IORB>) workQueue;
-//	for(IORB i  : list){
-//	
-//	    Debug.println('+', "" +i.getSectorNumber());
-//	    
-//	}
-	
-	
-//	if(sectorNumber == disk.geometry.NumSectors - 1) wait = true;
-	
-
+	}
 //	Debug.println('+', "workQueue size: " + workQueue.size());
 	
 	if (busy) {
@@ -229,7 +223,10 @@ public class DiskDriver {
 	
 	busy = true;
 	
-//	if(t.getSectorNumber() == disk.geometry.NumSectors - 1) wait = false;
+	if(Nachos.options.CSCAN){
+	    if(t.getSectorNumber() == disk.geometry.NumSectors - 1) wait = false;
+	}
+	   
     }
 
     public static class CustomComparator implements Comparator<IORB> {

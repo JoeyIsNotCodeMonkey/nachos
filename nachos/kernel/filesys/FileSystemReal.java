@@ -444,7 +444,10 @@ class FileSystemReal extends FileSystem {
     }
 
     public void checkConsistency() {
-
+	
+	
+	Debug.println('+',"---------------------Start Consistency Test--------------------");
+	
 	BitMap freeMap = new BitMap(numDiskSectors);
 	freeMap.fetchFrom(freeMapFile);
 
@@ -503,34 +506,46 @@ class FileSystemReal extends FileSystem {
 	    tmpMap[i] = false;
 	}
 	for (int i = 0; i < fileHeaderTable.length; i++) {
-	    int[] dataSectors = fileHeaderTable[i].getDataSectors();
-	    for (int j = 0; j < dataSectors.length; j++) {
-		if (dataSectors[j] != -1) {
-		    if (tmpMap[dataSectors[j]] == false) {
-			tmpMap[dataSectors[j]] = true;
-		    }
+	    
+	    if(fileHeaderTable[i]!=null){
+		    int[] dataSectors = fileHeaderTable[i].getDataSectors();
+		    for (int j = 0; j < dataSectors.length; j++) {
+			if (dataSectors[j] != -1) {
+			    if (tmpMap[dataSectors[j]] == false) {
+				tmpMap[dataSectors[j]] = true;
+			    }
 
-		    else {
-			Debug.println('+',
-				"Disk sectors that are referenced by more than one file header");
+			    else {
+				Debug.println('+',
+					"Disk sectors that are referenced by more than one file header");
+			    }
+			}
 		    }
-		}
 	    }
+	    
+
 	}
 
 	/**
 	 * multiple times in a single file header
 	 */
 	for (int i = 0; i < fileHeaderTable.length; i++) {
+	    if(fileHeaderTable[i]!=null){
 	    int[] dataSectors = fileHeaderTable[i].getDataSectors();
 	    ArrayList<Integer> tmpList = new ArrayList<Integer>();
+	    
+	    
 	    for (int j = 0; j < dataSectors.length; j++) {
-		if (tmpList.contains(dataSectors[j])) {
-		    Debug.println('+',
-			    "multiple times in a single file header");
-		} else {
-		    tmpList.add(dataSectors[j]);
+		
+		if(dataSectors[j]!=-1){
+			if (tmpList.contains(dataSectors[j])) {
+			    Debug.println('+',"Multiple times in a single file header"+ i);
+			} else {
+			    tmpList.add(dataSectors[j]);
+			}
 		}
+
+	    }
 	    }
 	}
 
@@ -547,31 +562,37 @@ class FileSystemReal extends FileSystem {
 	for (int i = 0; i < directory.getTableSize(); i++) {
 
 	    int sector = list[i].getSector();
-
-	    if (!temp.contains(sector)) {
-		temp.add(sector);
-	    } else {
-		Debug.println('+',
-			"Multiple directory entries that refer to the same file header.");
-		break;
+	    if(sector != 0){
+		
+		    if (!temp.contains(sector)) {
+			temp.add(sector);
+		    } else {
+			Debug.println('+',
+				"Multiple directory entries that refer to the same file header.");
+			break;
+		    }
 	    }
+
 
 	}
 
 	for (int i = 0; i < directory.getTableSize(); i++) {
 
 	    String name = list[i].getName();
+	    
+	    if(name!=null){
+		    if (!stringTemp.contains(name)) {
+			stringTemp.add(name);
+		    } else {
+			Debug.println('+',
+				"Multiple directory entries with the same file name");
+			break;
+		    }
 
-	    if (!stringTemp.contains(name)) {
-		stringTemp.add(name);
-	    } else {
-		Debug.println('+',
-			"Multiple directory entries with the same file name");
-		break;
 	    }
-
+	
 
 	}
-
+	Debug.println('+',"---------------------End Consistency Test--------------------");
     }
 }

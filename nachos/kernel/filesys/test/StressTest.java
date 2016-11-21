@@ -282,9 +282,13 @@ public class StressTest implements Runnable{
 	// TODO Auto-generated method stub
 	if(NachosThread.currentThread().name.equalsIgnoreCase("Stress test1")){
 	    performanceTest();
+	    
 	}else{
 	    performanceTest2();
 	}
+	
+	Nachos.fileSystem.checkConsistency();
+	
 	Nachos.scheduler.finishThread();
 	
     }
@@ -300,7 +304,7 @@ public class StressTest implements Runnable{
 //		new StressTest());
 //	
 	Nachos.scheduler.readyToRun(thread1);
-	Nachos.scheduler.readyToRun(thread2);
+//	Nachos.scheduler.readyToRun(thread2);
 //	Nachos.scheduler.readyToRun(thread3);
 //	Nachos.scheduler.readyToRun(thread4);
     }

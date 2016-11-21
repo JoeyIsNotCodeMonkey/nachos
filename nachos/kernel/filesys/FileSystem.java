@@ -98,6 +98,8 @@ public abstract class FileSystem {
      * This is only implemented by the real filesystem.
      */
     public void print() { }
+    
+    public void checkConsistency(){}
 
     /**
      * Utility method to deserialize a sequence of bytes into an integer.
