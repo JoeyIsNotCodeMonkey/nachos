@@ -475,12 +475,49 @@ class FileSystemReal extends FileSystem {
 	    }
 
 	}
-
-	/**
-	 * Disk sectors that are not used by any files (or file headers), but
-	 * that are marked as "in use" in the bitmap.
-	 */
 	
+	
+	
+	
+	Directory directory = new Directory(NumDirEntries, this);
+	directory.fetchFrom(directoryFile);
+	
+	
+	
+	DirectoryEntry[] list = directory.getTable();
+	
+	ArrayList<Integer> temp = new ArrayList<Integer>();
+	
+	ArrayList<String > stringTemp = new ArrayList<String>();
+	for(int i =0;i<directory.getTableSize();i++){
+	    
+	    int sector = list[i].getSector();
+	    
+	    if(!temp.contains(sector)){
+		temp.add(sector);
+	    }else{
+		Debug.println('+',
+			"Multiple directory entries that refer to the same file header.");
+		break;
+	    }
+	    
+	    
+	}
+	
+	for(int i =0;i<directory.getTableSize();i++){
+	    
+	    String name = list[i].getName();
+	    
+	    if(!stringTemp.contains(name)){
+		stringTemp.add(name);
+	    }else{
+		Debug.println('+',
+			"Multiple directory entries that refer to the same file header.");
+		break;
+	    }
+	    
+	    
+	}
 
     }
 }
