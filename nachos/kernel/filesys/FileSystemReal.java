@@ -211,16 +211,12 @@ class FileSystemReal extends FileSystem {
 
 	FileHeader hdr = new FileHeader(this);
 	hdr.fetchFrom(FreeMapSector);
-//	hdr.setSem(new Semaphore("fileHeaderLock" + FreeMapSector, 1));
-//	fileHeaderTable[FreeMapSector] = hdr;
 	fileHeaderTable.add(FreeMapSector, hdr);
 	
 	
 
 	hdr = new FileHeader(this);
 	hdr.fetchFrom(DirectorySector);
-//	hdr.setSem(new Semaphore("fileHeaderLock" + DirectorySector, 1));
-//	fileHeaderTable[DirectorySector] = hdr;
 	fileHeaderTable.add(DirectorySector, hdr);
     }
 
@@ -319,6 +315,8 @@ class FileSystemReal extends FileSystem {
 		    //hdr.setSem(new Semaphore("fileHeaderLock" + sector, 1));
 
 		    //fileHeaderTable[sector] = hdr;
+		    
+		    Debug.printf('+', "Createed %s\n", name);
 		}
 	    }
 	}
@@ -342,7 +340,8 @@ class FileSystemReal extends FileSystem {
 	OpenFile openFile = null;
 	int sector;
 
-	Debug.printf('f', "Opening file %s\n", name);
+	Debug.printf('+', "Opening file %s\n", name);
+	
 	directory.fetchFrom(directoryFile);
 	sector = directory.find(name);
 	if (sector >= 0) {
@@ -464,7 +463,8 @@ class FileSystemReal extends FileSystem {
 		// check file header sector
 		if (freeMap.test(i) == false) {
 		    Debug.println('+',
-			    "Disk sectors that are used by files (or file headers), but that are also marked as 'free' in the bitmap.");
+			    "Disk sectors that are used by files (or file headers), but that are also marked as 'free' in the bitmap.Sector: "+ i);
+		    break;
 		}
 
 		// check data sectors
@@ -473,7 +473,8 @@ class FileSystemReal extends FileSystem {
 		    if (dataSectors[j] != -1
 			    && freeMap.test(dataSectors[j]) == false) {
 			Debug.println('+',
-				"Disk sectors that are used by files (or file headers), but that are also marked as 'free' in the bitmap.");
+				"Disk sectors that are used by files (or file headers), but that are also marked as 'free' in the bitmap.Sector:"+j);
+			break;
 		    }
 		}
 	    }
@@ -498,7 +499,8 @@ class FileSystemReal extends FileSystem {
 	for (int i = 0; i < tmpMap.length; i++) {
 	    if (tmpMap[i] == false && freeMap.test(i)) {
 		Debug.println('+',
-			"Disk sectors that are not used by any files (or file headers), but that are marked as 'in use' in the bitmap.");
+			"Disk sectors that are not used by any files (or file headers), but that are marked as 'in use' in the bitmap.Sector: "+ i);
+		break;
 	    }
 	}
 
@@ -520,8 +522,9 @@ class FileSystemReal extends FileSystem {
 			    }
 
 			    else {
-				Debug.println('+',
-					"Disk sectors that are referenced by more than one file header");
+				Debug.println('+',"Disk sectors that are referenced by more than one file header- sector: "+j);
+				
+				break;
 			    }
 			}
 		    }

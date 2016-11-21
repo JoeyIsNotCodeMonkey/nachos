@@ -62,8 +62,18 @@ class OpenFileReal implements OpenFile {
      * @param filesystem  The underlying filesystem in which this file exists.
      */
     OpenFileReal(int sector, FileSystemReal filesystem) { 
-	//hdr = new FileHeader(filesystem);
+	
+	
+	
+	
+	
 	hdr = FileSystemReal.fileHeaderTable.get(sector);
+	
+	if(hdr==null){
+	    hdr = new FileHeader(filesystem);
+	}
+	
+	
 	hdr.fetchFrom(sector);
 	
 		

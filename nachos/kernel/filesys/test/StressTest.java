@@ -67,19 +67,23 @@ public class StressTest implements Runnable{
      */
     private void performanceTest() {
 	Debug.print('+', "Starting file system performance test:\n");
-	Simulation.stats.print();
+	//Simulation.stats.print();
 	Random random = new Random();
 	int rand = random.nextInt(9);
-	FileName = names[rand];
-	fileWrite();
-	Debug.print('+', "Writingggg:\n");
-	fileRead();
-	Debug.print('+', "Readinging:\n");
-	if (!Nachos.fileSystem.remove(FileName)) {
-	    Debug.printf('+', "Perf test: unable to remove %s\n", FileName);
+	Debug.println('+', "Rand:"+ rand);
+	
+	String fileName = names[rand];
+	fileWrite(fileName);
+	
+	fileRead(fileName);
+	//Debug.print('+', "Readinging:\n");
+	if (!Nachos.fileSystem.remove(fileName)) {
+	    Debug.printf('+', "Perf test: unable to remove %s\n", fileName);
 	    return;
 	}
-	Simulation.stats.print();
+	//Simulation.stats.print();
+	Debug.print('+', "Ending file system performance test:\n");
+	Nachos.fileSystem.checkConsistency();
     }
     
 
@@ -89,26 +93,26 @@ public class StressTest implements Runnable{
     /**
      * Write the test file for the performance test.
      */
-    private void fileWrite() {
+    private void fileWrite(String fileName) {
 	OpenFile openFile;
 	int i, numBytes;
 
 	Debug.printf('+',
 		"Sequential write of %d byte file, in %d byte chunks\n",
 		new Integer(FileSize), new Integer(ContentSize));
-	if (!Nachos.fileSystem.create(FileName, FileSize)) {
-	    Debug.printf('+', "Perf test: can't create %s\n", FileName);
+	if (!Nachos.fileSystem.create(fileName, FileSize)) {
+	    Debug.printf('+', "Perf test: can't create %s\n", fileName);
 	    return;
 	}
-	openFile = Nachos.fileSystem.open(FileName);
+	openFile = Nachos.fileSystem.open(fileName);
 	if (openFile == null) {
-	    Debug.printf('+', "Perf test: unable to open %s\n", FileName);
+	    Debug.printf('+', "Perf test: unable to open %s\n", fileName);
 	    return;
 	}
 	for (i = 0; i < FileSize; i += ContentSize) {
 	    numBytes = openFile.write(Contents, 0, ContentSize);
 	    if (numBytes < 10) {
-		Debug.printf('+', "Perf test: unable to write %s\n", FileName);
+		Debug.printf('+', "Perf test: unable to write %s\n", fileName);
 		return;
 	    }
 	}
@@ -117,7 +121,7 @@ public class StressTest implements Runnable{
     /**
      * Read and verify the file for the performance test.
      */
-    private void fileRead() {
+    private void fileRead(String fileName) {
 	OpenFile openFile;
 	byte buffer[] = new byte[ContentSize];
 	int i, numBytes;
@@ -126,14 +130,14 @@ public class StressTest implements Runnable{
 		"Sequential read of %d byte file, in %d byte chunks\n",
 		new Integer(FileSize), new Integer(ContentSize));
 
-	if ((openFile = Nachos.fileSystem.open(FileName)) == null) {
-	    Debug.printf('+', "Perf test: unable to open file %s\n", FileName);
+	if ((openFile = Nachos.fileSystem.open(fileName)) == null) {
+	    Debug.printf('+', "Perf test: unable to open file %s\n", fileName);
 	    return;
 	}
 	for (i = 0; i < FileSize; i += ContentSize) {
 	    numBytes = openFile.read(buffer, 0, ContentSize);
 	    if ((numBytes < 10) || !byteCmp(buffer, Contents, ContentSize)) {
-		Debug.printf('+', "Perf test: unable to read %s\n", FileName);
+		Debug.printf('+', "Perf test: unable to read %s\n", fileName);
 		return;
 	    }
 	}
@@ -163,33 +167,24 @@ public class StressTest implements Runnable{
     @Override
     public void run() {
 	// TODO Auto-generated method stub
-	if(NachosThread.currentThread().name.equalsIgnoreCase("Stress test1")){
-	    performanceTest();
-	    
-	}else{
-	    //performanceTest2();
-	}
-	
-	Nachos.fileSystem.checkConsistency();
-	
+
+	 performanceTest();
+	    	
 	Nachos.scheduler.finishThread();
 	
     }
     
     public static void start() {
-	NachosThread thread1 = new NachosThread("Stress test1",
-		new StressTest());	
-	NachosThread thread2 = new NachosThread("Stress test2",
-		new StressTest());
-//	NachosThread thread3 = new NachosThread("Stress test3",
-//		new StressTest());
-//	NachosThread thread4 = new NachosThread("Stress test4",
-//		new StressTest());
-//	
-	Nachos.scheduler.readyToRun(thread1);
-	Nachos.scheduler.readyToRun(thread2);
-//	Nachos.scheduler.readyToRun(thread3);
-//	Nachos.scheduler.readyToRun(thread4);
+
+	
+	
+	for(int i=1;i<=2;i++){
+	    
+	    
+	    NachosThread thread = new NachosThread("Stress test"+i,new StressTest());
+	    Nachos.scheduler.readyToRun(thread);
+	}
+	
     }
 
 }
