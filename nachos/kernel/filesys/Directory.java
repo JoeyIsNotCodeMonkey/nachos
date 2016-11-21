@@ -194,4 +194,14 @@ class Directory {
 	System.out.println("");
     }
 
+    public int getTableSize() {
+        return tableSize;
+    }
+
+    public DirectoryEntry[] getTable() {
+        return table;
+    }
+
+    
+    
 }

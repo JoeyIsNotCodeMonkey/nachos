@@ -113,10 +113,13 @@ class FileSystemReal extends FileSystem {
 
     // public static FileHeader fileHeaderTable[] = new FileHeader[10];
     public static FileHeader[] fileHeaderTable;
-    
-    private Semaphore createSem = new Semaphore("create",1);
-    private Semaphore openSem = new Semaphore("open",1);
-    private Semaphore removeSem = new Semaphore("remove",1);
+
+    private Semaphore createSem = new Semaphore("create", 1);
+
+    private Semaphore openSem = new Semaphore("open", 1);
+
+    private Semaphore removeSem = new Semaphore("remove", 1);
+
     /**
      * Initialize the file system. If format = true, the disk has nothing on it,
      * and we need to initialize the disk to contain an empty directory, and a
@@ -274,16 +277,14 @@ class FileSystemReal extends FileSystem {
      * @return true if the file was successfully created, otherwise false.
      */
     public boolean create(String name, long initialSize) {
-	
+
 	createSem.P();
-	
+
 	Directory directory;
 	BitMap freeMap;
 	FileHeader hdr;
 	int sector;
 	boolean success;
-	
-	
 
 	Debug.printf('f', "Creating file %s, size %d\n", name,
 		new Long(initialSize));
@@ -315,15 +316,13 @@ class FileSystemReal extends FileSystem {
 		    // add to File Head table
 		    hdr.setSem(new Semaphore("fileHeaderLock" + sector, 1));
 
-
 		    fileHeaderTable[sector] = hdr;
 		}
 	    }
 	}
-	
+
 	createSem.V();
-	
-	
+
 	return success;
     }
 
@@ -335,7 +334,7 @@ class FileSystemReal extends FileSystem {
      *            The text name of the file to be opened.
      */
     public OpenFile open(String name) {
-	
+
 	openSem.P();
 	Directory directory = new Directory(NumDirEntries, this);
 	OpenFile openFile = null;
@@ -358,7 +357,6 @@ class FileSystemReal extends FileSystem {
 	    // directory
 	}
 
-	    
 	openSem.V();
 	return openFile; // return null if not found
     }
@@ -375,9 +373,9 @@ class FileSystemReal extends FileSystem {
      *            The text name of the file to be removed.
      */
     public boolean remove(String name) {
-	
+
 	removeSem.P();
-	
+
 	Directory directory;
 	BitMap freeMap;
 	FileHeader fileHdr;
@@ -403,8 +401,7 @@ class FileSystemReal extends FileSystem {
 	directory.writeBack(directoryFile); // flush to disk
 
 	fileHeaderTable[sector] = null;
-	
-	
+
 	removeSem.V();
 	return true;
     }
@@ -480,7 +477,100 @@ class FileSystemReal extends FileSystem {
 	 * Disk sectors that are not used by any files (or file headers), but
 	 * that are marked as "in use" in the bitmap.
 	 */
-	
+	boolean tmpMap[] = new boolean[numDiskSectors];
+	for (int i = 0; i < fileHeaderTable.length; i++) {
+	    if (fileHeaderTable[i] != null) {
+		tmpMap[i] = true;
+		int[] dataSectors = fileHeaderTable[i].getDataSectors();
+		for (int j = 0; j < dataSectors.length; j++) {
+		    if (dataSectors[j] != -1) {
+			tmpMap[dataSectors[j]] = true;
+		    }
+		}
+	    }
+	}
+
+	for (int i = 0; i < tmpMap.length; i++) {
+	    if (tmpMap[i] == false && freeMap.test(i)) {
+		Debug.println('+',
+			"Disk sectors that are not used by any files (or file headers), but that are marked as 'in use' in the bitmap.");
+	    }
+	}
+
+	/**
+	 * Disk sectors that are referenced by more than one file header
+	 */
+	// clear tmpMap
+	for (int i = 0; i < tmpMap.length; i++) {
+	    tmpMap[i] = false;
+	}
+	for (int i = 0; i < fileHeaderTable.length; i++) {
+	    int[] dataSectors = fileHeaderTable[i].getDataSectors();
+	    for (int j = 0; j < dataSectors.length; j++) {
+		if (dataSectors[j] != -1) {
+		    if (tmpMap[dataSectors[j]] == false) {
+			tmpMap[dataSectors[j]] = true;
+		    }
+
+		    else {
+			Debug.println('+',
+				"Disk sectors that are referenced by more than one file header");
+		    }
+		}
+	    }
+	}
+
+	/**
+	 * multiple times in a single file header
+	 */
+	for (int i = 0; i < fileHeaderTable.length; i++) {
+	    int[] dataSectors = fileHeaderTable[i].getDataSectors();
+	    ArrayList<Integer> tmpList = new ArrayList<Integer>();
+	    for (int j = 0; j < dataSectors.length; j++) {
+		if (tmpList.contains(dataSectors[j])) {
+		    Debug.println('+',
+			    "multiple times in a single file header");
+		} else {
+		    tmpList.add(dataSectors[j]);
+		}
+	    }
+	}
+
+	Directory directory = new Directory(NumDirEntries, this);
+	directory.fetchFrom(directoryFile);
+
+	DirectoryEntry[] list = directory.getTable();
+
+	ArrayList<Integer> temp = new ArrayList<Integer>();
+
+	ArrayList<String> stringTemp = new ArrayList<String>();
+	for (int i = 0; i < directory.getTableSize(); i++) {
+
+	    int sector = list[i].getSector();
+
+	    if (!temp.contains(sector)) {
+		temp.add(sector);
+	    } else {
+		Debug.println('+',
+			"Multiple directory entries that refer to the same file header.");
+		break;
+	    }
+
+	}
+
+	for (int i = 0; i < directory.getTableSize(); i++) {
+
+	    String name = list[i].getName();
+
+	    if (!stringTemp.contains(name)) {
+		stringTemp.add(name);
+	    } else {
+		Debug.println('+',
+			"Multiple directory entries with the same file name");
+		break;
+	    }
+
+	}
 
     }
 }
