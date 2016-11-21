@@ -113,7 +113,10 @@ class FileSystemReal extends FileSystem {
 
     // public static FileHeader fileHeaderTable[] = new FileHeader[10];
     public static FileHeader[] fileHeaderTable;
-
+    
+    private Semaphore createSem = new Semaphore("create",1);
+    private Semaphore openSem = new Semaphore("open",1);
+    private Semaphore removeSem = new Semaphore("remove",1);
     /**
      * Initialize the file system. If format = true, the disk has nothing on it,
      * and we need to initialize the disk to contain an empty directory, and a
@@ -271,11 +274,16 @@ class FileSystemReal extends FileSystem {
      * @return true if the file was successfully created, otherwise false.
      */
     public boolean create(String name, long initialSize) {
+	
+	createSem.P();
+	
 	Directory directory;
 	BitMap freeMap;
 	FileHeader hdr;
 	int sector;
 	boolean success;
+	
+	
 
 	Debug.printf('f', "Creating file %s, size %d\n", name,
 		new Long(initialSize));
@@ -307,10 +315,15 @@ class FileSystemReal extends FileSystem {
 		    // add to File Head table
 		    hdr.setSem(new Semaphore("fileHeaderLock" + sector, 1));
 
+
 		    fileHeaderTable[sector] = hdr;
 		}
 	    }
 	}
+	
+	createSem.V();
+	
+	
 	return success;
     }
 
@@ -322,6 +335,8 @@ class FileSystemReal extends FileSystem {
      *            The text name of the file to be opened.
      */
     public OpenFile open(String name) {
+	
+	openSem.P();
 	Directory directory = new Directory(NumDirEntries, this);
 	OpenFile openFile = null;
 	int sector;
@@ -343,6 +358,8 @@ class FileSystemReal extends FileSystem {
 	    // directory
 	}
 
+	    
+	openSem.V();
 	return openFile; // return null if not found
     }
 
@@ -358,6 +375,9 @@ class FileSystemReal extends FileSystem {
      *            The text name of the file to be removed.
      */
     public boolean remove(String name) {
+	
+	removeSem.P();
+	
 	Directory directory;
 	BitMap freeMap;
 	FileHeader fileHdr;
@@ -383,6 +403,9 @@ class FileSystemReal extends FileSystem {
 	directory.writeBack(directoryFile); // flush to disk
 
 	fileHeaderTable[sector] = null;
+	
+	
+	removeSem.V();
 	return true;
     }
 
