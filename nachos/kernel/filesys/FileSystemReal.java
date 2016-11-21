@@ -137,7 +137,10 @@ class FileSystemReal extends FileSystem {
 	DirectoryFileSize = (DirectoryEntry.sizeOf() * NumDirEntries);
 
 	fileHeaderTable = new FileHeader[numDiskSectors];
-	
+	for (int i = 0; i < fileHeaderTable.length; i++) {
+	    fileHeaderTable[i] = null;
+	}
+
 	if (format) {
 	    BitMap freeMap = new BitMap(numDiskSectors);
 	    Directory directory = new Directory(NumDirEntries, this);
@@ -203,16 +206,14 @@ class FileSystemReal extends FileSystem {
 
 	FileHeader hdr = new FileHeader(this);
 	hdr.fetchFrom(FreeMapSector);
-	hdr.setSem(new Semaphore(
-		"fileHeaderLock" + FreeMapSector, 1));
+	hdr.setSem(new Semaphore("fileHeaderLock" + FreeMapSector, 1));
 	fileHeaderTable[FreeMapSector] = hdr;
 
 	hdr = new FileHeader(this);
 	hdr.fetchFrom(DirectorySector);
-	hdr.setSem(new Semaphore(
-		"fileHeaderLock" + DirectorySector, 1));
+	hdr.setSem(new Semaphore("fileHeaderLock" + DirectorySector, 1));
 	fileHeaderTable[DirectorySector] = hdr;
-	
+
     }
 
     /**
@@ -304,8 +305,8 @@ class FileSystemReal extends FileSystem {
 		    freeMap.writeBack(freeMapFile);
 
 		    // add to File Head table
-		    hdr.setSem(new Semaphore("fileHeaderLock"+ sector, 1));
-		
+		    hdr.setSem(new Semaphore("fileHeaderLock" + sector, 1));
+
 		    fileHeaderTable[sector] = hdr;
 		}
 	    }
@@ -329,21 +330,19 @@ class FileSystemReal extends FileSystem {
 	directory.fetchFrom(directoryFile);
 	sector = directory.find(name);
 	if (sector >= 0) {
-	    if(fileHeaderTable[sector] == null) {
+	    if (fileHeaderTable[sector] == null) {
 		// add to File Head table
 		FileHeader hdr = new FileHeader(this);
 		hdr.fetchFrom(sector);
-		hdr.setSem(new Semaphore("fileHeaderLock"+ sector, 1));
+		hdr.setSem(new Semaphore("fileHeaderLock" + sector, 1));
 
-		 fileHeaderTable[sector] = hdr;
+		fileHeaderTable[sector] = hdr;
 	    }
-	    
-	    
-	    
+
 	    openFile = new OpenFileReal(sector, this);// name was found in
-	      // directory
+	    // directory
 	}
-	    
+
 	return openFile; // return null if not found
     }
 
@@ -382,7 +381,7 @@ class FileSystemReal extends FileSystem {
 
 	freeMap.writeBack(freeMapFile); // flush to disk
 	directory.writeBack(directoryFile); // flush to disk
-	
+
 	fileHeaderTable[sector] = null;
 	return true;
     }
@@ -421,6 +420,44 @@ class FileSystemReal extends FileSystem {
 
 	directory.fetchFrom(directoryFile);
 	directory.print();
+
+    }
+
+    public void checkConsistency() {
+
+	BitMap freeMap = new BitMap(numDiskSectors);
+	freeMap.fetchFrom(freeMapFile);
+
+	/**
+	 * Disk sectors that are used by files (or file headers), but that are
+	 * also marked as "free" in the bitmap.
+	 */
+	for (int i = 0; i < fileHeaderTable.length; i++) {
+	    if (fileHeaderTable[i] != null) {
+		// check file header sector
+		if (freeMap.test(i) == false) {
+		    Debug.println('+',
+			    "Disk sectors that are used by files (or file headers), but that are also marked as 'free' in the bitmap.");
+		}
+
+		// check data sectors
+		int[] dataSectors = fileHeaderTable[i].getDataSectors();
+		for (int j = 0; j < dataSectors.length; j++) {
+		    if (dataSectors[j] != -1
+			    && freeMap.test(dataSectors[j]) == false) {
+			Debug.println('+',
+				"Disk sectors that are used by files (or file headers), but that are also marked as 'free' in the bitmap.");
+		    }
+		}
+	    }
+
+	}
+
+	/**
+	 * Disk sectors that are not used by any files (or file headers), but
+	 * that are marked as "in use" in the bitmap.
+	 */
+	
 
     }
 }

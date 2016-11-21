@@ -62,6 +62,8 @@ class FileHeader {
     /** Disk sector numbers for each data block in the file. */
     private int dataSectors[];
 
+
+
     /** The underlying filesystem in which the file header resides. */
     private final FileSystemReal filesystem;
 
@@ -222,6 +224,11 @@ class FileHeader {
      */
     int fileLength() {
 	return numBytes;
+    }
+    
+    
+    public int[] getDataSectors() {
+        return dataSectors;
     }
 
     /**
