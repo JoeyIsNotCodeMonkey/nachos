@@ -3,6 +3,7 @@ package nachos.kernel.filesys.test;
 import java.io.File;
 import java.io.FileInputStream;
 import java.io.IOException;
+import java.util.Random;
 
 import nachos.Debug;
 import nachos.kernel.Nachos;
@@ -13,62 +14,6 @@ import nachos.machine.Simulation;
 public class StressTest implements Runnable{
     /** Transfer data in small chunks, just to be difficult. */
     private static final int TransferSize = 10;
-
-    /**
-     * Copy the contents of the host file "from" to the Nachos file "to"
-     *
-     * @param from
-     *            The name of the file to be copied from the host filesystem.
-     * @param to
-     *            The name of the file to create on the Nachos filesystem.
-     */
-    private void copy(String from, String to) {
-	File fp;
-	FileInputStream fs;
-	OpenFile openFile;
-	int amountRead;
-	long fileLength;
-	byte buffer[];
-
-	// Open UNIX file
-	fp = new File(from);
-	if (!fp.exists()) {
-	    Debug.printf('+', "Copy: couldn't open input file %s\n", from);
-	    return;
-	}
-
-	// Figure out length of UNIX file
-	fileLength = fp.length();
-
-	// Create a Nachos file of the same length
-	Debug.printf('f', "Copying file %s, size %d, to file %s\n", from,
-		new Long(fileLength), to);
-	if (!Nachos.fileSystem.create(to, (int) fileLength)) {
-	    // Create Nachos file
-	    Debug.printf('+', "Copy: couldn't create output file %s\n", to);
-	    return;
-	}
-
-	openFile = Nachos.fileSystem.open(to);
-	Debug.ASSERT(openFile != null);
-
-	// Copy the data in TransferSize chunks
-	buffer = new byte[TransferSize];
-	try {
-	    fs = new FileInputStream(fp);
-	    while ((amountRead = fs.read(buffer)) > 0)
-		openFile.write(buffer, 0, amountRead);
-	} catch (IOException e) {
-	    Debug.print('+', "Copy: data copy failed\n");
-	    return;
-	}
-	// Close the UNIX and the Nachos files
-	// delete openFile;
-	try {
-	    fs.close();
-	} catch (IOException e) {
-	}
-    }
 
     /**
      * Print the contents of the Nachos file "name".
@@ -96,10 +41,12 @@ public class StressTest implements Runnable{
     
     
     /** Name of the file to create for the performance test. */
-    private static final String FileName = "TestFile";
-    private static final String FileName2 = "TestFile2";
+    private static String FileName;
+    //private static final String FileName2 = "TestFile2";
     /** Test data to be written to the file in the performance test. */
     private static final String ContentString = "1234567890";
+    
+    private String[] names = {"os1", "os2", "os3", "os4", "os5", "os6", "os7", "os8", "os9", "os10"};
 
     /** Length of the test data. */
     private static final int ContentSize = ContentString.length();
@@ -121,6 +68,9 @@ public class StressTest implements Runnable{
     private void performanceTest() {
 	Debug.print('+', "Starting file system performance test:\n");
 	Simulation.stats.print();
+	Random random = new Random();
+	int rand = random.nextInt(9);
+	FileName = names[rand];
 	fileWrite();
 	Debug.print('+', "Writingggg:\n");
 	fileRead();
@@ -190,74 +140,7 @@ public class StressTest implements Runnable{
     }
     
     
-    private void performanceTest2() {
-	Debug.print('+', "Starting file system performance test2:\n");
-	Simulation.stats.print();
-	fileWrite2();
-	fileRead2();
-	if (!Nachos.fileSystem.remove(FileName2)) {
-	    Debug.printf('+', "Perf test: unable to remove %s\n", FileName2);
-	    return;
-	}
-	Simulation.stats.print();
-    }
-    
 
-
-
-
-    /**
-     * Write the test file for the performance test.
-     */
-    private void fileWrite2() {
-	OpenFile openFile;
-	int i, numBytes;
-
-	Debug.printf('+',
-		"Sequential write of %d byte file, in %d byte chunks\n",
-		new Integer(FileSize), new Integer(ContentSize));
-	if (!Nachos.fileSystem.create(FileName2, FileSize)) {
-	    Debug.printf('+', "Perf test: can't create %s\n", FileName2);
-	    return;
-	}
-	openFile = Nachos.fileSystem.open(FileName2);
-	if (openFile == null) {
-	    Debug.printf('+', "Perf test: unable to open %s\n", FileName2);
-	    return;
-	}
-	for (i = 0; i < FileSize; i += ContentSize) {
-	    numBytes = openFile.write(Contents, 0, ContentSize);
-	    if (numBytes < 10) {
-		Debug.printf('+', "Perf test: unable to write %s\n", FileName2);
-		return;
-	    }
-	}
-    }
-
-    /**
-     * Read and verify the file for the performance test.
-     */
-    private void fileRead2() {
-	OpenFile openFile;
-	byte buffer[] = new byte[ContentSize];
-	int i, numBytes;
-
-	Debug.printf('+',
-		"Sequential read of %d byte file, in %d byte chunks\n",
-		new Integer(FileSize), new Integer(ContentSize));
-
-	if ((openFile = Nachos.fileSystem.open(FileName2)) == null) {
-	    Debug.printf('+', "Perf test: unable to open file %s\n", FileName2);
-	    return;
-	}
-	for (i = 0; i < FileSize; i += ContentSize) {
-	    numBytes = openFile.read(buffer, 0, ContentSize);
-	    if ((numBytes < 10) || !byteCmp(buffer, Contents, ContentSize)) {
-		Debug.printf('+', "Perf test: unable to read %s\n", FileName2);
-		return;
-	    }
-	}
-    }
 
     /**
      * Compare two byte arrays to see if they agree up to a specified length.
@@ -284,7 +167,7 @@ public class StressTest implements Runnable{
 	    performanceTest();
 	    
 	}else{
-	    performanceTest2();
+	    //performanceTest2();
 	}
 	
 	Nachos.fileSystem.checkConsistency();
@@ -304,7 +187,7 @@ public class StressTest implements Runnable{
 //		new StressTest());
 //	
 	Nachos.scheduler.readyToRun(thread1);
-//	Nachos.scheduler.readyToRun(thread2);
+	Nachos.scheduler.readyToRun(thread2);
 //	Nachos.scheduler.readyToRun(thread3);
 //	Nachos.scheduler.readyToRun(thread4);
     }

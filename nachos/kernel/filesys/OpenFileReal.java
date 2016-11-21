@@ -51,7 +51,6 @@ class OpenFileReal implements OpenFile {
     /** Current position within the file. */
     private int seekPosition;
     
-    private int currentSector;
 
     /**
      * Open a Nachos file for reading and writing.  Bring the file header
@@ -63,10 +62,10 @@ class OpenFileReal implements OpenFile {
      * @param filesystem  The underlying filesystem in which this file exists.
      */
     OpenFileReal(int sector, FileSystemReal filesystem) { 
-	hdr = new FileHeader(filesystem);
+	//hdr = new FileHeader(filesystem);
+	hdr = FileSystemReal.fileHeaderTable.get(sector);
 	hdr.fetchFrom(sector);
 	
-	currentSector = sector;
 		
 	seekPosition = 0;
 	this.filesystem = filesystem;
@@ -96,12 +95,10 @@ class OpenFileReal implements OpenFile {
      * @return The number of bytes actually read (0 if error).
      */
     public int read(byte[] into, int index, int numBytes) {
-	FileSystemReal.fileHeaderTable[currentSector].getSem().P();
 	
 	int result = readAt(into, index, numBytes, seekPosition);
 	seekPosition += result;
 	//Debug.println('+', "Releasing  Sector: "+ currentSector);
-	FileSystemReal.fileHeaderTable[currentSector].getSem().V();
 	
 	return result;
     }
@@ -119,12 +116,10 @@ class OpenFileReal implements OpenFile {
      * @return The number of bytes actually written (0 if error).
      */
     public int write(byte[] from, int index, int numBytes) {
-	FileSystemReal.fileHeaderTable[currentSector].getSem().P();
 	
 	int result = writeAt(from, index, numBytes, seekPosition);
 	seekPosition += result;
 	
-	FileSystemReal.fileHeaderTable[currentSector].getSem().V();
 	
 	return result;
     }

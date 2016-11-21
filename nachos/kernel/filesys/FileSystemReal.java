@@ -112,13 +112,14 @@ class FileSystemReal extends FileSystem {
     private final OpenFile directoryFile;
 
     // public static FileHeader fileHeaderTable[] = new FileHeader[10];
-    public static FileHeader[] fileHeaderTable;
+    //public static FileHeader[] fileHeaderTable;
+    public static FileHeaderTable fileHeaderTable;
 
-    private Semaphore createSem = new Semaphore("create", 1);
+    //private Semaphore createSem = new Semaphore("create", 1);
 
-    private Semaphore openSem = new Semaphore("open", 1);
+    //private Semaphore openSem = new Semaphore("open", 1);
 
-    private Semaphore removeSem = new Semaphore("remove", 1);
+    //private Semaphore removeSem = new Semaphore("remove", 1);
 
     /**
      * Initialize the file system. If format = true, the disk has nothing on it,
@@ -142,10 +143,8 @@ class FileSystemReal extends FileSystem {
 	FreeMapFileSize = (numDiskSectors / BitMap.BitsInByte);
 	DirectoryFileSize = (DirectoryEntry.sizeOf() * NumDirEntries);
 
-	fileHeaderTable = new FileHeader[numDiskSectors];
-	for (int i = 0; i < fileHeaderTable.length; i++) {
-	    fileHeaderTable[i] = null;
-	}
+	fileHeaderTable = new FileHeaderTable();
+	
 
 	if (format) {
 	    BitMap freeMap = new BitMap(numDiskSectors);
@@ -212,14 +211,17 @@ class FileSystemReal extends FileSystem {
 
 	FileHeader hdr = new FileHeader(this);
 	hdr.fetchFrom(FreeMapSector);
-	hdr.setSem(new Semaphore("fileHeaderLock" + FreeMapSector, 1));
-	fileHeaderTable[FreeMapSector] = hdr;
+//	hdr.setSem(new Semaphore("fileHeaderLock" + FreeMapSector, 1));
+//	fileHeaderTable[FreeMapSector] = hdr;
+	fileHeaderTable.add(FreeMapSector, hdr);
+	
+	
 
 	hdr = new FileHeader(this);
 	hdr.fetchFrom(DirectorySector);
-	hdr.setSem(new Semaphore("fileHeaderLock" + DirectorySector, 1));
-	fileHeaderTable[DirectorySector] = hdr;
-
+//	hdr.setSem(new Semaphore("fileHeaderLock" + DirectorySector, 1));
+//	fileHeaderTable[DirectorySector] = hdr;
+	fileHeaderTable.add(DirectorySector, hdr);
     }
 
     /**
@@ -278,7 +280,7 @@ class FileSystemReal extends FileSystem {
      */
     public boolean create(String name, long initialSize) {
 
-	createSem.P();
+	//createSem.P();
 
 	Directory directory;
 	BitMap freeMap;
@@ -314,14 +316,14 @@ class FileSystemReal extends FileSystem {
 		    freeMap.writeBack(freeMapFile);
 
 		    // add to File Head table
-		    hdr.setSem(new Semaphore("fileHeaderLock" + sector, 1));
+		    //hdr.setSem(new Semaphore("fileHeaderLock" + sector, 1));
 
-		    fileHeaderTable[sector] = hdr;
+		    //fileHeaderTable[sector] = hdr;
 		}
 	    }
 	}
 
-	createSem.V();
+	//createSem.V();
 
 	return success;
     }
@@ -335,7 +337,7 @@ class FileSystemReal extends FileSystem {
      */
     public OpenFile open(String name) {
 
-	openSem.P();
+	//openSem.P();
 	Directory directory = new Directory(NumDirEntries, this);
 	OpenFile openFile = null;
 	int sector;
@@ -344,20 +346,21 @@ class FileSystemReal extends FileSystem {
 	directory.fetchFrom(directoryFile);
 	sector = directory.find(name);
 	if (sector >= 0) {
-	    if (fileHeaderTable[sector] == null) {
+	    if (!fileHeaderTable.contains(sector)) {
 		// add to File Head table
 		FileHeader hdr = new FileHeader(this);
 		hdr.fetchFrom(sector);
-		hdr.setSem(new Semaphore("fileHeaderLock" + sector, 1));
+		//hdr.setSem(new Semaphore("fileHeaderLock" + sector, 1));
 
-		fileHeaderTable[sector] = hdr;
+		//fileHeaderTable[sector] = hdr;
+		fileHeaderTable.add(sector, hdr);
 	    }
 
 	    openFile = new OpenFileReal(sector, this);// name was found in
 	    // directory
 	}
 
-	openSem.V();
+	//openSem.V();
 	return openFile; // return null if not found
     }
 
@@ -374,7 +377,7 @@ class FileSystemReal extends FileSystem {
      */
     public boolean remove(String name) {
 
-	removeSem.P();
+	//removeSem.P();
 
 	Directory directory;
 	BitMap freeMap;
@@ -400,9 +403,10 @@ class FileSystemReal extends FileSystem {
 	freeMap.writeBack(freeMapFile); // flush to disk
 	directory.writeBack(directoryFile); // flush to disk
 
-	fileHeaderTable[sector] = null;
+	//fileHeaderTable[sector] = null;
+	fileHeaderTable.remove(sector);
 
-	removeSem.V();
+	//removeSem.V();
 	return true;
     }
 
@@ -455,8 +459,8 @@ class FileSystemReal extends FileSystem {
 	 * Disk sectors that are used by files (or file headers), but that are
 	 * also marked as "free" in the bitmap.
 	 */
-	for (int i = 0; i < fileHeaderTable.length; i++) {
-	    if (fileHeaderTable[i] != null) {
+	for (int i = 0; i < fileHeaderTable.size(); i++) {
+	    if (fileHeaderTable.get(i) != null) {
 		// check file header sector
 		if (freeMap.test(i) == false) {
 		    Debug.println('+',
@@ -464,7 +468,7 @@ class FileSystemReal extends FileSystem {
 		}
 
 		// check data sectors
-		int[] dataSectors = fileHeaderTable[i].getDataSectors();
+		int[] dataSectors = fileHeaderTable.get(i).getDataSectors();
 		for (int j = 0; j < dataSectors.length; j++) {
 		    if (dataSectors[j] != -1
 			    && freeMap.test(dataSectors[j]) == false) {
@@ -479,10 +483,10 @@ class FileSystemReal extends FileSystem {
 
 
 	boolean tmpMap[] = new boolean[numDiskSectors];
-	for (int i = 0; i < fileHeaderTable.length; i++) {
-	    if (fileHeaderTable[i] != null) {
+	for (int i = 0; i < fileHeaderTable.size(); i++) {
+	    if (fileHeaderTable.get(i) != null) {
 		tmpMap[i] = true;
-		int[] dataSectors = fileHeaderTable[i].getDataSectors();
+		int[] dataSectors = fileHeaderTable.get(i).getDataSectors();
 		for (int j = 0; j < dataSectors.length; j++) {
 		    if (dataSectors[j] != -1) {
 			tmpMap[dataSectors[j]] = true;
@@ -505,10 +509,10 @@ class FileSystemReal extends FileSystem {
 	for (int i = 0; i < tmpMap.length; i++) {
 	    tmpMap[i] = false;
 	}
-	for (int i = 0; i < fileHeaderTable.length; i++) {
+	for (int i = 0; i < fileHeaderTable.size(); i++) {
 	    
-	    if(fileHeaderTable[i]!=null){
-		    int[] dataSectors = fileHeaderTable[i].getDataSectors();
+	    if(fileHeaderTable.get(i)!=null){
+		    int[] dataSectors = fileHeaderTable.get(i).getDataSectors();
 		    for (int j = 0; j < dataSectors.length; j++) {
 			if (dataSectors[j] != -1) {
 			    if (tmpMap[dataSectors[j]] == false) {
@@ -529,9 +533,9 @@ class FileSystemReal extends FileSystem {
 	/**
 	 * multiple times in a single file header
 	 */
-	for (int i = 0; i < fileHeaderTable.length; i++) {
-	    if(fileHeaderTable[i]!=null){
-	    int[] dataSectors = fileHeaderTable[i].getDataSectors();
+	for (int i = 0; i < fileHeaderTable.size(); i++) {
+	    if(fileHeaderTable.get(i)!=null){
+	    int[] dataSectors = fileHeaderTable.get(i).getDataSectors();
 	    ArrayList<Integer> tmpList = new ArrayList<Integer>();
 	    
 	    
