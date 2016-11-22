@@ -178,7 +178,7 @@ public class StressTest implements Runnable{
 
 	
 	
-	for(int i=1;i<=2;i++){
+	for(int i=1;i<=5;i++){
 	    
 	    
 	    NachosThread thread = new NachosThread("Stress test"+i,new StressTest());

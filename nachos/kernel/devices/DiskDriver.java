@@ -137,7 +137,7 @@ if(Nachos.options.CSCAN){
     
 }	
 
-//	Debug.println('+', "workQueue size: " + workQueue.size());
+	//Debug.println('+', "workQueue size: " + workQueue.size());
 	
 	if (busy) {
 	   // Debug.println('+', "inside busy- write");
@@ -181,7 +181,7 @@ if(Nachos.options.CSCAN){
 	if(sectorNumber == disk.geometry.NumSectors - 1) wait = true;
 	
 	}
-//	Debug.println('+', "workQueue size: " + workQueue.size());
+	//Debug.println('+', "workQueue size: " + workQueue.size());
 	
 	if (busy) {
 	 //   Debug.println('+', "inside busy");

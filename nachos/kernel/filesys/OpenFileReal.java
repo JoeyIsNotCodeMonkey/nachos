@@ -69,9 +69,9 @@ class OpenFileReal implements OpenFile {
 	
 	hdr = FileSystemReal.fileHeaderTable.get(sector);
 	
-	if(hdr==null){
-	    hdr = new FileHeader(filesystem);
-	}
+//	if(hdr==null){
+//	    hdr = new FileHeader(filesystem);
+//	}
 	
 	
 	hdr.fetchFrom(sector);

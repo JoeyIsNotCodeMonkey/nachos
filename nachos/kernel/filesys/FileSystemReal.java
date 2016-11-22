@@ -14,6 +14,7 @@ import java.util.ArrayList;
 
 import nachos.Debug;
 import nachos.kernel.devices.DiskDriver;
+import nachos.kernel.threads.Lock;
 import nachos.kernel.threads.Semaphore;
 import nachos.machine.Disk;
 
@@ -115,11 +116,13 @@ class FileSystemReal extends FileSystem {
     //public static FileHeader[] fileHeaderTable;
     public static FileHeaderTable fileHeaderTable;
 
-    //private Semaphore createSem = new Semaphore("create", 1);
-
-    //private Semaphore openSem = new Semaphore("open", 1);
-
-    //private Semaphore removeSem = new Semaphore("remove", 1);
+//    private Semaphore createSem = new Semaphore("create", 1);
+//
+//    private Semaphore openSem = new Semaphore("open", 1);
+//
+//    private Semaphore removeSem = new Semaphore("remove", 1);
+    
+    private Lock lock;
 
     /**
      * Initialize the file system. If format = true, the disk has nothing on it,
@@ -142,6 +145,8 @@ class FileSystemReal extends FileSystem {
 	diskSectorSize = diskDriver.getSectorSize();
 	FreeMapFileSize = (numDiskSectors / BitMap.BitsInByte);
 	DirectoryFileSize = (DirectoryEntry.sizeOf() * NumDirEntries);
+	
+	lock = new Lock("file operation lock");
 
 	fileHeaderTable = new FileHeaderTable();
 	
@@ -179,6 +184,15 @@ class FileSystemReal extends FileSystem {
 	    // OK to open the bitmap and directory files now
 	    // The file system operations assume these two files are left open
 	    // while Nachos is running.
+	    FileHeader hdr = new FileHeader(this);
+		hdr.fetchFrom(FreeMapSector);
+		fileHeaderTable.add(FreeMapSector, hdr);
+		
+		
+
+		hdr = new FileHeader(this);
+		hdr.fetchFrom(DirectorySector);
+		fileHeaderTable.add(DirectorySector, hdr);
 
 	    freeMapFile = new OpenFileReal(FreeMapSector, this);
 	    directoryFile = new OpenFileReal(DirectorySector, this);
@@ -204,20 +218,22 @@ class FileSystemReal extends FileSystem {
 	    // representing
 	    // the bitmap and directory; these are left open while Nachos is
 	    // running
+	    FileHeader hdr = new FileHeader(this);
+		hdr.fetchFrom(FreeMapSector);
+		fileHeaderTable.add(FreeMapSector, hdr);
+		
+		
+
+		hdr = new FileHeader(this);
+		hdr.fetchFrom(DirectorySector);
+		fileHeaderTable.add(DirectorySector, hdr);
+	    
 	    freeMapFile = new OpenFileReal(FreeMapSector, this);
 	    directoryFile = new OpenFileReal(DirectorySector, this);
 
 	}
 
-	FileHeader hdr = new FileHeader(this);
-	hdr.fetchFrom(FreeMapSector);
-	fileHeaderTable.add(FreeMapSector, hdr);
 	
-	
-
-	hdr = new FileHeader(this);
-	hdr.fetchFrom(DirectorySector);
-	fileHeaderTable.add(DirectorySector, hdr);
     }
 
     /**
@@ -277,6 +293,7 @@ class FileSystemReal extends FileSystem {
     public boolean create(String name, long initialSize) {
 
 	//createSem.P();
+	lock.acquire();
 
 	Directory directory;
 	BitMap freeMap;
@@ -322,6 +339,7 @@ class FileSystemReal extends FileSystem {
 	}
 
 	//createSem.V();
+	lock.release();
 
 	return success;
     }
@@ -336,6 +354,7 @@ class FileSystemReal extends FileSystem {
     public OpenFile open(String name) {
 
 	//openSem.P();
+	lock.acquire();
 	Directory directory = new Directory(NumDirEntries, this);
 	OpenFile openFile = null;
 	int sector;
@@ -360,6 +379,7 @@ class FileSystemReal extends FileSystem {
 	}
 
 	//openSem.V();
+	lock.release();
 	return openFile; // return null if not found
     }
 
@@ -377,6 +397,7 @@ class FileSystemReal extends FileSystem {
     public boolean remove(String name) {
 
 	//removeSem.P();
+	lock.acquire();
 
 	Directory directory;
 	BitMap freeMap;
@@ -406,6 +427,7 @@ class FileSystemReal extends FileSystem {
 	fileHeaderTable.remove(sector);
 
 	//removeSem.V();
+	lock.release();
 	return true;
     }
 
