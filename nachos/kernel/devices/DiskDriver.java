@@ -124,18 +124,19 @@ public class DiskDriver {
 
 	IORB work = new IORB(sectorNumber, 1, data, index,
 		new Semaphore("work" + count++, 0));
+	//Debug.println('+', "---------------Offerring " + work.getSectorNumber());
 	workQueue.offer(work);
 	
 	
-if(Nachos.options.CSCAN){
-	if(!wait) {
-	    Collections.sort((LinkedList<IORB>) workQueue, new CustomComparator());
-	}
-	
-	if(sectorNumber == disk.geometry.NumSectors - 1) wait = true;
-    
-    
-}	
+        if(Nachos.options.CSCAN){
+        	if(!wait) {
+        	    Collections.sort((LinkedList<IORB>) workQueue, new CustomComparator());
+        	}
+        	
+        	if(sectorNumber == disk.geometry.NumSectors - 1) wait = true;
+            
+            
+        }	
 
 	//Debug.println('+', "workQueue size: " + workQueue.size());
 	
@@ -198,13 +199,19 @@ if(Nachos.options.CSCAN){
     }
 
     private void startOutput() {
+	
 	if (busy)
 	    return;
 
-	if (t != null)
+	if (t != null){
+	    
 	    t.getSemaphore().V();
-
+	   
+	   // Debug.println('+', "---------------Freeing " + t.getSectorNumber());
+	}
+	
 	t = workQueue.poll();
+	
 	if (t == null){
 	    //Debug.println('+', "t is null********");
 	    return;

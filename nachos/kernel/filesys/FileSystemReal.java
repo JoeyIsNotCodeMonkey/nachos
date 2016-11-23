@@ -11,12 +11,16 @@
 package nachos.kernel.filesys;
 
 import java.util.ArrayList;
+import java.util.Iterator;
+import java.util.Map;
+import java.util.Map.Entry;
 
 import nachos.Debug;
 import nachos.kernel.devices.DiskDriver;
 import nachos.kernel.threads.Lock;
 import nachos.kernel.threads.Semaphore;
 import nachos.machine.Disk;
+import nachos.machine.NachosThread;
 
 /**
  * This class manages the overall operation of the file system. It implements
@@ -247,7 +251,9 @@ class FileSystemReal extends FileSystem {
      *            Offset in the buffer at which to place the data.
      */
     void readSector(int sectorNumber, byte[] data, int index) {
+	
 	diskDriver.readSector(sectorNumber, data, index);
+	
     }
 
     /**
@@ -293,8 +299,9 @@ class FileSystemReal extends FileSystem {
     public boolean create(String name, long initialSize) {
 
 	//createSem.P();
-	lock.acquire();
-
+	
+	fileHeaderTable.lock(DirectorySector);
+	fileHeaderTable.lock(FreeMapSector);
 	Directory directory;
 	BitMap freeMap;
 	FileHeader hdr;
@@ -339,8 +346,9 @@ class FileSystemReal extends FileSystem {
 	}
 
 	//createSem.V();
-	lock.release();
-
+	
+	fileHeaderTable.release(FreeMapSector);
+	fileHeaderTable.release(DirectorySector);
 	return success;
     }
 
@@ -354,12 +362,13 @@ class FileSystemReal extends FileSystem {
     public OpenFile open(String name) {
 
 	//openSem.P();
-	lock.acquire();
+	fileHeaderTable.lock(DirectorySector);
+
 	Directory directory = new Directory(NumDirEntries, this);
 	OpenFile openFile = null;
 	int sector;
 
-	Debug.printf('+', "Opening file %s\n", name);
+	Debug.printf('+', "Opening file %s- %s\n", name,NachosThread.currentThread().name);
 	
 	directory.fetchFrom(directoryFile);
 	sector = directory.find(name);
@@ -379,7 +388,8 @@ class FileSystemReal extends FileSystem {
 	}
 
 	//openSem.V();
-	lock.release();
+
+	fileHeaderTable.release(DirectorySector);
 	return openFile; // return null if not found
     }
 
@@ -397,7 +407,10 @@ class FileSystemReal extends FileSystem {
     public boolean remove(String name) {
 
 	//removeSem.P();
-	lock.acquire();
+//	lock.acquire();
+	Debug.printf('+', "Removing file %s- %s\n", name,NachosThread.currentThread().name);
+	fileHeaderTable.lock(DirectorySector);
+	fileHeaderTable.lock(FreeMapSector);
 
 	Directory directory;
 	BitMap freeMap;
@@ -424,10 +437,17 @@ class FileSystemReal extends FileSystem {
 	directory.writeBack(directoryFile); // flush to disk
 
 	//fileHeaderTable[sector] = null;
-	fileHeaderTable.remove(sector);
+	
+	
+//	fileHeaderTable.remove(sector);
 
-	//removeSem.V();
-	lock.release();
+//	//removeSem.V();
+//	lock.release();
+	
+	
+	fileHeaderTable.release(FreeMapSector);
+	fileHeaderTable.release(DirectorySector);
+	
 	return true;
     }
 
@@ -477,88 +497,59 @@ class FileSystemReal extends FileSystem {
 	freeMap.fetchFrom(freeMapFile);
 
 	/**
-	 * Disk sectors that are used by files (or file headers), but that are
-	 * also marked as "free" in the bitmap.
-	 */
-	for (int i = 0; i < fileHeaderTable.size(); i++) {
-	    if (fileHeaderTable.get(i) != null) {
-		// check file header sector
-		if (freeMap.test(i) == false) {
-		    Debug.println('+',
-			    "Disk sectors that are used by files (or file headers), but that are also marked as 'free' in the bitmap.Sector: "+ i);
-		    break;
-		}
+	  * Disk sectors that are used by files (or file headers), but that are
+	  * also marked as "free" in the bitmap.
+	  */
+	 Iterator<Entry<Integer, FileHeader>> it = fileHeaderTable.getFileHeaderTable().entrySet().iterator();
+	 while (it.hasNext()) {
+	     Map.Entry pair = (Map.Entry) it.next();
+	     //check file header
+	     if(!freeMap.test((int)pair.getKey())) {
+	  Debug.println('+', "Disk sectors that are used by files (or file headers), but that are also marked as \"free\" in the bitmap.");
+	  break;
+	     }
+	     
+	     int[] dataSectors = ((FileHeader)pair.getValue()).getDataSectors();
+	     for (int j = 0; j < dataSectors.length; j++) {
+	      if (dataSectors[j] != -1 && !freeMap.test(dataSectors[j])) {
+	   Debug.println('+', "Disk sectors that are used by files (or file headers), but that are also marked as \"free\" in the bitmap.");
+	   break;
+	      }
+	  }
+	 }
+	 
+	 
+	 /**
+	  * Disk sectors that are not used by any files (or file headers), but that are marked as "in use" in the bitmap.
+	  */
+	 
 
-		// check data sectors
-		int[] dataSectors = fileHeaderTable.get(i).getDataSectors();
-		for (int j = 0; j < dataSectors.length; j++) {
-		    if (dataSectors[j] != -1
-			    && freeMap.test(dataSectors[j]) == false) {
-			Debug.println('+',
-				"Disk sectors that are used by files (or file headers), but that are also marked as 'free' in the bitmap.Sector:"+j);
-			break;
-		    }
-		}
-	    }
+	 boolean tmpMap[] = new boolean[numDiskSectors];
+	 while (it.hasNext()) {
+	     Map.Entry pair = (Map.Entry) it.next();
+	     tmpMap[(int)pair.getKey()] = true;
+	     int[] dataSectors = ((FileHeader)pair.getValue()).getDataSectors();
+	  for (int j = 0; j < dataSectors.length; j++) {
+	      if (dataSectors[j] != -1) {
+	   tmpMap[dataSectors[j]] = true;
+	      }
+	  }
+	  
+	 }
+	 
+	 for (int i = 0; i < tmpMap.length; i++) {
+	     if (tmpMap[i] == false && freeMap.test(i)) {
+	  Debug.println('+',
+	   "Disk sectors that are not used by any files (or file headers), but that are marked as 'in use' in the bitmap.Sector: " + i);
+	  break;
+	     }
+	 }
 
-	}
-
-
-
-	boolean tmpMap[] = new boolean[numDiskSectors];
-	for (int i = 0; i < fileHeaderTable.size(); i++) {
-	    if (fileHeaderTable.get(i) != null) {
-		tmpMap[i] = true;
-		int[] dataSectors = fileHeaderTable.get(i).getDataSectors();
-		for (int j = 0; j < dataSectors.length; j++) {
-		    if (dataSectors[j] != -1) {
-			tmpMap[dataSectors[j]] = true;
-		    }
-		}
-	    }
-	}
-
-	for (int i = 0; i < tmpMap.length; i++) {
-	    if (tmpMap[i] == false && freeMap.test(i)) {
-		Debug.println('+',
-			"Disk sectors that are not used by any files (or file headers), but that are marked as 'in use' in the bitmap.Sector: "+ i);
-		break;
-	    }
-	}
-
-	/**
-	 * Disk sectors that are referenced by more than one file header
-	 */
-	// clear tmpMap
-	for (int i = 0; i < tmpMap.length; i++) {
-	    tmpMap[i] = false;
-	}
-	for (int i = 0; i < fileHeaderTable.size(); i++) {
-	    
-	    if(fileHeaderTable.get(i)!=null){
-		    int[] dataSectors = fileHeaderTable.get(i).getDataSectors();
-		    for (int j = 0; j < dataSectors.length; j++) {
-			if (dataSectors[j] != -1) {
-			    if (tmpMap[dataSectors[j]] == false) {
-				tmpMap[dataSectors[j]] = true;
-			    }
-
-			    else {
-				Debug.println('+',"Disk sectors that are referenced by more than one file header- sector: "+j);
-				
-				break;
-			    }
-			}
-		    }
-	    }
-	    
-
-	}
-
-	/**
+	/*
 	 * multiple times in a single file header
 	 */
-	for (int i = 0; i < fileHeaderTable.size(); i++) {
+	//for (int i = 0; i < fileHeaderTable.size(); i++) {
+	for(int i : fileHeaderTable.getFileHeaderTable().keySet()){
 	    if(fileHeaderTable.get(i)!=null){
 	    int[] dataSectors = fileHeaderTable.get(i).getDataSectors();
 	    ArrayList<Integer> tmpList = new ArrayList<Integer>();
@@ -574,7 +565,7 @@ class FileSystemReal extends FileSystem {
 			}
 		}
 
-	    }
+	    	}
 	    }
 	}
 

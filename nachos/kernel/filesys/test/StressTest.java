@@ -47,6 +47,10 @@ public class StressTest implements Runnable{
     private static final String ContentString = "1234567890";
     
     private String[] names = {"os1", "os2", "os3", "os4", "os5", "os6", "os7", "os8", "os9", "os10"};
+    
+    
+    
+    private static int count ;
 
     /** Length of the test data. */
     private static final int ContentSize = ContentString.length();
@@ -66,6 +70,10 @@ public class StressTest implements Runnable{
      * out performance #'s.
      */
     private void performanceTest() {
+	
+	
+	
+	
 	Debug.print('+', "Starting file system performance test:\n");
 	//Simulation.stats.print();
 	Random random = new Random();
@@ -75,15 +83,22 @@ public class StressTest implements Runnable{
 	String fileName = names[rand];
 	fileWrite(fileName);
 	
-	fileRead(fileName);
-	//Debug.print('+', "Readinging:\n");
+	//fileRead(fileName);
+
 	if (!Nachos.fileSystem.remove(fileName)) {
 	    Debug.printf('+', "Perf test: unable to remove %s\n", fileName);
-	    return;
+	    //return;
 	}
-	//Simulation.stats.print();
+	
 	Debug.print('+', "Ending file system performance test:\n");
-	Nachos.fileSystem.checkConsistency();
+	
+	count --;
+	if(count==0){
+	    Nachos.fileSystem.checkConsistency();
+	    
+	}
+	   
+	
     }
     
 
@@ -167,7 +182,7 @@ public class StressTest implements Runnable{
     @Override
     public void run() {
 	// TODO Auto-generated method stub
-
+	
 	 performanceTest();
 	    	
 	Nachos.scheduler.finishThread();
@@ -176,9 +191,10 @@ public class StressTest implements Runnable{
     
     public static void start() {
 
+	//Nachos.fileSystem.checkConsistency();
 	
-	
-	for(int i=1;i<=5;i++){
+	count =3;
+	for(int i=1;i<=3;i++){
 	    
 	    
 	    NachosThread thread = new NachosThread("Stress test"+i,new StressTest());
