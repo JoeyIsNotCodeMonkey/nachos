@@ -406,8 +406,8 @@ class FileSystemReal extends FileSystem {
 
 
 	//removeSem.P();
-//	lock.acquire();
-	Debug.printf('+', "Removing file %s- %s\n", name,NachosThread.currentThread().name);
+	//lock.acquire();
+	Debug.printf('+', "Removing file: %s\n", name);
 	fileHeaderTable.lock(DirectorySector);
 	fileHeaderTable.lock(FreeMapSector);
 
@@ -419,7 +419,9 @@ class FileSystemReal extends FileSystem {
 	directory = new Directory(NumDirEntries, this);
 	directory.fetchFrom(directoryFile);
 	sector = directory.find(name);
+	
 	if (sector == -1) {
+	   // lock.release();
 	    return false; // file not found
 	}
 	fileHdr = new FileHeader(this);
@@ -443,12 +445,16 @@ class FileSystemReal extends FileSystem {
 
 
 //	//removeSem.V();
-//	lock.release();
+	
 	
 	
 	fileHeaderTable.release(FreeMapSector);
 	fileHeaderTable.release(DirectorySector);
 	
+	
+	
+	
+	//lock.release();
 	return true;
     }
 
@@ -507,14 +513,14 @@ class FileSystemReal extends FileSystem {
 	     Map.Entry pair = (Map.Entry) it.next();
 	     //check file header
 	     if(!freeMap.test((int)pair.getKey())) {
-	  Debug.println('+', "Disk sectors that are used by files (or file headers), but that are also marked as \"free\" in the bitmap.");
+	  Debug.println('+', "Disk sectors that are used by files (or file headers), but that are also marked as \"free\" in the bitmap."+(int)pair.getKey());
 	  break;
 	     }
 	     
 	     int[] dataSectors = ((FileHeader)pair.getValue()).getDataSectors();
 	     for (int j = 0; j < dataSectors.length; j++) {
 	      if (dataSectors[j] != -1 && !freeMap.test(dataSectors[j])) {
-	   Debug.println('+', "Disk sectors that are used by files (or file headers), but that are also marked as \"free\" in the bitmap.");
+	   Debug.println('+', "Disk sectors that are used by files (or file headers), but that are also marked as \"free\" in the bitmap."+j);
 	   break;
 	      }
 	      //dataSectors = null;

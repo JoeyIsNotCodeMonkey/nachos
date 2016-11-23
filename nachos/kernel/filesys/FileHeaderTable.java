@@ -7,7 +7,7 @@ import nachos.kernel.threads.Semaphore;
 
 public class FileHeaderTable {
     private HashMap<Integer, FileHeader> fileHeaderTable;
-    private Lock lock;
+    protected Semaphore lock;
     
     public HashMap<Integer, FileHeader> getFileHeaderTable() {
         return fileHeaderTable;
@@ -19,7 +19,7 @@ public class FileHeaderTable {
 
     public FileHeaderTable() {
 	fileHeaderTable = new HashMap<Integer, FileHeader>();
-	lock = new Lock("file operation lock");
+	lock = new Semaphore("file operation lock",1);
     }
     
     public void add(int sector, FileHeader fileHeader) {
@@ -36,10 +36,10 @@ public class FileHeaderTable {
     }
     
     public void remove(int sector) {
-	fileHeaderTable.get(sector).getSem().V();
 	
-	
+	lock.P();
 	fileHeaderTable.remove(sector);	
+	lock.V();
     }
     
     public boolean contains(int sector) {
