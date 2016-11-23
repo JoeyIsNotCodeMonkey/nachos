@@ -7,6 +7,14 @@ import nachos.kernel.threads.Semaphore;
 public class FileHeaderTable {
     private HashMap<Integer, FileHeader> fileHeaderTable;
     
+    public HashMap<Integer, FileHeader> getFileHeaderTable() {
+        return fileHeaderTable;
+    }
+
+    public void setFileHeaderTable(HashMap<Integer, FileHeader> fileHeaderTable) {
+        this.fileHeaderTable = fileHeaderTable;
+    }
+
     public FileHeaderTable() {
 	fileHeaderTable = new HashMap<Integer, FileHeader>();
     }

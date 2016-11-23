@@ -11,6 +11,9 @@
 package nachos.kernel.filesys;
 
 import java.util.ArrayList;
+import java.util.Iterator;
+import java.util.Map;
+import java.util.Map.Entry;
 
 import nachos.Debug;
 import nachos.kernel.devices.DiskDriver;
@@ -113,15 +116,15 @@ class FileSystemReal extends FileSystem {
     private final OpenFile directoryFile;
 
     // public static FileHeader fileHeaderTable[] = new FileHeader[10];
-    //public static FileHeader[] fileHeaderTable;
+    // public static FileHeader[] fileHeaderTable;
     public static FileHeaderTable fileHeaderTable;
 
-//    private Semaphore createSem = new Semaphore("create", 1);
-//
-//    private Semaphore openSem = new Semaphore("open", 1);
-//
-//    private Semaphore removeSem = new Semaphore("remove", 1);
-    
+    // private Semaphore createSem = new Semaphore("create", 1);
+    //
+    // private Semaphore openSem = new Semaphore("open", 1);
+    //
+    // private Semaphore removeSem = new Semaphore("remove", 1);
+
     private Lock lock;
 
     /**
@@ -145,11 +148,10 @@ class FileSystemReal extends FileSystem {
 	diskSectorSize = diskDriver.getSectorSize();
 	FreeMapFileSize = (numDiskSectors / BitMap.BitsInByte);
 	DirectoryFileSize = (DirectoryEntry.sizeOf() * NumDirEntries);
-	
+
 	lock = new Lock("file operation lock");
 
 	fileHeaderTable = new FileHeaderTable();
-	
 
 	if (format) {
 	    BitMap freeMap = new BitMap(numDiskSectors);
@@ -185,14 +187,12 @@ class FileSystemReal extends FileSystem {
 	    // The file system operations assume these two files are left open
 	    // while Nachos is running.
 	    FileHeader hdr = new FileHeader(this);
-		hdr.fetchFrom(FreeMapSector);
-		fileHeaderTable.add(FreeMapSector, hdr);
-		
-		
+	    hdr.fetchFrom(FreeMapSector);
+	    fileHeaderTable.add(FreeMapSector, hdr);
 
-		hdr = new FileHeader(this);
-		hdr.fetchFrom(DirectorySector);
-		fileHeaderTable.add(DirectorySector, hdr);
+	    hdr = new FileHeader(this);
+	    hdr.fetchFrom(DirectorySector);
+	    fileHeaderTable.add(DirectorySector, hdr);
 
 	    freeMapFile = new OpenFileReal(FreeMapSector, this);
 	    directoryFile = new OpenFileReal(DirectorySector, this);
@@ -219,21 +219,18 @@ class FileSystemReal extends FileSystem {
 	    // the bitmap and directory; these are left open while Nachos is
 	    // running
 	    FileHeader hdr = new FileHeader(this);
-		hdr.fetchFrom(FreeMapSector);
-		fileHeaderTable.add(FreeMapSector, hdr);
-		
-		
+	    hdr.fetchFrom(FreeMapSector);
+	    fileHeaderTable.add(FreeMapSector, hdr);
 
-		hdr = new FileHeader(this);
-		hdr.fetchFrom(DirectorySector);
-		fileHeaderTable.add(DirectorySector, hdr);
-	    
+	    hdr = new FileHeader(this);
+	    hdr.fetchFrom(DirectorySector);
+	    fileHeaderTable.add(DirectorySector, hdr);
+
 	    freeMapFile = new OpenFileReal(FreeMapSector, this);
 	    directoryFile = new OpenFileReal(DirectorySector, this);
 
 	}
 
-	
     }
 
     /**
@@ -292,7 +289,7 @@ class FileSystemReal extends FileSystem {
      */
     public boolean create(String name, long initialSize) {
 
-	//createSem.P();
+	// createSem.P();
 	lock.acquire();
 
 	Directory directory;
@@ -329,16 +326,16 @@ class FileSystemReal extends FileSystem {
 		    freeMap.writeBack(freeMapFile);
 
 		    // add to File Head table
-		    //hdr.setSem(new Semaphore("fileHeaderLock" + sector, 1));
+		    // hdr.setSem(new Semaphore("fileHeaderLock" + sector, 1));
 
-		    //fileHeaderTable[sector] = hdr;
-		    
+		    // fileHeaderTable[sector] = hdr;
+
 		    Debug.printf('+', "Createed %s\n", name);
 		}
 	    }
 	}
 
-	//createSem.V();
+	// createSem.V();
 	lock.release();
 
 	return success;
@@ -353,14 +350,14 @@ class FileSystemReal extends FileSystem {
      */
     public OpenFile open(String name) {
 
-	//openSem.P();
+	// openSem.P();
 	lock.acquire();
 	Directory directory = new Directory(NumDirEntries, this);
 	OpenFile openFile = null;
 	int sector;
 
 	Debug.printf('+', "Opening file %s\n", name);
-	
+
 	directory.fetchFrom(directoryFile);
 	sector = directory.find(name);
 	if (sector >= 0) {
@@ -368,9 +365,9 @@ class FileSystemReal extends FileSystem {
 		// add to File Head table
 		FileHeader hdr = new FileHeader(this);
 		hdr.fetchFrom(sector);
-		//hdr.setSem(new Semaphore("fileHeaderLock" + sector, 1));
+		// hdr.setSem(new Semaphore("fileHeaderLock" + sector, 1));
 
-		//fileHeaderTable[sector] = hdr;
+		// fileHeaderTable[sector] = hdr;
 		fileHeaderTable.add(sector, hdr);
 	    }
 
@@ -378,7 +375,7 @@ class FileSystemReal extends FileSystem {
 	    // directory
 	}
 
-	//openSem.V();
+	// openSem.V();
 	lock.release();
 	return openFile; // return null if not found
     }
@@ -396,7 +393,7 @@ class FileSystemReal extends FileSystem {
      */
     public boolean remove(String name) {
 
-	//removeSem.P();
+	// removeSem.P();
 	lock.acquire();
 
 	Directory directory;
@@ -423,10 +420,10 @@ class FileSystemReal extends FileSystem {
 	freeMap.writeBack(freeMapFile); // flush to disk
 	directory.writeBack(directoryFile); // flush to disk
 
-	//fileHeaderTable[sector] = null;
+	// fileHeaderTable[sector] = null;
 	fileHeaderTable.remove(sector);
 
-	//removeSem.V();
+	// removeSem.V();
 	lock.release();
 	return true;
     }
@@ -468,160 +465,5 @@ class FileSystemReal extends FileSystem {
 
     }
 
-    public void checkConsistency() {
-	
-	
-	Debug.println('+',"---------------------Start Consistency Test--------------------");
-	
-	BitMap freeMap = new BitMap(numDiskSectors);
-	freeMap.fetchFrom(freeMapFile);
-
-	/**
-	 * Disk sectors that are used by files (or file headers), but that are
-	 * also marked as "free" in the bitmap.
-	 */
-	for (int i = 0; i < fileHeaderTable.size(); i++) {
-	    if (fileHeaderTable.get(i) != null) {
-		// check file header sector
-		if (freeMap.test(i) == false) {
-		    Debug.println('+',
-			    "Disk sectors that are used by files (or file headers), but that are also marked as 'free' in the bitmap.Sector: "+ i);
-		    break;
-		}
-
-		// check data sectors
-		int[] dataSectors = fileHeaderTable.get(i).getDataSectors();
-		for (int j = 0; j < dataSectors.length; j++) {
-		    if (dataSectors[j] != -1
-			    && freeMap.test(dataSectors[j]) == false) {
-			Debug.println('+',
-				"Disk sectors that are used by files (or file headers), but that are also marked as 'free' in the bitmap.Sector:"+j);
-			break;
-		    }
-		}
-	    }
-
-	}
-
-
-
-	boolean tmpMap[] = new boolean[numDiskSectors];
-	for (int i = 0; i < fileHeaderTable.size(); i++) {
-	    if (fileHeaderTable.get(i) != null) {
-		tmpMap[i] = true;
-		int[] dataSectors = fileHeaderTable.get(i).getDataSectors();
-		for (int j = 0; j < dataSectors.length; j++) {
-		    if (dataSectors[j] != -1) {
-			tmpMap[dataSectors[j]] = true;
-		    }
-		}
-	    }
-	}
-
-	for (int i = 0; i < tmpMap.length; i++) {
-	    if (tmpMap[i] == false && freeMap.test(i)) {
-		Debug.println('+',
-			"Disk sectors that are not used by any files (or file headers), but that are marked as 'in use' in the bitmap.Sector: "+ i);
-		break;
-	    }
-	}
-
-	/**
-	 * Disk sectors that are referenced by more than one file header
-	 */
-	// clear tmpMap
-	for (int i = 0; i < tmpMap.length; i++) {
-	    tmpMap[i] = false;
-	}
-	for (int i = 0; i < fileHeaderTable.size(); i++) {
-	    
-	    if(fileHeaderTable.get(i)!=null){
-		    int[] dataSectors = fileHeaderTable.get(i).getDataSectors();
-		    for (int j = 0; j < dataSectors.length; j++) {
-			if (dataSectors[j] != -1) {
-			    if (tmpMap[dataSectors[j]] == false) {
-				tmpMap[dataSectors[j]] = true;
-			    }
-
-			    else {
-				Debug.println('+',"Disk sectors that are referenced by more than one file header- sector: "+j);
-				
-				break;
-			    }
-			}
-		    }
-	    }
-	    
-
-	}
-
-	/**
-	 * multiple times in a single file header
-	 */
-	for (int i = 0; i < fileHeaderTable.size(); i++) {
-	    if(fileHeaderTable.get(i)!=null){
-	    int[] dataSectors = fileHeaderTable.get(i).getDataSectors();
-	    ArrayList<Integer> tmpList = new ArrayList<Integer>();
-	    
-	    
-	    for (int j = 0; j < dataSectors.length; j++) {
-		
-		if(dataSectors[j]!=-1){
-			if (tmpList.contains(dataSectors[j])) {
-			    Debug.println('+',"Multiple times in a single file header"+ i);
-			} else {
-			    tmpList.add(dataSectors[j]);
-			}
-		}
-
-	    }
-	    }
-	}
-
-	
-	
-	Directory directory = new Directory(NumDirEntries, this);
-	directory.fetchFrom(directoryFile);
-
-	DirectoryEntry[] list = directory.getTable();
-
-	ArrayList<Integer> temp = new ArrayList<Integer>();
-
-	ArrayList<String> stringTemp = new ArrayList<String>();
-	for (int i = 0; i < directory.getTableSize(); i++) {
-
-	    int sector = list[i].getSector();
-	    if(sector != 0){
-		
-		    if (!temp.contains(sector)) {
-			temp.add(sector);
-		    } else {
-			Debug.println('+',
-				"Multiple directory entries that refer to the same file header.");
-			break;
-		    }
-	    }
-
-
-	}
-
-	for (int i = 0; i < directory.getTableSize(); i++) {
-
-	    String name = list[i].getName();
-	    
-	    if(name!=null){
-		    if (!stringTemp.contains(name)) {
-			stringTemp.add(name);
-		    } else {
-			Debug.println('+',
-				"Multiple directory entries with the same file name");
-			break;
-		    }
-
-	    }
-	
-
-	}
-	Debug.println('+',"---------------------End Consistency Test--------------------");
-    }
+    
 }
