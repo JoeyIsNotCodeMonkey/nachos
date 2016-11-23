@@ -439,7 +439,7 @@ class FileSystemReal extends FileSystem {
 	//fileHeaderTable[sector] = null;
 	
 	
-//	fileHeaderTable.remove(sector);
+	fileHeaderTable.remove(sector);
 
 
 //	//removeSem.V();

@@ -77,16 +77,19 @@ public class StressTest implements Runnable {
 	// Simulation.stats.print();
 	Random random = new Random();
 	int rand = random.nextInt(9);
-	Debug.println('+', "Rand:" + rand);
+	// Debug.println('+', "Rand:" + rand);
 
 	String fileName = names[rand];
 	fileWrite(fileName);
 
-	// fileRead(fileName);
+	fileRead(fileName);
 
-	if (!Nachos.fileSystem.remove(fileName)) {
-	    Debug.printf('+', "Perf test: unable to remove %s\n", fileName);
-	    // return;
+	if (fileName.equalsIgnoreCase("os1") || fileName.equalsIgnoreCase("os2")
+		|| fileName.equalsIgnoreCase("os3")) {
+	    if (!Nachos.fileSystem.remove(fileName)) {
+		Debug.printf('+', "Perf test: unable to remove %s\n", fileName);
+		// return;
+	    }
 	}
 
 	Debug.print('+', "Ending file system performance test:\n");
