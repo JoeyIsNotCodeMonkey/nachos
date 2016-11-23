@@ -61,14 +61,14 @@ public class DiskDriver {
     /** Only one read/write request can be sent to the disk at a time. */
     private Lock lock;
 
-    private boolean busy = false;
+    private static boolean busy = false;
 
     int count = 0;
 
     int waitingThread = 0;
 
     private Queue<IORB> workQueue = new FIFOQueue<IORB>();
-    
+
     private boolean wait = false;
 
     /**
@@ -80,7 +80,7 @@ public class DiskDriver {
      */
     public DiskDriver(int unit) {
 
-	semaphore = new Semaphore("synch disk", 0);
+	semaphore = new Semaphore("synch disk", 1);
 
 	lock = new Lock("synch disk lock");
 	disk = Machine.getDisk(unit);
@@ -124,30 +124,32 @@ public class DiskDriver {
 
 	IORB work = new IORB(sectorNumber, 1, data, index,
 		new Semaphore("work" + count++, 0));
-	//Debug.println('+', "---------------Offerring " + work.getSectorNumber());
+	// Debug.println('+', "---------------Offerring " +
+	// work.getSectorNumber());
 	workQueue.offer(work);
-	
-	
-        if(Nachos.options.CSCAN){
-        	if(!wait) {
-        	    Collections.sort((LinkedList<IORB>) workQueue, new CustomComparator());
-        	}
-        	
-        	if(sectorNumber == disk.geometry.NumSectors - 1) wait = true;
-            
-            
-        }	
 
-	//Debug.println('+', "workQueue size: " + workQueue.size());
-	
+	// Debug.println('+', "---------------Offer " + work.getSectorNumber());
+	if (Nachos.options.CSCAN) {
+	    if (!wait) {
+		Collections.sort((LinkedList<IORB>) workQueue,
+			new CustomComparator());
+	    }
+
+	    if (sectorNumber == disk.geometry.NumSectors - 1)
+		wait = true;
+
+	}
+
+	// Debug.println('+', "workQueue size: " + workQueue.size());
+
 	if (busy) {
-	   // Debug.println('+', "inside busy- write");
+	    // Debug.println('+', "inside busy- write");
 	    lock.release();
 	    work.getSemaphore().P();
 	    lock.acquire();
 	}
 
-	startOutput();
+	startOutput("up");
 
 	CPU.setLevel(oldLevel);
 	lock.release();
@@ -165,75 +167,83 @@ public class DiskDriver {
      *            Offset in the buffer at which to place the data.
      */
     public void readSector(int sectorNumber, byte[] data, int index) {
-	
+
 	Debug.ASSERT(0 <= sectorNumber && sectorNumber < getNumSectors());
+
 	lock.acquire();
 	int oldLevel = CPU.setLevel(CPU.IntOff);
 
 	IORB work = new IORB(sectorNumber, 0, data, index,
 		new Semaphore("work" + count++, 0));
 	workQueue.offer(work);
-	
-	if(Nachos.options.CSCAN){	
-	if(!wait) {
-	    Collections.sort((LinkedList<IORB>) workQueue, new CustomComparator());
-	    
-	}	
-	if(sectorNumber == disk.geometry.NumSectors - 1) wait = true;
-	
+	// Debug.println('+', "---------------Offer " + work.getSectorNumber());
+	if (Nachos.options.CSCAN) {
+	    if (!wait) {
+		Collections.sort((LinkedList<IORB>) workQueue,
+			new CustomComparator());
+
+	    }
+	    if (sectorNumber == disk.geometry.NumSectors - 1)
+		wait = true;
+
 	}
-	//Debug.println('+', "workQueue size: " + workQueue.size());
-	
+	// Debug.println('+', "workQueue size: " + workQueue.size());
+
 	if (busy) {
-	 //   Debug.println('+', "inside busy");
+	    // Debug.println('+', "inside busy:");
 	    lock.release();
 	    work.getSemaphore().P();
 	    lock.acquire();
 	}
-	
-	
-	startOutput();
+
+	startOutput("up read");
 
 	CPU.setLevel(oldLevel);
 	lock.release();
     }
 
-    private void startOutput() {
-	
+    private void startOutput(String tag) {
+
 	if (busy)
 	    return;
+	// Debug.println('+', "---------------FUCKCKKCKC ------ " +tag);
 
-	if (t != null){
-	    
-	    t.getSemaphore().V();
-	   
-	   // Debug.println('+', "---------------Freeing " + t.getSectorNumber());
-	}
-	
+	IORB last = t;
+
 	t = workQueue.poll();
-	
-	if (t == null){
-	    //Debug.println('+', "t is null********");
+
+	if (t != null) {
+	    busy = true;
+	    // Debug.println('+', "---------------Workgin on " +
+	    // t.getSectorNumber());
+	}
+
+	if (last != null) {
+	    last.getSemaphore().V();
+	    // Debug.println('+', "---------------Last Finished " +
+	    // last.getSectorNumber());
+	}
+
+	if (t == null) {
+	    // Debug.println('+', "--------------t is null********");
 	    return;
 	}
-	    
-	   	
 
-//	Debug.println('+', "start Request********");
+	// Debug.println('+', "start Request********");
 
-	
-	if(t.getFlag() == 0) {
+	if (t.getFlag() == 0) {
+	    // Debug.println('+', "workQueue size: " + workQueue.size());
 	    disk.readRequest(t.getSectorNumber(), t.getData(), t.getIndex());
 	} else {
+	    // Debug.println('+', "workQueue size: " + workQueue.size());
 	    disk.writeRequest(t.getSectorNumber(), t.getData(), t.getIndex());
 	}
-	
-	busy = true;
-	
-	if(Nachos.options.CSCAN){
-	    if(t.getSectorNumber() == disk.geometry.NumSectors - 1) wait = false;
+
+	if (Nachos.options.CSCAN) {
+	    if (t.getSectorNumber() == disk.geometry.NumSectors - 1)
+		wait = false;
 	}
-	   
+
     }
 
     public static class CustomComparator implements Comparator<IORB> {
@@ -255,9 +265,11 @@ public class DiskDriver {
 	 * request that just finished.
 	 */
 	public void handleInterrupt() {
+
 	    busy = false;
-//	    Debug.println('+', "End Request");
-	    startOutput();
+
+	    // Debug.println('+', "End Request");
+	    startOutput("bott");
 	}
 
     }

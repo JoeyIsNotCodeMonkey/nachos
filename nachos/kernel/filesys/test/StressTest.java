@@ -189,6 +189,7 @@ public class StressTest implements Runnable {
 
 	    NachosThread thread = new NachosThread("Stress test" + i,
 		    new StressTest());
+
 	    Nachos.scheduler.readyToRun(thread);
 	}
 
