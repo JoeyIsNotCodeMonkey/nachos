@@ -103,15 +103,22 @@ class OpenFileReal implements OpenFile {
      * @return The number of bytes actually read (0 if error).
      */
     public int read(byte[] into, int index, int numBytes) {
-	
-	
+//	FileSystemReal.fileHeaderTable.lock.P();
+//	if(FileSystemReal.fileHeaderTable.contains(headerSector)){
 	FileSystemReal.fileHeaderTable.lock(headerSector);
 	
 	int result = readAt(into, index, numBytes, seekPosition);
 	seekPosition += result;
 	//Debug.println('+', "Releasing  Sector: "+ currentSector);
 	FileSystemReal.fileHeaderTable.release(headerSector);
+	FileSystemReal.fileHeaderTable.lock.V();
 	return result;
+	
+//	}else{
+//	    Debug.println('+', "Error: File header has been removed");
+//	    FileSystemReal.fileHeaderTable.lock.V();
+//	    return 0;
+//	}
     }
 
     /**
@@ -127,12 +134,22 @@ class OpenFileReal implements OpenFile {
      * @return The number of bytes actually written (0 if error).
      */
     public int write(byte[] from, int index, int numBytes) {
-	FileSystemReal.fileHeaderTable.lock(headerSector);
-	int result = writeAt(from, index, numBytes, seekPosition);
-	seekPosition += result;
-	FileSystemReal.fileHeaderTable.release(headerSector);
+//	FileSystemReal.fileHeaderTable.lock.P();
+//	if(FileSystemReal.fileHeaderTable.contains(headerSector)){
+		FileSystemReal.fileHeaderTable.lock(headerSector);
+		int result = writeAt(from, index, numBytes, seekPosition);
+		seekPosition += result;
+		FileSystemReal.fileHeaderTable.release(headerSector);
+		FileSystemReal.fileHeaderTable.lock.V();
+		return result;
+//	}else{
+//	    Debug.println('+', "Error: File header has been removed:");
+//	    FileSystemReal.fileHeaderTable.lock.V();
+//	    return 0;
+//	}
+
 	
-	return result;
+	
     }
 
     /**

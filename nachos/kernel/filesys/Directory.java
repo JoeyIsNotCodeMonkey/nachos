@@ -9,6 +9,8 @@
 
 package nachos.kernel.filesys;
 
+import nachos.Debug;
+
 /**
  * This class class defines a UNIX-like "directory".  Each entry in
  * the directory describes a file, and where to find it on disk.
@@ -74,6 +76,7 @@ class Directory {
     void fetchFrom(OpenFile file) {
 	byte buffer[] = new byte[tableSize * DirectoryEntry.sizeOf()];
 	file.readAt(buffer, 0, tableSize * DirectoryEntry.sizeOf(), 0);
+	
 	int pos = 0;
 	for (int i = 0; i < tableSize; i++) {
 	    table[i].internalize(buffer, pos);
@@ -105,8 +108,11 @@ class Directory {
      */
     private int findIndex(String name) {
 	for (int i = 0; i < tableSize; i++) {
-	    if (table[i].inUse() && name.equals(table[i].getName()))
+	    if (table[i].inUse() && name.equals(table[i].getName())){
+		
+	    
 		return i;
+	}
 	}
 	return -1;		// name not in directory
     }

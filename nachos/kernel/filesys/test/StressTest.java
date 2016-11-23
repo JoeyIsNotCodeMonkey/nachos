@@ -8,17 +8,20 @@ import java.util.Random;
 import nachos.Debug;
 import nachos.kernel.Nachos;
 import nachos.kernel.filesys.OpenFile;
+import nachos.kernel.threads.Semaphore;
 import nachos.machine.NachosThread;
 import nachos.machine.Simulation;
 
 public class StressTest implements Runnable {
-    private static final int numOfThread = 3;
+    private static final int numOfThread = 10;
 
     private static int count = numOfThread;
 
     /** Transfer data in small chunks, just to be difficult. */
     private static final int TransferSize = 10;
-
+    
+    
+    private Semaphore sem = new Semaphore("lcokdsdf",1);
     /**
      * Print the contents of the Nachos file "name".
      *
@@ -73,7 +76,7 @@ public class StressTest implements Runnable {
      */
     private void performanceTest() {
 
-	Debug.print('+', "Starting file system performance test:\n");
+	//Debug.print('+', "Starting file system performance test:\n");
 	// Simulation.stats.print();
 	Random random = new Random();
 	int rand = random.nextInt(9);
@@ -84,21 +87,14 @@ public class StressTest implements Runnable {
 
 	fileRead(fileName);
 
-	if (fileName.equalsIgnoreCase("os1") || fileName.equalsIgnoreCase("os2")
-		|| fileName.equalsIgnoreCase("os3")) {
+	if (fileName.equalsIgnoreCase("os1") || fileName.equalsIgnoreCase("os2")) {
 	    if (!Nachos.fileSystem.remove(fileName)) {
 		Debug.printf('+', "Perf test: unable to remove %s\n", fileName);
 		// return;
 	    }
 	}
 
-	Debug.print('+', "Ending file system performance test:\n");
 
-	count--;
-	if (count == 0) {
-	    Nachos.fileSystem.checkConsistency();
-
-	}
 
     }
 
@@ -109,9 +105,9 @@ public class StressTest implements Runnable {
 	OpenFile openFile;
 	int i, numBytes;
 
-	Debug.printf('+',
-		"Sequential write of %d byte file, in %d byte chunks\n",
-		new Integer(FileSize), new Integer(ContentSize));
+//	Debug.printf('+',
+//		"Sequential write of %d byte file, in %d byte chunks\n",
+//		new Integer(FileSize), new Integer(ContentSize));
 	if (!Nachos.fileSystem.create(fileName, FileSize)) {
 	    Debug.printf('+', "Perf test: can't create %s\n", fileName);
 	    return;
@@ -138,9 +134,9 @@ public class StressTest implements Runnable {
 	byte buffer[] = new byte[ContentSize];
 	int i, numBytes;
 
-	Debug.printf('+',
-		"Sequential read of %d byte file, in %d byte chunks\n",
-		new Integer(FileSize), new Integer(ContentSize));
+//	Debug.printf('+',
+//		"Sequential read of %d byte file, in %d byte chunks\n",
+//		new Integer(FileSize), new Integer(ContentSize));
 
 	if ((openFile = Nachos.fileSystem.open(fileName)) == null) {
 	    Debug.printf('+', "Perf test: unable to open file %s\n", fileName);
@@ -180,14 +176,39 @@ public class StressTest implements Runnable {
 
 	performanceTest();
 
-	Nachos.scheduler.finishThread();
+	
+	count --;
+	//sem.V();
+	
+	
+	
+	if (count == 0) {
+	    
+	   
+	    Nachos.fileSystem.checkConsistency();
+	    Debug.print('+', "End test:\n");
+	}
+	
+	     Nachos.scheduler.finishThread();
+	
 
+	
     }
 
     public static void start() {
-
+	Nachos.options.FORMAT_DISK = true;
+	Nachos.fileSystem.init(Nachos.diskDriver);
+	
+	
 	// Nachos.fileSystem.checkConsistency();
-
+	Debug.print('+', "Starting stress test:\n");
+	if(Nachos.options.CSCAN){
+	    Debug.println('+', "--------Using CSCAN");
+	}else{
+	    Debug.println('+', "--------Using FCFS");
+	}
+	
+	
 	for (int i = 1; i <= numOfThread; i++) {
 
 	    NachosThread thread = new NachosThread("Stress test" + i,
