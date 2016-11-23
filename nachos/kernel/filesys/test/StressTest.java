@@ -193,8 +193,8 @@ public class StressTest implements Runnable{
 
 	//Nachos.fileSystem.checkConsistency();
 	
-	count =3;
-	for(int i=1;i<=3;i++){
+	count =10;
+	for(int i=1;i<=10;i++){
 	    
 	    
 	    NachosThread thread = new NachosThread("Stress test"+i,new StressTest());
