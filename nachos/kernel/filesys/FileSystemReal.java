@@ -20,6 +20,7 @@ import nachos.kernel.devices.DiskDriver;
 import nachos.kernel.threads.Lock;
 import nachos.kernel.threads.Semaphore;
 import nachos.machine.Disk;
+import nachos.machine.NachosThread;
 
 /**
  * This class manages the overall operation of the file system. It implements
@@ -244,7 +245,9 @@ class FileSystemReal extends FileSystem {
      *            Offset in the buffer at which to place the data.
      */
     void readSector(int sectorNumber, byte[] data, int index) {
+	
 	diskDriver.readSector(sectorNumber, data, index);
+	
     }
 
     /**
@@ -289,9 +292,11 @@ class FileSystemReal extends FileSystem {
      */
     public boolean create(String name, long initialSize) {
 
-	// createSem.P();
-	lock.acquire();
 
+	//createSem.P();
+	
+	fileHeaderTable.lock(DirectorySector);
+	fileHeaderTable.lock(FreeMapSector);
 	Directory directory;
 	BitMap freeMap;
 	FileHeader hdr;
@@ -335,9 +340,11 @@ class FileSystemReal extends FileSystem {
 	    }
 	}
 
-	// createSem.V();
-	lock.release();
 
+	//createSem.V();
+	
+	fileHeaderTable.release(FreeMapSector);
+	fileHeaderTable.release(DirectorySector);
 	return success;
     }
 
@@ -350,14 +357,17 @@ class FileSystemReal extends FileSystem {
      */
     public OpenFile open(String name) {
 
-	// openSem.P();
-	lock.acquire();
+
+	//openSem.P();
+	fileHeaderTable.lock(DirectorySector);
+
 	Directory directory = new Directory(NumDirEntries, this);
 	OpenFile openFile = null;
 	int sector;
 
-	Debug.printf('+', "Opening file %s\n", name);
 
+	Debug.printf('+', "Opening file %s- %s\n", name,NachosThread.currentThread().name);
+	
 	directory.fetchFrom(directoryFile);
 	sector = directory.find(name);
 	if (sector >= 0) {
@@ -375,8 +385,9 @@ class FileSystemReal extends FileSystem {
 	    // directory
 	}
 
-	// openSem.V();
-	lock.release();
+	//openSem.V();
+
+	fileHeaderTable.release(DirectorySector);
 	return openFile; // return null if not found
     }
 
@@ -393,8 +404,12 @@ class FileSystemReal extends FileSystem {
      */
     public boolean remove(String name) {
 
-	// removeSem.P();
-	lock.acquire();
+
+	//removeSem.P();
+//	lock.acquire();
+	Debug.printf('+', "Removing file %s- %s\n", name,NachosThread.currentThread().name);
+	fileHeaderTable.lock(DirectorySector);
+	fileHeaderTable.lock(FreeMapSector);
 
 	Directory directory;
 	BitMap freeMap;
@@ -420,11 +435,20 @@ class FileSystemReal extends FileSystem {
 	freeMap.writeBack(freeMapFile); // flush to disk
 	directory.writeBack(directoryFile); // flush to disk
 
-	// fileHeaderTable[sector] = null;
-	fileHeaderTable.remove(sector);
 
-	// removeSem.V();
-	lock.release();
+	//fileHeaderTable[sector] = null;
+	
+	
+//	fileHeaderTable.remove(sector);
+
+
+//	//removeSem.V();
+//	lock.release();
+	
+	
+	fileHeaderTable.release(FreeMapSector);
+	fileHeaderTable.release(DirectorySector);
+	
 	return true;
     }
 
@@ -465,5 +489,132 @@ class FileSystemReal extends FileSystem {
 
     }
 
-    
+
+    public void checkConsistency() {
+	
+	
+	Debug.println('+',"---------------------Start Consistency Test--------------------");
+	
+	BitMap freeMap = new BitMap(numDiskSectors);
+	freeMap.fetchFrom(freeMapFile);
+
+	/**
+	  * Disk sectors that are used by files (or file headers), but that are
+	  * also marked as "free" in the bitmap.
+	  */
+	 Iterator<Entry<Integer, FileHeader>> it = fileHeaderTable.getFileHeaderTable().entrySet().iterator();
+	 while (it.hasNext()) {
+	     Map.Entry pair = (Map.Entry) it.next();
+	     //check file header
+	     if(!freeMap.test((int)pair.getKey())) {
+	  Debug.println('+', "Disk sectors that are used by files (or file headers), but that are also marked as \"free\" in the bitmap.");
+	  break;
+	     }
+	     
+	     int[] dataSectors = ((FileHeader)pair.getValue()).getDataSectors();
+	     for (int j = 0; j < dataSectors.length; j++) {
+	      if (dataSectors[j] != -1 && !freeMap.test(dataSectors[j])) {
+	   Debug.println('+', "Disk sectors that are used by files (or file headers), but that are also marked as \"free\" in the bitmap.");
+	   break;
+	      }
+	  }
+	 }
+	 
+	 
+	 /**
+	  * Disk sectors that are not used by any files (or file headers), but that are marked as "in use" in the bitmap.
+	  */
+	 
+
+	 boolean tmpMap[] = new boolean[numDiskSectors];
+	 while (it.hasNext()) {
+	     Map.Entry pair = (Map.Entry) it.next();
+	     tmpMap[(int)pair.getKey()] = true;
+	     int[] dataSectors = ((FileHeader)pair.getValue()).getDataSectors();
+	  for (int j = 0; j < dataSectors.length; j++) {
+	      if (dataSectors[j] != -1) {
+	   tmpMap[dataSectors[j]] = true;
+	      }
+	  }
+	  
+	 }
+	 
+	 for (int i = 0; i < tmpMap.length; i++) {
+	     if (tmpMap[i] == false && freeMap.test(i)) {
+	  Debug.println('+',
+	   "Disk sectors that are not used by any files (or file headers), but that are marked as 'in use' in the bitmap.Sector: " + i);
+	  break;
+	     }
+	 }
+
+	/*
+	 * multiple times in a single file header
+	 */
+	//for (int i = 0; i < fileHeaderTable.size(); i++) {
+	for(int i : fileHeaderTable.getFileHeaderTable().keySet()){
+	    if(fileHeaderTable.get(i)!=null){
+	    int[] dataSectors = fileHeaderTable.get(i).getDataSectors();
+	    ArrayList<Integer> tmpList = new ArrayList<Integer>();
+	    
+	    
+	    for (int j = 0; j < dataSectors.length; j++) {
+		
+		if(dataSectors[j]!=-1){
+			if (tmpList.contains(dataSectors[j])) {
+			    Debug.println('+',"Multiple times in a single file header"+ i);
+			} else {
+			    tmpList.add(dataSectors[j]);
+			}
+		}
+
+	    	}
+	    }
+	}
+
+	
+	
+	Directory directory = new Directory(NumDirEntries, this);
+	directory.fetchFrom(directoryFile);
+
+	DirectoryEntry[] list = directory.getTable();
+
+	ArrayList<Integer> temp = new ArrayList<Integer>();
+
+	ArrayList<String> stringTemp = new ArrayList<String>();
+	for (int i = 0; i < directory.getTableSize(); i++) {
+
+	    int sector = list[i].getSector();
+	    if(sector != 0){
+		
+		    if (!temp.contains(sector)) {
+			temp.add(sector);
+		    } else {
+			Debug.println('+',
+				"Multiple directory entries that refer to the same file header.");
+			break;
+		    }
+	    }
+
+
+	}
+
+	for (int i = 0; i < directory.getTableSize(); i++) {
+
+	    String name = list[i].getName();
+	    
+	    if(name!=null){
+		    if (!stringTemp.contains(name)) {
+			stringTemp.add(name);
+		    } else {
+			Debug.println('+',
+				"Multiple directory entries with the same file name");
+			break;
+		    }
+
+	    }
+	
+
+	}
+	Debug.println('+',"---------------------End Consistency Test--------------------");
+    }
 }

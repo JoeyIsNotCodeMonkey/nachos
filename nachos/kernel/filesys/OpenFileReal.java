@@ -51,6 +51,8 @@ class OpenFileReal implements OpenFile {
     /** Current position within the file. */
     private int seekPosition;
     
+    private int headerSector;
+    
 
     /**
      * Open a Nachos file for reading and writing.  Bring the file header
@@ -68,12 +70,8 @@ class OpenFileReal implements OpenFile {
 	
 	
 	hdr = FileSystemReal.fileHeaderTable.get(sector);
-	
-//	if(hdr==null){
-//	    hdr = new FileHeader(filesystem);
-//	}
-	
-	
+
+	headerSector = sector;
 	hdr.fetchFrom(sector);
 	
 		
@@ -106,10 +104,13 @@ class OpenFileReal implements OpenFile {
      */
     public int read(byte[] into, int index, int numBytes) {
 	
+	
+	FileSystemReal.fileHeaderTable.lock(headerSector);
+	
 	int result = readAt(into, index, numBytes, seekPosition);
 	seekPosition += result;
 	//Debug.println('+', "Releasing  Sector: "+ currentSector);
-	
+	FileSystemReal.fileHeaderTable.release(headerSector);
 	return result;
     }
 
@@ -126,10 +127,10 @@ class OpenFileReal implements OpenFile {
      * @return The number of bytes actually written (0 if error).
      */
     public int write(byte[] from, int index, int numBytes) {
-	
+	FileSystemReal.fileHeaderTable.lock(headerSector);
 	int result = writeAt(from, index, numBytes, seekPosition);
 	seekPosition += result;
-	
+	FileSystemReal.fileHeaderTable.release(headerSector);
 	
 	return result;
     }
@@ -265,6 +266,9 @@ class OpenFileReal implements OpenFile {
     public int close() {
 	// If it is possible that we made changes to the FileHeader,
 	// it must be written back to the disk at this point.
+	
+	Debug.println('+', "++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++");
+	
 	hdr = null;  // Ensure further access fails.
 	return(1);
     }
