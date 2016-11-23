@@ -11,7 +11,11 @@ import nachos.kernel.filesys.OpenFile;
 import nachos.machine.NachosThread;
 import nachos.machine.Simulation;
 
-public class StressTest implements Runnable{
+public class StressTest implements Runnable {
+    private static final int numOfThread = 3;
+
+    private static int count = numOfThread;
+
     /** Transfer data in small chunks, just to be difficult. */
     private static final int TransferSize = 10;
 
@@ -38,19 +42,16 @@ public class StressTest implements Runnable{
 
 	return;
     }
-    
-    
+
     /** Name of the file to create for the performance test. */
     private static String FileName;
-    //private static final String FileName2 = "TestFile2";
+
+    // private static final String FileName2 = "TestFile2";
     /** Test data to be written to the file in the performance test. */
     private static final String ContentString = "1234567890";
-    
-    private String[] names = {"os1", "os2", "os3", "os4", "os5", "os6", "os7", "os8", "os9", "os10"};
-    
-    
-    
-    private static int count ;
+
+    private String[] names = { "os1", "os2", "os3", "os4", "os5", "os6", "os7",
+	    "os8", "os9", "os10" };
 
     /** Length of the test data. */
     private static final int ContentSize = ContentString.length();
@@ -60,6 +61,7 @@ public class StressTest implements Runnable{
 
     /** Total size of the test file. */
     private static final int FileSize = ContentSize * 300;
+
     /**
      * Stress the Nachos file system by creating a large file, writing it out a
      * bit at a time, reading it back a bit at a time, and then deleting the
@@ -70,40 +72,32 @@ public class StressTest implements Runnable{
      * out performance #'s.
      */
     private void performanceTest() {
-	
-	
-	
-	
+
 	Debug.print('+', "Starting file system performance test:\n");
-	//Simulation.stats.print();
+	// Simulation.stats.print();
 	Random random = new Random();
 	int rand = random.nextInt(9);
-	Debug.println('+', "Rand:"+ rand);
-	
+	Debug.println('+', "Rand:" + rand);
+
 	String fileName = names[rand];
 	fileWrite(fileName);
-	
-	//fileRead(fileName);
+
+	// fileRead(fileName);
 
 	if (!Nachos.fileSystem.remove(fileName)) {
 	    Debug.printf('+', "Perf test: unable to remove %s\n", fileName);
-	    //return;
+	    // return;
 	}
-	
+
 	Debug.print('+', "Ending file system performance test:\n");
-	
-	count --;
-	if(count==0){
+
+	count--;
+	if (count == 0) {
 	    Nachos.fileSystem.checkConsistency();
-	    
+
 	}
-	   
-	
+
     }
-    
-
-
-
 
     /**
      * Write the test file for the performance test.
@@ -157,9 +151,6 @@ public class StressTest implements Runnable{
 	    }
 	}
     }
-    
-    
-
 
     /**
      * Compare two byte arrays to see if they agree up to a specified length.
@@ -179,28 +170,28 @@ public class StressTest implements Runnable{
 		return false;
 	return true;
     }
+
     @Override
     public void run() {
 	// TODO Auto-generated method stub
-	
-	 performanceTest();
-	    	
+
+	performanceTest();
+
 	Nachos.scheduler.finishThread();
-	
+
     }
-    
+
     public static void start() {
 
-	//Nachos.fileSystem.checkConsistency();
-	
-	count =3;
-	for(int i=1;i<=3;i++){
-	    
-	    
-	    NachosThread thread = new NachosThread("Stress test"+i,new StressTest());
+	// Nachos.fileSystem.checkConsistency();
+
+	for (int i = 1; i <= numOfThread; i++) {
+
+	    NachosThread thread = new NachosThread("Stress test" + i,
+		    new StressTest());
 	    Nachos.scheduler.readyToRun(thread);
 	}
-	
+
     }
 
 }

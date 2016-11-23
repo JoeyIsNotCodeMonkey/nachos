@@ -517,6 +517,7 @@ class FileSystemReal extends FileSystem {
 	   Debug.println('+', "Disk sectors that are used by files (or file headers), but that are also marked as \"free\" in the bitmap.");
 	   break;
 	      }
+	      //dataSectors = null;
 	  }
 	 }
 	 
