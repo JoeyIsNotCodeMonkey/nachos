@@ -9,7 +9,7 @@ In this assignment, we implemented two disk scheduling policy. Besides, we added
 
 
 The disk driver class used to allow only one thread to access the disk at a time. We changed the program to permit multiple thread accessible. 
-We implemented a workQueue to take all the requests from multiple threads. It orders the request respond to the user¡¦s option of the disk scheduling policy. 
+We implemented a workQueue to take all the requests from multiple threads. It orders the request respond to the userï¿½ï¿½s option of the disk scheduling policy. 
 We set the interrupt on and off manually in the top half. The requests are also enqueued in the top half then wait the previous request complete.
 The waiting request will be unlocked inside interrupter, which means last request has been completed. 
 Then the next request is going to be selected from work queue and issued to disk. 
@@ -23,7 +23,7 @@ and always serve a request that is >= the previous request served, except once t
 
 
 
-***The disk scheduling policy is enabled in FCFS by default. User can enable CSCAN scheduling by including ¡§-cscan¡¨ in run configuration*****
+***The disk scheduling policy is enabled in FCFS by default. User can enable CSCAN scheduling by including ï¿½ï¿½-cscanï¿½ï¿½ in run configuration*****
 
 
 
@@ -35,7 +35,7 @@ and always serve a request that is >= the previous request served, except once t
 
 To make sure that the file system will not crash, we introduced a fileTable object, which maintains a hashmap with sector number as key and file header as value.
 The file header is going to be added to the file header table when a file is opened, and it will be removed from table when the file is removed.
-File headers will be locked until certain operation is done, we implemented the lock inside ¡§fileSystemReal¡¨ class for corresponding file operation. Locks will also be added to directory and bitmap to ensure the thread safety. 
+File headers will be locked until certain operation is done, we implemented the lock inside ï¿½ï¿½fileSystemRealï¿½ï¿½ class for corresponding file operation. Locks will also be added to directory and bitmap to ensure the thread safety. 
 
 
 
@@ -45,7 +45,7 @@ File headers will be locked until certain operation is done, we implemented the 
 
 
 
-We added a method ¡§checkConsistency()¡¨ in the ¡§FileSystemReal¡¨ class, and it checks five potential consistency error as the manual listed:
+We added a method ï¿½ï¿½checkConsistency()ï¿½ï¿½ in the ï¿½ï¿½FileSystemRealï¿½ï¿½ class, and it checks five potential consistency error as the manual listed:
 Disk sectors that are used by files (or file headers), but that are also marked as "free" in the bitmap.
 Disk sectors that are not used by any files (or file headers), but that are marked as "in use" in the bitmap.
 Disk sectors that are referenced by more than one file header, or multiple times in a single file header.
@@ -59,11 +59,11 @@ Our point is to know whether there are consistency error but do not want to see 
 
 
 --------------------------------------------Stress Test-----------------------------------------------------
-*****StressTest need to be enable in Nachos.options. To run ¡§StressTest¡¨, you can set stressTest to true, and fileTest to false******
+*****StressTest need to be enable in Nachos.options. To run ï¿½ï¿½StressTestï¿½ï¿½, you can set stressTest to true, and fileTest to false******
 
-We created a separate stress test file in ¡§filesys.test¡¨ package. A specified number of Nachosthread will be created when stress test starts.
-There is a variable called ¡§numOfThread¡¨ at the beginning of the ¡§stressTest¡¨ class, which is 10 by default. Each thread will randomly choose a name from a string array that contains ten different names. 
-Each thread will call a performanceTest(), which will create a file, write random content to the file and read from the file. A consistency check will be performed when last thread ends. 
+We created a separate stress test file in ï¿½ï¿½filesys.testï¿½ï¿½ package. A specified number of Nachosthread will be created when stress test starts.
+There is a variable called ï¿½ï¿½numOfThreadï¿½ï¿½ at the beginning of the ï¿½ï¿½stressTestï¿½ï¿½ class, which is 10 by default. Each thread will randomly choose a name from a string array that contains ten different names. 
+Each thread will call a performanceTest(), which will create a file, write random content to the file and read from the file, and eventually remove it self in certain chance. A consistency check will be performed when last thread ends. 
 The disk will be formatted before each stress test starts by default (in case of system crash in previous run).
 
 

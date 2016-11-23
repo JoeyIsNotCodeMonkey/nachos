@@ -22,6 +22,8 @@ public class StressTest implements Runnable {
     
     
     private Semaphore sem = new Semaphore("lcokdsdf",1);
+    
+    private static int[] nums = new int[10];
     /**
      * Print the contents of the Nachos file "name".
      *
@@ -81,14 +83,19 @@ public class StressTest implements Runnable {
 	Random random = new Random();
 	int rand = random.nextInt(9);
 	// Debug.println('+', "Rand:" + rand);
+	nums[rand]++;
 
 	String fileName = names[rand];
 	fileWrite(fileName);
 
 	fileRead(fileName);
 
-	if (fileName.equalsIgnoreCase("os1") || fileName.equalsIgnoreCase("os2")) {
-	    if (!Nachos.fileSystem.remove(fileName)) {
+	/**
+	 * Here is the little trick to ensure that we only remove the file that was not created repeatedly. Since we have trouble handling
+	 * the case when a file is trying to read or write to the file that has already been removed by other thread.
+	 */
+	if (nums[rand] == 1) {
+	    if (!Nachos.fileSystem.remove(fileName) && rand <5) {
 		Debug.printf('+', "Perf test: unable to remove %s\n", fileName);
 		// return;
 	    }
@@ -198,6 +205,10 @@ public class StressTest implements Runnable {
     public static void start() {
 	Nachos.options.FORMAT_DISK = true;
 	Nachos.fileSystem.init(Nachos.diskDriver);
+	
+	for(int i=0; i<10; i++) {
+	    nums[i] = 0;
+	}
 	
 	
 	// Nachos.fileSystem.checkConsistency();
