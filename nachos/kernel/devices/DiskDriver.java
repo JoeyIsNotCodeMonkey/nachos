@@ -18,28 +18,31 @@
 
 package nachos.kernel.devices;
 
+import java.util.Collections;
+import java.util.Comparator;
+import java.util.LinkedList;
+
 import nachos.Debug;
 import nachos.machine.Machine;
-import nachos.machine.NachosThread;
 import nachos.util.FIFOQueue;
 import nachos.util.Queue;
+import nachos.machine.CPU;
 import nachos.machine.Disk;
 import nachos.machine.InterruptHandler;
 import nachos.kernel.threads.Semaphore;
 import nachos.kernel.Nachos;
 import nachos.kernel.threads.Lock;
 
-
 /**
- * This class defines a "synchronous" disk abstraction.
- * As with other I/O devices, the raw physical disk is an asynchronous
- * device -- requests to read or write portions of the disk return immediately,
- * and an interrupt occurs later to signal that the operation completed.
- * (Also, the physical characteristics of the disk device assume that
- * only one operation can be requested at a time).
+ * This class defines a "synchronous" disk abstraction. As with other I/O
+ * devices, the raw physical disk is an asynchronous device -- requests to read
+ * or write portions of the disk return immediately, and an interrupt occurs
+ * later to signal that the operation completed. (Also, the physical
+ * characteristics of the disk device assume that only one operation can be
+ * requested at a time).
  *
- * This driver provides the abstraction of "synchronous I/O":  any request
- * blocks the calling thread until the requested operation has finished.
+ * This driver provides the abstraction of "synchronous I/O": any request blocks
+ * the calling thread until the requested operation has finished.
  * 
  * @author Thomas Anderson (UC Berkeley), original C++ version
  * @author Peter Druschel (Rice University), Java translation
@@ -50,33 +53,39 @@ public class DiskDriver {
     /** Raw disk device. */
     private Disk disk;
 
+    IORB t;
+
     /** To synchronize requesting thread with the interrupt handler. */
     private Semaphore semaphore;
 
     /** Only one read/write request can be sent to the disk at a time. */
-    private  Lock lock;
+    private Lock lock;
 
-    private int count;
-    
-    private Queue<IORB> workQueue;
-    
-    private boolean first = true;
-    private boolean processing = false;
-    Semaphore semaphoreFirst;
+    private static boolean busy = false;
+
+    int count = 0;
+
+    int waitingThread = 0;
+
+    private Queue<IORB> workQueue = new FIFOQueue<IORB>();
+
+    private boolean wait = false;
+
     /**
      * Initialize the synchronous interface to the physical disk, in turn
      * initializing the physical disk.
      * 
-     * @param unit  The disk unit to be handled by this driver.
+     * @param unit
+     *            The disk unit to be handled by this driver.
      */
     public DiskDriver(int unit) {
-	workQueue = new FIFOQueue<IORB>();
-	count =0;
-	semaphoreFirst = new Semaphore("synch disk"+count, 0);
+
+	semaphore = new Semaphore("synch disk", 1);
+
 	lock = new Lock("synch disk lock");
 	disk = Machine.getDisk(unit);
 	disk.setHandler(new DiskIntHandler());
-	
+
     }
 
     /**
@@ -98,60 +107,148 @@ public class DiskDriver {
     }
 
     /**
-     * Read the contents of a disk sector into a buffer.  Return only
-     *	after the data has been read.
+     * Write the contents of a buffer into a disk sector. Return only after the
+     * data has been written.
      *
-     * @param sectorNumber The disk sector to read.
-     * @param data The buffer to hold the contents of the disk sector.
-     * @param index Offset in the buffer at which to place the data.
-     */
-    public void readSector(int sectorNumber, byte[] data, int index) {
-	Debug.ASSERT(0 <= sectorNumber && sectorNumber < getNumSectors());
-	
-	
-	//queue work entry
-	semaphore = new Semaphore("synch disk"+count, 0);
-	IORB e = new IORB(sectorNumber,0,data,index,semaphore);
-	workQueue.offer(e);
-	count++;
-	
-	
-	if(first&& !processing){
-	    processing = true;
-	    lock.acquire();
-	    byte[] data2 = new byte[1000];
-	    disk.readRequest(0, data2, 0);
-	    
-	    Debug.println('+', "Fist Locked "+ NachosThread.currentThread().name);
-	    semaphoreFirst.P();			// wait for interrupt
-	    lock.release();
-	   
-	}
-	
-	semaphore.P();
-	
-	Debug.println('+', "hereeee");
-	lock.acquire();			// only one disk I/O at a time
-	disk.readRequest(sectorNumber, data, index);
-	semaphore.P();			// wait for interrupt
-	lock.release();
-	Debug.println('+', "done");
-    }
 
-    /**
-     * Write the contents of a buffer into a disk sector.  Return only
-     *	after the data has been written.
-     *
-     * @param sectorNumber The disk sector to be written.
-     * @param data The new contents of the disk sector.
-     * @param index Offset in the buffer from which to get the data.
      */
     public void writeSector(int sectorNumber, byte[] data, int index) {
 	Debug.ASSERT(0 <= sectorNumber && sectorNumber < getNumSectors());
-	lock.acquire();			// only one disk I/O at a time
-	disk.writeRequest(sectorNumber, data, index);
-	semaphore.P();			// wait for interrupt
+	lock.acquire();
+	int oldLevel = CPU.setLevel(CPU.IntOff);
+
+	IORB work = new IORB(sectorNumber, 1, data, index,
+		new Semaphore("work" + count++, 0));
+	// Debug.println('+', "---------------Offerring " +
+	// work.getSectorNumber());
+	workQueue.offer(work);
+
+	// Debug.println('+', "---------------Offer " + work.getSectorNumber());
+	if (Nachos.options.CSCAN) {
+	    if (!wait) {
+		Collections.sort((LinkedList<IORB>) workQueue,
+			new CustomComparator());
+	    }
+
+	    if (sectorNumber == disk.geometry.NumSectors - 1)
+		wait = true;
+
+	}
+
+	// Debug.println('+', "workQueue size: " + workQueue.size());
+
+	if (busy) {
+	    // Debug.println('+', "inside busy- write");
+	    lock.release();
+	    work.getSemaphore().P();
+	    lock.acquire();
+	}
+
+	startOutput("up");
+
+	CPU.setLevel(oldLevel);
 	lock.release();
+    }
+
+    /**
+     * Read the contents of a disk sector into a buffer. Return only after the
+     * data has been read.
+     *
+     * @param sectorNumber
+     *            The disk sector to read.
+     * @param data
+     *            The buffer to hold the contents of the disk sector.
+     * @param index
+     *            Offset in the buffer at which to place the data.
+     */
+    public void readSector(int sectorNumber, byte[] data, int index) {
+
+	Debug.ASSERT(0 <= sectorNumber && sectorNumber < getNumSectors());
+
+	lock.acquire();
+	int oldLevel = CPU.setLevel(CPU.IntOff);
+
+	IORB work = new IORB(sectorNumber, 0, data, index,
+		new Semaphore("work" + count++, 0));
+	workQueue.offer(work);
+	// Debug.println('+', "---------------Offer " + work.getSectorNumber());
+	if (Nachos.options.CSCAN) {
+	    if (!wait) {
+		Collections.sort((LinkedList<IORB>) workQueue,
+			new CustomComparator());
+
+	    }
+	    if (sectorNumber == disk.geometry.NumSectors - 1)
+		wait = true;
+
+	}
+	// Debug.println('+', "workQueue size: " + workQueue.size());
+
+	if (busy) {
+	    // Debug.println('+', "inside busy:");
+	    lock.release();
+	    work.getSemaphore().P();
+	    lock.acquire();
+	}
+
+	startOutput("up read");
+
+	CPU.setLevel(oldLevel);
+	lock.release();
+    }
+
+    private void startOutput(String tag) {
+
+	if (busy)
+	    return;
+	// Debug.println('+', "---------------FUCKCKKCKC ------ " +tag);
+
+	IORB last = t;
+
+	t = workQueue.poll();
+
+	if (t != null) {
+	    busy = true;
+	    // Debug.println('+', "---------------Workgin on " +
+	    // t.getSectorNumber());
+	}
+
+	if (last != null) {
+	    last.getSemaphore().V();
+	    // Debug.println('+', "---------------Last Finished " +
+	    // last.getSectorNumber());
+	}
+
+	if (t == null) {
+	    // Debug.println('+', "--------------t is null********");
+	    return;
+	}
+
+	// Debug.println('+', "start Request********");
+
+	if (t.getFlag() == 0) {
+	    // Debug.println('+', "workQueue size: " + workQueue.size());
+	    disk.readRequest(t.getSectorNumber(), t.getData(), t.getIndex());
+	} else {
+	    // Debug.println('+', "workQueue size: " + workQueue.size());
+	    disk.writeRequest(t.getSectorNumber(), t.getData(), t.getIndex());
+	}
+
+	if (Nachos.options.CSCAN) {
+	    if (t.getSectorNumber() == disk.geometry.NumSectors - 1)
+		wait = false;
+	}
+
+    }
+
+    public static class CustomComparator implements Comparator<IORB> {
+
+	@Override
+	public int compare(IORB o1, IORB o2) {
+
+	    return o2.getSectorNumber() - o1.getSectorNumber();
+	}
+
     }
 
     /**
@@ -159,44 +256,18 @@ public class DiskDriver {
      */
     private class DiskIntHandler implements InterruptHandler {
 	/**
-	 * When the disk interrupts, just wake up the thread that issued
-	 * the request that just finished.
+	 * When the disk interrupts, just wake up the thread that issued the
+	 * request that just finished.
 	 */
-	
-	IORB nextToRun;
-	 
 	public void handleInterrupt() {
-	    
-	   
-	   
-	    if(first){
-		processing = false;
-		first=false;
-		semaphoreFirst.V();
-		    Debug.println('+', "Fist Freed");
-	    }else{
-		nextToRun.getSemaphore().V();
-		 Debug.println('+', "normal freed: " + nextToRun.getSemaphore().name);
-	    }
-	    
-	    nextToRun = workQueue.poll();
-	    
-	    if(nextToRun==null){
-		first=true;
-		return;
-	    }
-	    
-	    
-	 	   
-	    nextToRun.getSemaphore().V();
-		
-	    
-	    
-	    
-	 
-	    
-	}
-    }
 
+
+	    busy = false;
+
+	    // Debug.println('+', "End Request");
+	    startOutput("bott");
+	}
+
+    }
 
 }

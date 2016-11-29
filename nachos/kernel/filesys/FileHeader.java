@@ -11,6 +11,7 @@
 package nachos.kernel.filesys;
 
 import nachos.Debug;
+import nachos.kernel.threads.Semaphore;
 
 /**
  * This class defines the Nachos "file header" (in UNIX terms,  
@@ -61,11 +62,19 @@ class FileHeader {
     /** Disk sector numbers for each data block in the file. */
     private int dataSectors[];
 
+
+
     /** The underlying filesystem in which the file header resides. */
     private final FileSystemReal filesystem;
 
     /** Disk sector size for the underlying filesystem. */
     private final int diskSectorSize;
+    
+    private Semaphore sem;
+
+    
+
+
 
     /**
      * Allocate a new "in-core" file header.
@@ -84,6 +93,18 @@ class FileHeader {
 	for(int i = 0; i < NumDirect; i++)
 	    dataSectors[i] = -1;
     }
+    
+    public Semaphore getSem() {
+        return sem;
+    }
+
+
+
+    public void setSem(Semaphore sem) {
+        this.sem = sem;
+    }
+    
+    
 
     // the following methods deal with conversion between the on-disk and
     // the in-memory representation of a DirectoryEnry.
@@ -161,7 +182,11 @@ class FileHeader {
      */
     void fetchFrom(int sector) {
 	byte buffer[] = new byte[diskSectorSize];
+	
+	
+	
 	filesystem.readSector(sector, buffer, 0);
+	//Debug.println('+', "***************readSector" + sector);
 	internalize(buffer, 0);
     }
 
@@ -173,7 +198,10 @@ class FileHeader {
     void writeBack(int sector) {
 	byte buffer[] = new byte[diskSectorSize];
 	externalize(buffer, 0);
+	
+	
 	filesystem.writeSector(sector, buffer, 0); 
+	//Debug.println('+', "**************writeSector" + sector);
     }
 
     /**
@@ -196,6 +224,11 @@ class FileHeader {
      */
     int fileLength() {
 	return numBytes;
+    }
+    
+    
+    public int[] getDataSectors() {
+        return dataSectors;
     }
 
     /**

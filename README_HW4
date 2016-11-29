@@ -1,0 +1,95 @@
+--------------------------------------------Disk Scheduling--------------------------------------------
+
+
+
+
+In this assignment, we implemented two disk scheduling policy. Besides, we added consistency to the file system, and made a consistency check when we execute the stress test. 
+
+
+
+
+The disk driver class used to allow only one thread to access the disk at a time. We changed the program to permit multiple thread accessible. 
+We implemented a workQueue to take all the requests from multiple threads. It orders the request respond to the user��s option of the disk scheduling policy. 
+We set the interrupt on and off manually in the top half. The requests are also enqueued in the top half then wait the previous request complete.
+The waiting request will be unlocked inside interrupter, which means last request has been completed. 
+Then the next request is going to be selected from work queue and issued to disk. 
+
+
+
+
+The different between CSCAN policy with FCFS is that workQueue is always sorted by sector number when CSCAN is enabled, 
+and always serve a request that is >= the previous request served, except once the highest numbered sector is reached, restart from sector 0.
+
+
+
+
+***The disk scheduling policy is enabled in FCFS by default. User can enable CSCAN scheduling by including ��-cscan�� in run configuration*****
+
+
+
+
+--------------------------------------------Thread Safety-------------------------------------------------
+
+
+
+
+To make sure that the file system will not crash, we introduced a fileTable object, which maintains a hashmap with sector number as key and file header as value.
+The file header is going to be added to the file header table when a file is opened, and it will be removed from table when the file is removed.
+File headers will be locked until certain operation is done, we implemented the lock inside ��fileSystemReal�� class for corresponding file operation. Locks will also be added to directory and bitmap to ensure the thread safety. 
+
+
+
+
+--------------------------------------------Consistency Checking--------------------------------------------
+
+
+
+
+We added a method ��checkConsistency()�� in the ��FileSystemReal�� class, and it checks five potential consistency error as the manual listed:
+Disk sectors that are used by files (or file headers), but that are also marked as "free" in the bitmap.
+Disk sectors that are not used by any files (or file headers), but that are marked as "in use" in the bitmap.
+Disk sectors that are referenced by more than one file header, or multiple times in a single file header.
+Multiple directory entries that refer to the same file header.
+Multiple directory entries with the same file name.
+The error will be printed in the debug information followed by the sector number that ran into problem.
+Each error will only print once since we added break for each error situation.
+Our point is to know whether there are consistency error but do not want to see too many error messages printed.
+
+
+
+
+--------------------------------------------Stress Test-----------------------------------------------------
+*****StressTest need to be enable in Nachos.options. To run ��StressTest��, you can set stressTest to true, and fileTest to false******
+
+We created a separate stress test file in ��filesys.test�� package. A specified number of Nachosthread will be created when stress test starts.
+There is a variable called ��numOfThread�� at the beginning of the ��stressTest�� class, which is 10 by default. Each thread will randomly choose a name from a string array that contains ten different names. 
+Each thread will call a performanceTest(), which will create a file, write random content to the file and read from the file, and eventually remove it self in certain chance. A consistency check will be performed when last thread ends. 
+The disk will be formatted before each stress test starts by default (in case of system crash in previous run).
+
+
+*****Potential NullPointer Exception will occur when the test file is trying read a file that has been removed by another thread.********
+
+
+
+--------------------------------------------Our Test Run-----------------------------------------------------
+
+
+We ran our stress test that includes different file system operations: create/open/read/write/remove five times on each scheduling and the here's the result based on cpu ticks.
+
+
+
+
+					FCFS						CSCAN
+				--------------------------------------------
+					68340513		|			57554511
+					58450511		|			63917502
+					74066502		|			47590502
+					59682502		|			41042511
+					65362511		|			76893502
+									|	
+			Average:65180507.8		|			57399705.6
+
+
+On average, using cscan reduces the running time, which is what we expected.
+
+

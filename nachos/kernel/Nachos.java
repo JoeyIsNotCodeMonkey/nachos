@@ -45,6 +45,7 @@ import nachos.kernel.threads.test.ThreadTest;
 import nachos.kernel.userprog.test.ProgTest;
 import nachos.kernel.userprog.test.testDriver;
 import nachos.kernel.filesys.test.FileSystemTest;
+import nachos.kernel.filesys.test.StressTest;
 
 /**
  * The Nachos main class.  Nachos is "booted up" when a Java thread calls the
@@ -149,6 +150,9 @@ public class Nachos implements Runnable {
 	    NetworkTest.start();
 	if(options.CONSOLE_TEST)
 	    ConsoleTest.start();
+	
+	if(options.STRESS_TEST)
+	    StressTest.start();
 	
 	
 //	if(!PhysicalMemoryManager.getInstance().isEmpty()){

@@ -110,7 +110,7 @@ public class Options {
      * will run concurrently as Java threads, and will run truly concurrently
      * if the host system is a multi-CPU system and the JVM supports it.
      */
-    public int NUM_CPUS = 1;
+    public int NUM_CPUS = 2;
     
     /**
      * The number of consoles on the system.
@@ -184,7 +184,9 @@ public class Options {
     public boolean CONSOLE_TEST = false;
     
     /** Should we run the filesystem test? */
-    public boolean FILESYS_TEST = true;
+    public boolean FILESYS_TEST = false;
+    
+    public boolean STRESS_TEST = true;
     
     /** Should we run the serial port test? */
     public boolean SERIAL_TEST = false;
@@ -198,6 +200,7 @@ public class Options {
     public static boolean SRT = false;
     public static boolean HRRN = false;
     public static boolean FEEDBACK = false;
+    public static boolean CSCAN = false;
     
     
     public Options(String[] args) {
@@ -378,6 +381,15 @@ public class Options {
 				FEEDBACK = true;
 			    }
 			 }),
+		new Spec("-cscan",  // enable pre-emptive scheduling using per-CPU scheduling timers
+			 new Class[] { },
+			 null,
+			 new Options.Action() {
+			    public void processOption(String flag, Object[] params) {
+				CSCAN = true;
+				
+			    }
+			 })
 	});
     }
     

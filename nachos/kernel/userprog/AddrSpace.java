@@ -53,7 +53,7 @@ public class AddrSpace {
 
     /** Default size of the user stack area -- increase this as necessary! */
 
-    private static final int UserStackSize = 128;
+    private static final int UserStackSize = 1024;
 
 
     private PhysicalMemoryManager pmm;
