@@ -121,6 +121,7 @@ public class DiskDriver {
 	    lock.acquire();
 	    byte[] data2 = new byte[1000];
 	    disk.readRequest(0, data2, 0);
+	    
 	    Debug.println('+', "Fist Locked "+ NachosThread.currentThread().name);
 	    semaphoreFirst.P();			// wait for interrupt
 	    lock.release();
@@ -128,6 +129,7 @@ public class DiskDriver {
 	}
 	
 	semaphore.P();
+	
 	Debug.println('+', "hereeee");
 	lock.acquire();			// only one disk I/O at a time
 	disk.readRequest(sectorNumber, data, index);
@@ -166,7 +168,7 @@ public class DiskDriver {
 	public void handleInterrupt() {
 	    
 	   
-	 
+	   
 	    if(first){
 		processing = false;
 		first=false;
