@@ -63,6 +63,9 @@ public class AddrSpace {
     private int numPages;
 
     private int spaceID;
+    
+    
+    private OpenFile Executable;
 
     Semaphore join_lock = new Semaphore(
 	    "join_lock for process " + spaceID, 0);
@@ -139,7 +142,38 @@ public class AddrSpace {
 	allocate_lock.V();
 	//pmmLock.release();
     }
+    
+    
+    
+    
+    public void deAllocateOldPageTable() {
+	
+	allocate_lock.P();
+	//pmmLock.acquire();
+	TranslationEntry[] te = this.getPageTable();
 
+	for (int i = 0; i < te.length; i++) {
+
+	    pmm.decreaseCounter(te[i].physicalPage);
+	   // Debug.println('+', "DeAllocateMemory PhysicAddress:" + te[i].physicalPage );
+
+	    if (pmm.getPhysicalPages()[te[i].physicalPage] == 0) {
+
+		int start = te[i].physicalPage * 128;
+		int end = start + 128;
+		for (int z = start; z < end; z++) {
+		    Machine.mainMemory[z] = (byte) 0;
+		}
+
+		//Debug.println('+', "ZeroOut PhysicAddress:" + te[i].physicalPage);
+	    }
+
+	}
+
+
+	allocate_lock.V();
+	//pmmLock.release();
+    }
     /**
      * Load the program from a file "executable", and set everything up so that
      * we can start executing user instructions.
@@ -157,6 +191,8 @@ public class AddrSpace {
 
 //	pmmLock.acquire();
 	allocate_lock.P();
+	this.setExecutable(executable);
+	
 	NoffHeader noffH;
 
 	if ((noffH = NoffHeader.readHeader(executable)) == null)
@@ -382,6 +418,14 @@ public class AddrSpace {
 	int ppn = pagetable[vpn].physicalPage;
 	int pa = (((ppn << 7) | off));
 	return pa;
+    }
+
+    public OpenFile getExecutable() {
+        return Executable;
+    }
+
+    public void setExecutable(OpenFile executable) {
+        Executable = executable;
     }
 
 }

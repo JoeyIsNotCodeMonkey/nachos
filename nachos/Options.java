@@ -125,7 +125,8 @@ public class Options {
     public int NUM_PORTS = 1;
     
     /** The types of disk devices on the system. */
-    public Class<?>[] DISK_TYPES = new Class<?>[] { /**Disk.class*/ };
+
+    public Class<?>[] DISK_TYPES = new Class<?>[] {/* Disk.class*/ };
 
     /** The number of disks on the system. */
     public int NUM_DISKS = DISK_TYPES.length;
