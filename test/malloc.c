@@ -31,22 +31,45 @@ memory_region *place(memory_region *ptr, unsigned int size);
 memory_region *coalesce(void *ptr);
 memory_region *extend_heap(unsigned int size);
 unsigned int align(unsigned int size);
-
+char* itoa(int num, char* str, int base);
+void reverse(char str[], int length);
+void decToHex(int dec, char* hexadecimalNumber);
 
 int main(int argc, char const *argv[])
 {
-	sf_malloc(128);
+	int *addr = sf_malloc(128);
+	//char hex[20];
+	//decToHex(addr, hex);
+	char str[20];
+	itoa(addr, str, 10);
+	Write(str, 20, 100);
+
 	//printf("After malloc, the address returned is: %p\n", (void *)address);
 	//printf("After malloc, the starting address of the free list is: %p\n", (void *)firstfree);
 	//printf("After malloc, free list size is: %d\n", firstfree->size);
 
+
 	int *addr2 = sf_malloc(256);
+
+	//char hex2[20];
+	//decToHex(addr2, hex2);
+	char str2[20];
+	itoa(addr2, str2, 10);
+	Write(str2, 20, 100);
+
 	sf_malloc(512);
+
 
 	sf_free(addr2);
 	//printf("After free, firstfree size is: %d\n", firstfree->size);
+
+
 	sf_malloc(512);
 	//printf("After free, firstfree->next size is: %d\n", firstfree->next->size);
+
+
+	//Write("After free, firstfree->next size is: ", 50, 100);
+
 	return 0;
 }
 
@@ -251,12 +274,89 @@ void remove_from_freelist(memory_region *ptr) {
 }
 
 
-
-
-
 unsigned int align(unsigned int size) {
 	while(size % WSIZE != 0){
 		size++;
 	}
 	return size;
+}
+
+void reverse(char str[], int length)
+{
+    int start = 0;
+    int end = length -1;
+    while (start < end)
+    {
+				char* tmp = *(str+start);
+				*(str+start) = *(str+end);
+				*(str+end) = tmp;
+        //swap(*(str+start), *(str+end));
+        start++;
+        end--;
+    }
+}
+
+char* itoa(int num, char* str, int base)
+{
+    int i = 0;
+    int isNegative = 0;
+
+    /* Handle 0 explicitely, otherwise empty string is printed for 0 */
+    if (num == 0)
+    {
+        str[i++] = '0';
+        str[i] = '\0';
+        return str;
+    }
+
+    // In standard itoa(), negative numbers are handled only with
+    // base 10. Otherwise numbers are considered unsigned.
+    if (num < 0 && base == 10)
+    {
+        isNegative = 1;
+        num = -num;
+    }
+
+    // Process individual digits
+    while (num != 0)
+    {
+        int rem = num % base;
+        str[i++] = (rem > 9)? (rem-10) + 'a' : rem + '0';
+        num = num/base;
+    }
+
+    // If number is negative, append '-'
+    if (isNegative)
+        str[i++] = '-';
+
+    str[i] = '\0'; // Append string terminator
+
+    // Reverse the string
+    reverse(str, i);
+
+    return str;
+}
+
+void decToHex(int dec, char* hexadecimalNumber) {
+	  int quotient;
+    int i=2,j,temp;
+
+
+		hexadecimalNumber[0] = '0';
+		hexadecimalNumber[1] = 'x';
+
+    quotient = dec;
+
+    while(quotient!=0){
+         temp = quotient % 16;
+
+      //To convert integer into character
+      if( temp < 10)
+           temp =temp + 48;
+      else
+         temp = temp + 55;
+
+      hexadecimalNumber[i++]= temp;
+      quotient = quotient / 16;
+  }
 }
