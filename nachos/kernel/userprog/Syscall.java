@@ -1,10 +1,13 @@
-// Copyright (c) 1992-1993 The Regents of the University of California.
+ // Copyright (c) 1992-1993 The Regents of the University of California.
 // Copyright (c) 1998 Rice University.
 // Copyright (c) 2003 State University of New York at Stony Brook.
 // All rights reserved.  See the COPYRIGHT file for copyright notice and
 // limitation of liability and disclaimer of warranty provisions.
 
 package nachos.kernel.userprog;
+
+import java.io.UnsupportedEncodingException;
+import java.util.Arrays;
 
 import nachos.Debug;
 import nachos.kernel.Nachos;
@@ -271,6 +274,15 @@ public class Syscall {
 	    for (int i = 0; i < size; i++) {
 		userThread.getConsoleDriver().putChar((char) buffer[i]);
 	    }
+	}
+	
+	else {
+	    StringBuilder str = new StringBuilder();
+	    for (int i = 0; i < size; i++) {
+		str.append((char) buffer[i]);
+	    }
+	    Debug.println('+', str.toString());
+	    
 	}
 
 	consoleLock.V();

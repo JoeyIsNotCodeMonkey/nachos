@@ -11,6 +11,7 @@ import nachos.machine.Machine;
 import nachos.machine.MachineException;
 import nachos.machine.NachosThread;
 import nachos.machine.TranslationEntry;
+import nachos.kernel.Nachos;
 import nachos.kernel.userprog.Syscall;
 
 /**
@@ -49,7 +50,105 @@ public class ExceptionHandler implements nachos.machine.ExceptionHandler {
      */
     public void handleException(int which) {
 	int type = CPU.readRegister(2);
+	
+	
+	if(which == MachineException.AddressErrorException){
+	    
+	    
+	    
+	    int VA = CPU.readRegister(nachos.machine.MIPS.BadVAddrReg);
+	    int  VPN = ((VA>>7) & 0x1ffffff);
+	    
+	    Debug.println('+',"____________________Address Error " + VPN);
+	    
+	   UserThread errorThread = (UserThread)NachosThread.currentThread();
+	   
+	   TranslationEntry oldTable[] = errorThread.space.getPageTable();
+	    
+	   int pageNeeded = VPN+1;
+	   //Create new larger page table
+	 
+	   
+	   
+	    TranslationEntry pageTable[] = new TranslationEntry[pageNeeded];
+		for (int i = 0; i < pageNeeded; i++) {
+		    
+		    if(i<oldTable.length){
+			pageTable[i] = oldTable[i];	
+	
+		    }else{
+			  pageTable[i] = new TranslationEntry();
+			    pageTable[i].virtualPage = i;
 
+			    pageTable[i].physicalPage = PhysicalMemoryManager.getInstance()
+				    .getPhysicalPage(pageTable[i].virtualPage);
+
+			    pageTable[i].valid = false;
+			    pageTable[i].use = false;
+			    pageTable[i].dirty = false;
+			    pageTable[i].readOnly = false; // if code and data segments live on
+							   // separate pages, we could set code
+							   // pages to be read-only
+		    }
+		    
+		  
+		}
+
+	    //errorThread.space.deAllocateOldPageTable();
+	    errorThread.space.setPageTable(pageTable);
+	    
+	    
+	//    errorThread.space.initRegisters();		// set the initial register values
+	    errorThread.space.restoreState();		// load page table register
+	
+	
+	    CPU.runUserCode();		// jump to the user progam
+	   
+	    
+	  //  Nachos.scheduler.sleepThread(100000);
+	}
+	
+	
+	
+	if(which == MachineException.PageFaultException){
+	    Debug.println('+',"____________________Page Fault Error ");
+	    
+	    UserThread errorThread = (UserThread)NachosThread.currentThread();
+		   
+	    TranslationEntry pageTable[] = errorThread.space.getPageTable();
+	    int index=0;
+	    
+	    while(index<pageTable.length){
+		if(pageTable[index].valid==false){
+		    
+		    int start = pageTable[index].physicalPage * 128;
+			int end = start + 128;
+			for (int z = start; z < end; z++) {
+			    Machine.mainMemory[z] = (byte) 0;
+			}
+		    
+		    
+		    pageTable[index].valid = true;
+		    break;
+		}
+		
+		index++;
+	    }
+	    
+	    
+//	    errorThread.space.initRegisters();		// set the initial register values
+//	    errorThread.space.restoreState();		// load page table register
+//	    Nachos.scheduler.sleepThread(100000);
+	
+	    CPU.runUserCode();		// jump to the user progam
+	   
+	    
+	    
+	    
+	   
+	    
+	}
+	
 	if (which == MachineException.SyscallException) {
 
 	    switch (type) {
@@ -151,6 +250,10 @@ public class ExceptionHandler implements nachos.machine.ExceptionHandler {
 	    return;
 	}
 
+	if(which == MachineException.AddressErrorException) {
+	    
+	}
+	
 	System.out.println(
 		"Unexpected user mode exception " + which + ", " + type);
 	//Debug.ASSERT(false);
