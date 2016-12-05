@@ -35,6 +35,7 @@ import nachos.kernel.devices.test.NetworkTest;
 import nachos.kernel.devices.test.SerialTest;
 import nachos.kernel.threads.Callout;
 import nachos.kernel.threads.Scheduler;
+import nachos.kernel.userprog.BackingStore;
 import nachos.kernel.userprog.ExceptionHandler;
 import nachos.kernel.userprog.PhysicalMemoryManager;
 import nachos.kernel.filesys.FileSystem;
@@ -68,6 +69,9 @@ public class Nachos implements Runnable {
     /** Access to the disk. */
     public static DiskDriver diskDriver;
 
+    public static BackingStore backingStore;
+    
+    public static DiskDriver pageDriver;
     /** Access to the network. */
     public static NetworkDriver networkDriver;
 
@@ -103,7 +107,10 @@ public class Nachos implements Runnable {
 	if(Machine.NUM_CONSOLES > 0)
 	    consoleDriver = ConsoleManager.getInstance().getDefaultConsole();
 	if(Machine.NUM_DISKS > 0)
-	    diskDriver = new DiskDriver(0);
+	    diskDriver = new DiskDriver(0);	
+	
+	if(Machine.NUM_DISKS > 1)
+	    pageDriver = new DiskDriver(1);
 
 	if(Machine.NUM_PORTS > 0)
 	    serialDriver = new SerialDriver();
@@ -113,7 +120,11 @@ public class Nachos implements Runnable {
 	
 	// Initialize the filesystem.
 	callout = new Callout(Machine.getTimer(0));
-
+	
+	
+	backingStore = new BackingStore(pageDriver);
+	
+	
 	if(options.FILESYS_STUB || options.FILESYS_REAL)
 	    fileSystem = FileSystem.init(diskDriver);
 

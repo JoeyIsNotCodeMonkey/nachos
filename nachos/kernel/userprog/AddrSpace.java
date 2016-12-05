@@ -126,7 +126,9 @@ public class AddrSpace {
 	   // Debug.println('+', "DeAllocateMemory PhysicAddress:" + te[i].physicalPage );
 
 	    if (pmm.getPhysicalPages()[te[i].physicalPage] == 0) {
-
+		
+		pmm.setPageStatus(te[i].physicalPage, -1, false);
+		
 		int start = te[i].physicalPage * 128;
 		int end = start + 128;
 		for (int z = start; z < end; z++) {
@@ -232,6 +234,7 @@ public class AddrSpace {
 
 	// first, set up the translation
 	pageTable = new TranslationEntry[numPages];
+	
 	for (int i = 0; i < numPages; i++) {
 	    pageTable[i] = new TranslationEntry();
 	    pageTable[i].virtualPage = i;
@@ -245,6 +248,11 @@ public class AddrSpace {
 	    pageTable[i].readOnly = false; // if code and data segments live on
 					   // separate pages, we could set code
 					   // pages to be read-only
+	    
+	    
+	   pmm.setPageStatus(pageTable[i].physicalPage, spaceID, false);
+	    
+	    
 	}
 
 	// Zero out the entire address space, to zero the uninitialized data

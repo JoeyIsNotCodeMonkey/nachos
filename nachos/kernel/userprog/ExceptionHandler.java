@@ -50,105 +50,149 @@ public class ExceptionHandler implements nachos.machine.ExceptionHandler {
      */
     public void handleException(int which) {
 	int type = CPU.readRegister(2);
-	
-	
-	if(which == MachineException.AddressErrorException){
-	    
-	    
-	    
+
+	if (which == MachineException.AddressErrorException) {
+
 	    int VA = CPU.readRegister(nachos.machine.MIPS.BadVAddrReg);
-	    int  VPN = ((VA>>7) & 0x1ffffff);
-	    
-	    //Debug.println('+',"____________________Address Error " + VPN);
-	    
-	   UserThread errorThread = (UserThread)NachosThread.currentThread();
-	   
-	   TranslationEntry oldTable[] = errorThread.space.getPageTable();
-	    
-	   int pageNeeded = VPN+1;
-	   //Create new larger page table
-	 
-	   
-	   
+	    int VPN = ((VA >> 7) & 0x1ffffff);
+
+	    // Debug.println('+',"____________________Address Error " + VPN);
+
+	    UserThread errorThread = (UserThread) NachosThread.currentThread();
+
+	    TranslationEntry oldTable[] = errorThread.space.getPageTable();
+
+	    int pageNeeded = VPN + 1;
+	    // Create new larger page table
+
 	    TranslationEntry pageTable[] = new TranslationEntry[pageNeeded];
-		for (int i = 0; i < pageNeeded; i++) {
-		    
-		    if(i<oldTable.length){
-			pageTable[i] = oldTable[i];	
-	
-		    }else{
-			  pageTable[i] = new TranslationEntry();
-			    pageTable[i].virtualPage = i;
+	    for (int i = 0; i < pageNeeded; i++) {
 
-			    pageTable[i].physicalPage = PhysicalMemoryManager.getInstance()
-				    .getPhysicalPage(pageTable[i].virtualPage);
+		if (i < oldTable.length) {
+		    pageTable[i] = oldTable[i];
 
-			    pageTable[i].valid = false;
-			    pageTable[i].use = false;
-			    pageTable[i].dirty = false;
-			    pageTable[i].readOnly = false; // if code and data segments live on
-							   // separate pages, we could set code
-							   // pages to be read-only
-		    }
-		    
-		  
+		} else {
+		    pageTable[i] = new TranslationEntry();
+		    pageTable[i].virtualPage = i;
+
+		    pageTable[i].physicalPage = PhysicalMemoryManager
+			    .getInstance()
+			    .getPhysicalPage(pageTable[i].virtualPage);
+
+		    pageTable[i].valid = false;
+		    pageTable[i].use = false;
+		    pageTable[i].dirty = false;
+		    pageTable[i].readOnly = false; // if code and data segments
+						   // live on
+						   // separate pages, we could
+						   // set code
+						   // pages to be read-only
+
+		    PhysicalMemoryManager.getInstance().setPageStatus(
+			    pageTable[i].physicalPage,
+			    errorThread.space.getSpaceID(), true);
+
 		}
 
-	    //errorThread.space.deAllocateOldPageTable();
+	    }
+
+	    // errorThread.space.deAllocateOldPageTable();
 	    errorThread.space.setPageTable(pageTable);
-	    
-	    
-	//    errorThread.space.initRegisters();		// set the initial register values
-	    errorThread.space.restoreState();		// load page table register
-	
-	
-	    CPU.runUserCode();		// jump to the user progam
-	   
-	    
-	  //  Nachos.scheduler.sleepThread(100000);
+
+	    // errorThread.space.initRegisters(); // set the initial register
+	    // values
+	    errorThread.space.restoreState(); // load page table register
+
+	    CPU.runUserCode(); // jump to the user progam
+
+	    // Nachos.scheduler.sleepThread(100000);
 	}
-	
-	
-	
-	if(which == MachineException.PageFaultException){
-	    //Debug.println('+',"____________________Page Fault Error ");
-	    
-	    UserThread errorThread = (UserThread)NachosThread.currentThread();
-		   
+
+	if (which == MachineException.PageFaultException) {
+	    // Debug.println('+',"____________________Page Fault Error ");
+
+	    UserThread errorThread = (UserThread) NachosThread.currentThread();
+	    int currentSpace = errorThread.space.getSpaceID();
 	    TranslationEntry pageTable[] = errorThread.space.getPageTable();
-	    int index=0;
-	    
-	    while(index<pageTable.length){
-		if(pageTable[index].valid==false){
-		    
-		    int start = pageTable[index].physicalPage * 128;
-			int end = start + 128;
-			for (int z = start; z < end; z++) {
-			    Machine.mainMemory[z] = (byte) 0;
+	    int index = 0;
+
+	    while (index < pageTable.length) {
+		if (pageTable[index].valid == false) {
+
+		    int pp = pageTable[index].physicalPage;
+
+		    // If no memory avaliable
+		    if (pp >= Machine.NumPhysPages) {
+			// evict one allocated page
+			int i = 0;
+
+			pageStatus[] table = PhysicalMemoryManager.getInstance().getCoreMap();
+
+			while (true) {
+
+			    int pageIndex = PhysicalMemoryManager.getInstance().getFIFO().get(i);
+
+			    if (table[pageIndex].isExtendRegion() == true
+				    && table[pageIndex]
+					    .getAddressSpace() != currentSpace) {
+
+				// write old data into backing store
+
+				byte[] data = new byte[Machine.PageSize];
+				int start = pageIndex * 128;
+				int end = start + 128;
+				int x =0;
+				
+				 for (int z = start; z < end; z++) {     
+				     data[x++]=Machine.mainMemory[z];
+				     
+				 }
+								
+				Nachos.backingStore.writeBack(currentSpace,index, data);
+
+				PhysicalMemoryManager.getInstance().getFIFO()
+					.remove(pageIndex);
+				PhysicalMemoryManager.getInstance().getFIFO()
+					.add(pageIndex);
+
+				break;
+			    }
+			    i++;
 			}
+
+		    }
 		    
-		    
+		    if(Nachos.backingStore.checkForBackup(currentSpace, index)){
+			
+			byte[] data = Nachos.backingStore.readData(currentSpace, index);
+			
+			    int start = pp * 128;
+			    int end = start + 128;
+			    int i =0;
+			    for (int z = start; z < end; z++) {
+				Machine.mainMemory[z] = data[i++];
+			    }
+		    }else{
+			    int start = pp * 128;
+			    int end = start + 128;
+			    for (int z = start; z < end; z++) {
+				Machine.mainMemory[z] = (byte) 0;
+			    }
+		    }
+
+
+
 		    pageTable[index].valid = true;
 		    break;
 		}
-		
+
 		index++;
 	    }
-	    
-	    
-//	    errorThread.space.initRegisters();		// set the initial register values
-//	    errorThread.space.restoreState();		// load page table register
-//	    Nachos.scheduler.sleepThread(100000);
-	
-	    CPU.runUserCode();		// jump to the user progam
-	   
-	    
-	    
-	    
-	   
-	    
+
+	    CPU.runUserCode(); // jump to the user progam
+
 	}
-	
+
 	if (which == MachineException.SyscallException) {
 
 	    switch (type) {
@@ -158,11 +202,10 @@ public class ExceptionHandler implements nachos.machine.ExceptionHandler {
 	    case Syscall.SC_Exit:
 		Syscall.exit(CPU.readRegister(4));
 		break;
-	    
+
 	    case Syscall.SC_Yield:
 		Syscall.yield();
 		break;
-		
 
 	    case Syscall.SC_Exec:
 
@@ -170,8 +213,9 @@ public class ExceptionHandler implements nachos.machine.ExceptionHandler {
 
 		AddrSpace currentAddrSpace = ((UserThread) NachosThread
 			.currentThread()).space;
-		int va = CPU.readRegister(4);		
-		int index = currentAddrSpace.translateAddr(va, currentAddrSpace);
+		int va = CPU.readRegister(4);
+		int index = currentAddrSpace.translateAddr(va,
+			currentAddrSpace);
 
 		if (index > Machine.mainMemory.length) {
 		    CPU.writeRegister(2, -1);
@@ -193,48 +237,48 @@ public class ExceptionHandler implements nachos.machine.ExceptionHandler {
 		CPU.writeRegister(2, id);
 
 		break;
-	
+
 	    case Syscall.SC_Fork:
 		int func = CPU.readRegister(4);
 		Syscall.fork(func);
 		break;
-		
+
 	    case Syscall.SC_Join:
 		int processID = CPU.readRegister(4);
 		int status = Syscall.join(processID);
 		CPU.writeRegister(2, status);
-		break;	
-		
+		break;
+
 	    case Syscall.SC_Read:
 		int readPtr = CPU.readRegister(4);
 		int readLen = CPU.readRegister(5);
 		byte readBuf[] = new byte[readLen];
-		
-		//translate
+
+		// translate
 		AddrSpace currentAddrSpaceRead = ((UserThread) NachosThread
 			.currentThread()).space;
-		int pa = currentAddrSpaceRead.translateAddr(readPtr, currentAddrSpaceRead);
-		
+		int pa = currentAddrSpaceRead.translateAddr(readPtr,
+			currentAddrSpaceRead);
+
 		int size = Syscall.read(readBuf, readLen, CPU.readRegister(6));
-		
+
 		System.arraycopy(readBuf, 0, Machine.mainMemory, pa, size);
-		
+
 		break;
-		
+
 	    case Syscall.SC_Write:
 		int ptr = CPU.readRegister(4);
 		int len = CPU.readRegister(5);
-		
-		
-		
-		AddrSpace as = ((UserThread) NachosThread.currentThread()).space;
+
+		AddrSpace as = ((UserThread) NachosThread
+			.currentThread()).space;
 		ptr = as.translateAddr(ptr, as);
 		byte buf[] = new byte[len];
-		
+
 		System.arraycopy(Machine.mainMemory, ptr, buf, 0, len);
 		Syscall.write(buf, len, CPU.readRegister(6));
 		break;
-		
+
 	    case Syscall.SC_PredictCPU:
 		int burstLen = CPU.readRegister(4);
 		Syscall.PredictCPU(burstLen);
@@ -250,13 +294,13 @@ public class ExceptionHandler implements nachos.machine.ExceptionHandler {
 	    return;
 	}
 
-	if(which == MachineException.AddressErrorException) {
-	    
+	if (which == MachineException.AddressErrorException) {
+
 	}
-	
+
 	System.out.println(
 		"Unexpected user mode exception " + which + ", " + type);
-	//Debug.ASSERT(false);
+	// Debug.ASSERT(false);
 
     }
 }

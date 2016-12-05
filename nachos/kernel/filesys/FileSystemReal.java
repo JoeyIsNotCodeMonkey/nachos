@@ -143,6 +143,8 @@ class FileSystemReal extends FileSystem {
      *            Should we initialize the disk?
      */
     protected FileSystemReal(DiskDriver diskDriver, boolean format) {
+	
+	
 	Debug.print('f', "Initializing the file system.\n");
 	this.diskDriver = diskDriver;
 	numDiskSectors = diskDriver.getNumSectors();
