@@ -34,15 +34,17 @@ unsigned int align(unsigned int size);
 char* itoa(int num, char* str, int base);
 void reverse(char str[], int length);
 void decToHex(int dec, char* hexadecimalNumber);
+void sf_strcat(char *dest, char *src);
+int sf_strlen(char *s);
 
 int main(int argc, char const *argv[])
 {
 	int *addr = sf_malloc(128);
-	//char hex[20];
-	//decToHex(addr, hex);
-	char str[20];
-	itoa(addr, str, 10);
-	Write(str, 20, 100);
+	char hex[20];
+	decToHex(addr, hex);
+	//char str[20];
+	//itoa(addr, str, 10);
+	Write(hex, 20, 100);
 
 	//printf("After malloc, the address returned is: %p\n", (void *)address);
 	//printf("After malloc, the starting address of the free list is: %p\n", (void *)firstfree);
@@ -51,11 +53,11 @@ int main(int argc, char const *argv[])
 
 	int *addr2 = sf_malloc(256);
 
-	//char hex2[20];
-	//decToHex(addr2, hex2);
-	char str2[20];
-	itoa(addr2, str2, 10);
-	Write(str2, 20, 100);
+	char hex2[20];
+	decToHex(addr2, hex2);
+	//char str2[20];
+	//itoa(addr2, str2, 10);
+	Write(hex2, 20, 100);
 
 	sf_malloc(512);
 
@@ -149,7 +151,7 @@ memory_region *coalesce(void *ptr) {
 void sf_init() {
 	//heap_start = (memory_region *)sbrk(0);
 
-
+	Write("Initializing virtual memory...", 32, 100);
 
 	//make sure the first free data's address is double words alignment
 	memory_region* record = heap_start;
@@ -171,6 +173,23 @@ void sf_init() {
 	firstfree->next = NULL;
     firstfree->size = heap_limit - heap_start;
     //printf("After init, the size of free list is: %d\n", firstfree->size);
+
+//print help info
+		Write("Initializing finished", 22, 100);
+		char str[50] = "Memory starts from ";
+		char *addr = NULL;
+
+		int *start_addr = (void *)heap_start;
+		decToHex(start_addr, addr);
+		sf_strcat(str, addr);
+
+		Write(str, sf_strlen(str), 100);
+
+		char *freesize = "Initialy, the free list size is: ";
+		// char* firstfreeSize = NULL;
+		// itoa(firstfree->size, firstfreeSize, 10);
+		// sf_strcat(freesize, firstfreeSize);
+		Write(freesize, sf_strlen(freesize), 100);
 }
 
 memory_region *find_fit(unsigned int size) {
@@ -281,16 +300,18 @@ unsigned int align(unsigned int size) {
 	return size;
 }
 
+
 void reverse(char str[], int length)
 {
     int start = 0;
     int end = length -1;
     while (start < end)
     {
-				char* tmp = *(str+start);
-				*(str+start) = *(str+end);
-				*(str+end) = tmp;
-        //swap(*(str+start), *(str+end));
+
+        char tmp = str[start];
+				str[start] = str[end];
+				str[end] = tmp;
+
         start++;
         end--;
     }
@@ -342,6 +363,7 @@ void decToHex(int dec, char* hexadecimalNumber) {
     int i=2,j,temp;
 
 
+
 		hexadecimalNumber[0] = '0';
 		hexadecimalNumber[1] = 'x';
 
@@ -359,4 +381,33 @@ void decToHex(int dec, char* hexadecimalNumber) {
       hexadecimalNumber[i++]= temp;
       quotient = quotient / 16;
   }
+
+	hexadecimalNumber[i] = '\0';
+
+	reverse(hexadecimalNumber+2, i-2);
+
+}
+
+void sf_strcat(char *dest, char *src)
+{
+
+    while (*dest!= '\0')
+        *dest++ ;
+    do
+    {
+        *dest++ = *src++;
+    }
+    while (*src != '\0') ;
+		*dest = '\0';
+}
+
+int sf_strlen(char *s)
+{
+    char *start;
+    start = s;
+    while(*s != 0)
+    {
+        s++;
+    }
+    return s - start;
 }
