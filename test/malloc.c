@@ -18,7 +18,6 @@ static struct memory_region *firstfree = NULL;
 extern void *heap_start;
 extern void *heap_limit;
 
-
 void *sf_malloc(unsigned int size);
 void sf_free(void *ptr);
 
@@ -31,20 +30,19 @@ memory_region *place(memory_region *ptr, unsigned int size);
 memory_region *coalesce(void *ptr);
 memory_region *extend_heap(unsigned int size);
 unsigned int align(unsigned int size);
-char* itoa(int num, char* str, int base);
+void* itoa(int num, char* str, int base);
 void reverse(char str[], int length);
 void decToHex(int dec, char* hexadecimalNumber);
 void sf_strcat(char *dest, char *src);
 int sf_strlen(char *s);
+void printAddress(int *addr);
+void printFreeList();
 
 int main(int argc, char const *argv[])
 {
-	int *addr = sf_malloc(128);
-	char hex[20];
-	decToHex(addr, hex);
-	//char str[20];
-	//itoa(addr, str, 10);
-	Write(hex, 20, 100);
+	int *addr1 = sf_malloc(128);
+	printAddress(addr1);
+	//Write("caonimamain", 18, 100);
 
 	//printf("After malloc, the address returned is: %p\n", (void *)address);
 	//printf("After malloc, the starting address of the free list is: %p\n", (void *)firstfree);
@@ -52,12 +50,9 @@ int main(int argc, char const *argv[])
 
 
 	int *addr2 = sf_malloc(256);
+	printAddress(addr2);
 
-	char hex2[20];
-	decToHex(addr2, hex2);
-	//char str2[20];
-	//itoa(addr2, str2, 10);
-	Write(hex2, 20, 100);
+
 
 	sf_malloc(512);
 
@@ -68,6 +63,7 @@ int main(int argc, char const *argv[])
 
 	sf_malloc(512);
 	//printf("After free, firstfree->next size is: %d\n", firstfree->next->size);
+	printFreeList();
 
 
 	//Write("After free, firstfree->next size is: ", 50, 100);
@@ -76,6 +72,10 @@ int main(int argc, char const *argv[])
 }
 
 void *sf_malloc(unsigned int size) {
+	// char malloc_start[] = "------malloc starting------";
+	// Write(malloc_start, sf_strlen(malloc_start), 100);
+	//Write("caonima", 10, 100);
+
 	memory_region *ptr;
 
 	//first call
@@ -104,6 +104,16 @@ void *sf_malloc(unsigned int size) {
 	}
 
 	place(ptr, size);
+
+	//print help info
+
+	// char *addr = NULL;
+	//
+	// int *start_addr = (void *)heap_start;
+	// decToHex(start_addr, addr);
+	// sf_strcat(return_addr, addr);
+
+
 
 	return (void *)(ptr->data);
 
@@ -151,7 +161,7 @@ memory_region *coalesce(void *ptr) {
 void sf_init() {
 	//heap_start = (memory_region *)sbrk(0);
 
-	Write("Initializing virtual memory...", 32, 100);
+	//Write("Initializing virtual memory...", 32, 100);
 
 	//make sure the first free data's address is double words alignment
 	memory_region* record = heap_start;
@@ -175,21 +185,21 @@ void sf_init() {
     //printf("After init, the size of free list is: %d\n", firstfree->size);
 
 //print help info
-		Write("Initializing finished", 22, 100);
-		char str[50] = "Memory starts from ";
-		char *addr = NULL;
-
-		int *start_addr = (void *)heap_start;
-		decToHex(start_addr, addr);
-		sf_strcat(str, addr);
-
-		Write(str, sf_strlen(str), 100);
-
-		char *freesize = "Initialy, the free list size is: ";
+		// Write("Initializing finished", 22, 100);
+		// char str[] = "Memory starts from ";
+		// char *addr = NULL;
+		//
+		// int *start_addr = (void *)heap_start;
+		// decToHex(start_addr, addr);
+		// sf_strcat(str, addr);
+		//
+		// Write(str, sf_strlen(str), 100);
+		//
+		// char *freesize = "Initialy, the free list size is: ";
 		// char* firstfreeSize = NULL;
 		// itoa(firstfree->size, firstfreeSize, 10);
 		// sf_strcat(freesize, firstfreeSize);
-		Write(freesize, sf_strlen(freesize), 100);
+		// Write(freesize, sf_strlen(freesize), 100);
 }
 
 memory_region *find_fit(unsigned int size) {
@@ -317,7 +327,7 @@ void reverse(char str[], int length)
     }
 }
 
-char* itoa(int num, char* str, int base)
+void* itoa(int num, char* str, int base)
 {
     int i = 0;
     int isNegative = 0;
@@ -355,7 +365,6 @@ char* itoa(int num, char* str, int base)
     // Reverse the string
     reverse(str, i);
 
-    return str;
 }
 
 void decToHex(int dec, char* hexadecimalNumber) {
@@ -410,4 +419,29 @@ int sf_strlen(char *s)
         s++;
     }
     return s - start;
+}
+
+void printAddress(int *addr) {
+	char str[] = "The address is: ";
+	char address[] = "";
+	decToHex(addr, address);
+	sf_strcat(str, address);
+	Write(str, sf_strlen(str), 100);
+}
+
+void printFreeList() {
+	char list[] = "The free list is: ";
+	char size[] = "";
+	char arrow[] = "->";
+	memory_region *ptr = firstfree;
+	while(ptr != NULL) {
+		itoa(ptr->size, size, 10);
+		//Write(size, sf_strlen(size), 100);
+		sf_strcat(list, size);
+		sf_strcat(list, arrow);
+
+		ptr = ptr->next;
+	}
+	list[sf_strlen(list)-2] = '\0';
+	Write(list, sf_strlen(list), 100);
 }

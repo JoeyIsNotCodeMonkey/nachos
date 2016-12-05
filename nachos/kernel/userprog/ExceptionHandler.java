@@ -59,7 +59,7 @@ public class ExceptionHandler implements nachos.machine.ExceptionHandler {
 	    int VA = CPU.readRegister(nachos.machine.MIPS.BadVAddrReg);
 	    int  VPN = ((VA>>7) & 0x1ffffff);
 	    
-	    Debug.println('+',"____________________Address Error " + VPN);
+	    //Debug.println('+',"____________________Address Error " + VPN);
 	    
 	   UserThread errorThread = (UserThread)NachosThread.currentThread();
 	   
@@ -111,7 +111,7 @@ public class ExceptionHandler implements nachos.machine.ExceptionHandler {
 	
 	
 	if(which == MachineException.PageFaultException){
-	    Debug.println('+',"____________________Page Fault Error ");
+	    //Debug.println('+',"____________________Page Fault Error ");
 	    
 	    UserThread errorThread = (UserThread)NachosThread.currentThread();
 		   
