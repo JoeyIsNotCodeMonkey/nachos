@@ -250,6 +250,10 @@ public class ExceptionHandler implements nachos.machine.ExceptionHandler {
 	    return;
 	}
 
+	if(which == MachineException.AddressErrorException) {
+	    
+	}
+	
 	System.out.println(
 		"Unexpected user mode exception " + which + ", " + type);
 	//Debug.ASSERT(false);

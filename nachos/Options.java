@@ -125,6 +125,7 @@ public class Options {
     public int NUM_PORTS = 1;
     
     /** The types of disk devices on the system. */
+
     public Class<?>[] DISK_TYPES = new Class<?>[] {/* Disk.class*/ };
 
     /** The number of disks on the system. */
@@ -175,7 +176,7 @@ public class Options {
     public boolean SMP_TEST = false;
 
     /** Should we run the user program test? */
-    public boolean PROG_TEST = false;
+    public boolean PROG_TEST = true;
     
     /** Should we run the user program test? */
     public boolean testDriver = false;

@@ -6,6 +6,9 @@
 
 package nachos.kernel.userprog;
 
+import java.io.UnsupportedEncodingException;
+import java.util.Arrays;
+
 import nachos.Debug;
 import nachos.kernel.Nachos;
 import nachos.kernel.devices.ConsoleManager;
@@ -271,6 +274,15 @@ public class Syscall {
 	    for (int i = 0; i < size; i++) {
 		userThread.getConsoleDriver().putChar((char) buffer[i]);
 	    }
+	}
+	
+	else {
+	    StringBuilder str = new StringBuilder();
+	    for (int i = 0; i < size; i++) {
+		str.append((char) buffer[i]);
+	    }
+	    Debug.println('+', str.toString());
+	    
 	}
 
 	consoleLock.V();
