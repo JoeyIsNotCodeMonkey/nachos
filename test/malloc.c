@@ -176,7 +176,8 @@ void sf_init() {
 
 //print help info
 		Write("Initializing finished", 22, 100);
-		char str[50] = "Memory starts from ";
+		char str[]= "Memory starts from " ;
+
 		char *addr = NULL;
 
 		int *start_addr = (void *)heap_start;
@@ -185,10 +186,10 @@ void sf_init() {
 
 		Write(str, sf_strlen(str), 100);
 
-		char *freesize = "Initialy, the free list size is: ";
-		// char* firstfreeSize = NULL;
-		// itoa(firstfree->size, firstfreeSize, 10);
-		// sf_strcat(freesize, firstfreeSize);
+		char freesize[] = "Initialy, the free list size is: ";
+		char * firstfreeSize = NULL;
+		itoa(firstfree->size, firstfreeSize, 10);
+		sf_strcat(freesize, firstfreeSize);
 		Write(freesize, sf_strlen(freesize), 100);
 }
 
