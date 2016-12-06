@@ -6,11 +6,13 @@ import java.util.HashMap;
 import nachos.Debug;
 import nachos.kernel.threads.Semaphore;
 import nachos.machine.Machine;
+import nachos.machine.NachosThread;
 
 public class PhysicalMemoryManager {
 
     //available->false; unavailable->true
     private static int physicalPages[];
+    private static pageStatus coreMap[];
     private static Semaphore physicalPage_lock;
     private static Semaphore spaceID_lock;
     private static Semaphore joinList_lock;
@@ -21,7 +23,7 @@ public class PhysicalMemoryManager {
     private HashMap<Integer, AddrSpace> processTable;
     private HashMap<Integer, Integer> parentTable;
     private static ArrayList<Object[]> joinList;
-
+    private static ArrayList<Integer> FIFO;
 
 
 
@@ -30,6 +32,8 @@ public class PhysicalMemoryManager {
     private static PhysicalMemoryManager pmm;
     
     public PhysicalMemoryManager(){
+	
+	coreMap = new pageStatus[Machine.NumPhysPages];
 	physicalPages = new int[Machine.NumPhysPages];
 	spaceID_lock = new Semaphore("spaceID_lock", 1);
 	joinList_lock  = new Semaphore("joinList_lock", 1);
@@ -37,6 +41,13 @@ public class PhysicalMemoryManager {
 	processTable = new HashMap<Integer, AddrSpace>();
 	parentTable = new HashMap<Integer, Integer>();
 	joinList = new ArrayList<Object[]>();
+	FIFO = new ArrayList<Integer>();
+	
+	
+//	for(int i =0 ; i<Machine.NumPhysPages;i++){
+//	    FIFO.add(i);
+//	}
+	
     }
     
     
@@ -106,12 +117,24 @@ public class PhysicalMemoryManager {
 	
 	physicalPages[index] ++;
 	
+	FIFO.add(index);
+//	coreMap[index].setAddressSpace(((UserThread)NachosThread.currentThread()).space.getSpaceID());
+	
+	
 	//Debug.println('+', "AllocateMemory PhysicAddress:" + index);
 	
 	
 	physicalPage_lock.V();
 	return index;
     }
+    
+    
+    public void setPageStatus(int pageNumber,int addressSpace,boolean extend){
+	coreMap[pageNumber].setAddressSpace(addressSpace);
+	coreMap[pageNumber].setExtendRegion(extend);
+    }
+    
+    
     
     public void decreaseCounter(int index) {
 	physicalPage_lock.P();
@@ -171,6 +194,21 @@ public class PhysicalMemoryManager {
 	    return true;
 	else
 	    return false;
+    }
+
+
+    public static pageStatus[] getCoreMap() {
+        return coreMap;
+    }
+
+
+    public static ArrayList<Integer> getFIFO() {
+        return FIFO;
+    }
+
+
+    public static void setFIFO(ArrayList<Integer> fIFO) {
+        FIFO = fIFO;
     }
     
 
