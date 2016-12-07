@@ -4,6 +4,8 @@
 
 package nachos.kernel.userprog;
 
+import java.util.ArrayList;
+
 import nachos.Debug;
 import nachos.machine.CPU;
 import nachos.machine.MIPS;
@@ -74,7 +76,15 @@ public class ExceptionHandler implements nachos.machine.ExceptionHandler {
 		} else {
 		    pageTable[i] = new TranslationEntry();
 		    pageTable[i].virtualPage = i;
-
+		    
+		    
+		    /**for testing page replacement*/
+		    if(errorThread.space.getSpaceID() > 1) {
+			pageTable[i].physicalPage = -1;
+		    }
+		    /**test end*/
+		    
+		    else {
 		    pageTable[i].physicalPage = PhysicalMemoryManager
 			    .getInstance()
 			    .getPhysicalPage(pageTable[i].virtualPage);
@@ -92,6 +102,7 @@ public class ExceptionHandler implements nachos.machine.ExceptionHandler {
 			    pageTable[i].physicalPage,
 			    errorThread.space.getSpaceID(), true);
 
+		    }
 		}
 
 	    }
@@ -124,6 +135,7 @@ public class ExceptionHandler implements nachos.machine.ExceptionHandler {
 		    // If no memory avaliable
 		    if (pp == -1) {
 			// evict one allocated page
+			Debug.println('+', "evicting page");
 			int i = 0;
 
 			pageStatus[] table = PhysicalMemoryManager.getInstance().getCoreMap();
@@ -148,12 +160,17 @@ public class ExceptionHandler implements nachos.machine.ExceptionHandler {
 				     
 				 }
 								
-				Nachos.backingStore.writeBack(currentSpace,index, data);
+				Nachos.backingStore.writeBack(table[pageIndex].getAddressSpace(),index, data);
+				table[pageIndex].setAddressSpace(currentSpace);
 
 				PhysicalMemoryManager.getInstance().getFIFO()
-					.remove(pageIndex);//remove(0)???
+					.remove(i);//remove(0)???
 				PhysicalMemoryManager.getInstance().getFIFO()
 					.add(pageIndex);
+				
+				//ArrayList<Integer> fifo = PhysicalMemoryManager.getInstance().getFIFO();
+				pageTable[index].physicalPage = pageIndex;
+				pp = pageIndex;
 
 				break;
 			    }
@@ -163,6 +180,7 @@ public class ExceptionHandler implements nachos.machine.ExceptionHandler {
 		    }
 		    
 		    if(Nachos.backingStore.checkForBackup(currentSpace, index)){
+			Debug.println('+', "found data in backing store");
 			
 			byte[] data = Nachos.backingStore.readData(currentSpace, index);
 			
@@ -173,6 +191,7 @@ public class ExceptionHandler implements nachos.machine.ExceptionHandler {
 				Machine.mainMemory[z] = data[i++];
 			    }
 		    }else{
+			Debug.println('+', "data not found");
 			    int start = pp * 128;
 			    int end = start + 128;
 			    for (int z = start; z < end; z++) {

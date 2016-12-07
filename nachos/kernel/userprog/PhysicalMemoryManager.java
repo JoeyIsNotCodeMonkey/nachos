@@ -44,9 +44,9 @@ public class PhysicalMemoryManager {
 	FIFO = new ArrayList<Integer>();
 	
 	
-//	for(int i =0 ; i<Machine.NumPhysPages;i++){
-//	    FIFO.add(i);
-//	}
+	for(int i =0 ; i<Machine.NumPhysPages;i++){
+	    FIFO.add(i);
+	}
 	
     }
     
@@ -120,7 +120,7 @@ public class PhysicalMemoryManager {
 	
 	physicalPages[index] ++;
 	
-	FIFO.add(index);
+	//FIFO.add(index);
 //	coreMap[index].setAddressSpace(((UserThread)NachosThread.currentThread()).space.getSpaceID());
 	
 	
