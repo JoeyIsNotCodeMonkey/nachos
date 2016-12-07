@@ -185,6 +185,7 @@ void sf_init() {
     //printf("After init, the size of free list is: %d\n", firstfree->size);
 
 //print help info
+
 		// Write("Initializing finished", 22, 100);
 		// char str[] = "Memory starts from ";
 		// char *addr = NULL;
@@ -200,6 +201,7 @@ void sf_init() {
 		// itoa(firstfree->size, firstfreeSize, 10);
 		// sf_strcat(freesize, firstfreeSize);
 		// Write(freesize, sf_strlen(freesize), 100);
+
 }
 
 memory_region *find_fit(unsigned int size) {
