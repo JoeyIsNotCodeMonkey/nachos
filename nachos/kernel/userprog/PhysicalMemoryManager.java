@@ -110,10 +110,13 @@ public class PhysicalMemoryManager {
 	
 	
 	int index = 0;
-	while(physicalPages[index]>0) {
+	while(physicalPages[index]>0 && index < 128) {
 	    index++;
 	}
 	
+	if(index == 128) {
+	    return -1;
+	}
 	
 	physicalPages[index] ++;
 	
@@ -130,8 +133,10 @@ public class PhysicalMemoryManager {
     
     
     public void setPageStatus(int pageNumber,int addressSpace,boolean extend){
-	coreMap[pageNumber].setAddressSpace(addressSpace);
-	coreMap[pageNumber].setExtendRegion(extend);
+	pageStatus ps = new pageStatus();
+	ps.setAddressSpace(addressSpace);
+	ps.setExtendRegion(extend);
+	coreMap[pageNumber] = ps;
     }
     
     

@@ -122,7 +122,7 @@ public class ExceptionHandler implements nachos.machine.ExceptionHandler {
 		    int pp = pageTable[index].physicalPage;
 
 		    // If no memory avaliable
-		    if (pp >= Machine.NumPhysPages) {
+		    if (pp == -1) {
 			// evict one allocated page
 			int i = 0;
 
@@ -151,7 +151,7 @@ public class ExceptionHandler implements nachos.machine.ExceptionHandler {
 				Nachos.backingStore.writeBack(currentSpace,index, data);
 
 				PhysicalMemoryManager.getInstance().getFIFO()
-					.remove(pageIndex);
+					.remove(pageIndex);//remove(0)???
 				PhysicalMemoryManager.getInstance().getFIFO()
 					.add(pageIndex);
 
