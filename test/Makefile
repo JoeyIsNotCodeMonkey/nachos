@@ -12,15 +12,16 @@
 
 # Change the following to point to where you have the MIPS cross-compiler
 # installed.
-GCCDIR = /Users/MC/Desktop/mips/
+GCCDIR = /cygdrive/c/Users/MC/Desktop/mips/
 
 # Change the following to point to where you have Java executables installed.
-JAVADIR = 
+JAVADIR = /cygdrive/c/Program\ Files/JAVA/jdk1.8.0_40/bin/
 
 # Uncomment the following when running on Windows.
-JAVA= $(JAVADIR)java -classpath '..'
+JAVA= $(JAVADIR)java -classpath '../machine.jar'
 
-# Uncomment the following when running on Unix.
+
+# Uncomment the folloffffwing when running on Unix.
 #JAVA= $(JAVADIR)java -classpath '..'
 
 CC = $(GCCDIR)gcc
@@ -30,9 +31,9 @@ CPP = $(GCCDIR)cpp
 
 COFF2NOFF = $(JAVA) nachos.noff.Coff2Noff
 
-LDFLAGS = -T script -N  
-ASFLAGS = -mips1 
-CPPFLAGS = -I$(INCDIR) -B$(GCCDIR) 
+LDFLAGS = -T script -N
+ASFLAGS = -mips1
+CPPFLAGS = -I$(INCDIR)
 
 CFLAGS = -G 0 -I$(INCDIR) -B$(GCCDIR) -c -fno-builtin
 SFLAGS = -G 0 -I$(INCDIR) -B$(GCCDIR) -c -S -fno-builtin
@@ -58,6 +59,9 @@ halt: halt.o start.o
 	rm halt.o
 	$(COFF2NOFF) halt.coff halt
 	rm halt.coff
+
+
+
 
 # If you are using gmake, the following rules should enable you to
 # compile any of the test programs.  Otherwise, you have to copy the
