@@ -31,9 +31,11 @@ public class BackingStore {
 	 
 	int sectorToWrite = 0;
 	
-	while(sectors[sectorToWrite]==false){
+	while(sectors[sectorToWrite]==true){
 	    sectorToWrite++;
 	}
+	
+	sectors[sectorToWrite] = true;
 	
 	int [] keys = new int[2];
 	keys[0] = spaceID;

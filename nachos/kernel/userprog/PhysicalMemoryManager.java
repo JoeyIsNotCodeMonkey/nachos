@@ -44,9 +44,9 @@ public class PhysicalMemoryManager {
 	FIFO = new ArrayList<Integer>();
 	
 	
-//	for(int i =0 ; i<Machine.NumPhysPages;i++){
-//	    FIFO.add(i);
-//	}
+	for(int i =0 ; i<Machine.NumPhysPages;i++){
+	    FIFO.add(i);
+	}
 	
     }
     
@@ -110,14 +110,17 @@ public class PhysicalMemoryManager {
 	
 	
 	int index = 0;
-	while(physicalPages[index]>0) {
+	while(physicalPages[index]>0 && index < 128) {
 	    index++;
 	}
 	
+	if(index == 128) {
+	    return -1;
+	}
 	
 	physicalPages[index] ++;
 	
-	FIFO.add(index);
+	//FIFO.add(index);
 //	coreMap[index].setAddressSpace(((UserThread)NachosThread.currentThread()).space.getSpaceID());
 	
 	
@@ -130,8 +133,10 @@ public class PhysicalMemoryManager {
     
     
     public void setPageStatus(int pageNumber,int addressSpace,boolean extend){
-	coreMap[pageNumber].setAddressSpace(addressSpace);
-	coreMap[pageNumber].setExtendRegion(extend);
+	pageStatus ps = new pageStatus();
+	ps.setAddressSpace(addressSpace);
+	ps.setExtendRegion(extend);
+	coreMap[pageNumber] = ps;
     }
     
     
