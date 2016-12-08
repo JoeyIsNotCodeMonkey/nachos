@@ -6,16 +6,16 @@
 #
 #    Nachos assumes that the location of the program startup routine (the
 # 	location the kernel jumps to when the program initially starts up)
-#       is at location 0.  This means: start.o must be the first .o passed 
+#       is at location 0.  This means: start.o must be the first .o passed
 # 	to ld, in order for the routine "Start" to be loaded at location 0
 #
 
 # Change the following to point to where you have the MIPS cross-compiler
 # installed.
-GCCDIR = /Users/MC/Desktop/mips/
+GCCDIR = /Users/Joey/Documents/mips-gcc/
 
 # Change the following to point to where you have Java executables installed.
-JAVADIR = 
+JAVADIR =
 
 # Uncomment the following when running on Windows.
 JAVA= $(JAVADIR)java -classpath '..'
@@ -30,9 +30,9 @@ CPP = $(GCCDIR)cpp
 
 COFF2NOFF = $(JAVA) nachos.noff.Coff2Noff
 
-LDFLAGS = -T script -N  
-ASFLAGS = -mips1 
-CPPFLAGS = -I$(INCDIR) -B$(GCCDIR) 
+LDFLAGS = -T script -N
+ASFLAGS = -mips1
+CPPFLAGS = -I$(INCDIR) -B$(GCCDIR)
 
 CFLAGS = -G 0 -I$(INCDIR) -B$(GCCDIR) -c -fno-builtin
 SFLAGS = -G 0 -I$(INCDIR) -B$(GCCDIR) -c -S -fno-builtin
@@ -59,17 +59,27 @@ halt: halt.o start.o
 	$(COFF2NOFF) halt.coff halt
 	rm halt.coff
 
+malloc.s: malloc.c
+	$(CC) $(SFLAGS) malloc.c
+malloc.o: malloc.c
+	$(CC) $(CFLAGS) malloc.c
+malloc: malloc.o start.o
+	$(LD) $(LDFLAGS) start.o malloc.o -o malloc.coff
+	rm malloc.o
+	$(COFF2NOFF) malloc.coff malloc
+	rm malloc.coff
+
 # If you are using gmake, the following rules should enable you to
 # compile any of the test programs.  Otherwise, you have to copy the
 # above code for "halt", making appropriate changes, to compile other
 # test programs.
 
 %.s: %.c
-	$(CC) $(SFLAGS) $< 
+	$(CC) $(SFLAGS) $<
 %.o: %.c
 	$(CC) $(CFLAGS) $<
-%: %.o start.o
-	$(LD) $(LDFLAGS) start.o $< -o $*.coff
+%: %.o start.o malloc.o
+	$(LD) $(LDFLAGS) start.o malloc.o $< -o $*.coff
 	rm $*.o
 	$(COFF2NOFF) $*.coff $@
 	rm $*.coff
