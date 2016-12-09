@@ -45,6 +45,7 @@ public class PhysicalMemoryManager {
 	
 	
 	for(int i =0 ; i<Machine.NumPhysPages;i++){
+	    coreMap[i] = new pageStatus();
 	    FIFO.add(i);
 	}
 	

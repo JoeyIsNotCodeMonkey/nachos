@@ -14,6 +14,7 @@ import nachos.machine.MachineException;
 import nachos.machine.NachosThread;
 import nachos.machine.TranslationEntry;
 import nachos.kernel.Nachos;
+import nachos.kernel.threads.Lock;
 import nachos.kernel.threads.Semaphore;
 import nachos.kernel.userprog.Syscall;
 
@@ -52,20 +53,23 @@ public class ExceptionHandler implements nachos.machine.ExceptionHandler {
      * @author Eugene W. Stark (Stony Brook University)
      */
     public void handleException(int which) {
-	Semaphore addressLock = new Semaphore("address lock" , 1);
+	
+	Lock lock = AddrSpace.pmmLock;
 	int type = CPU.readRegister(2);
 
 	if (which == MachineException.AddressErrorException) {
 	    
-	 
-	    addressLock.P();
+	    lock.acquire();
+	   
 	    int VA = CPU.readRegister(nachos.machine.MIPS.BadVAddrReg);
 	    int VPN = ((VA >> 7) & 0x1ffffff);
-	    addressLock.V();
-
-	    Debug.println('+',"____________________Address Error " + VPN);
+	
+	  
 
 	    UserThread errorThread = (UserThread) NachosThread.currentThread();
+
+
+	    Debug.println('+',"____________________Address Error " + VPN+" "+errorThread.space.getSpaceID());
 
 	    TranslationEntry oldTable[] = errorThread.space.getPageTable();
 
@@ -84,7 +88,7 @@ public class ExceptionHandler implements nachos.machine.ExceptionHandler {
 		    
 		    
 		    /**for testing page replacement*/
-		    if(errorThread.space.getSpaceID() > 100) {
+		    if(errorThread.space.getSpaceID() > 1) {
 			pageTable[i].physicalPage = -1;
 		    }
 		    /**test end*/
@@ -93,6 +97,7 @@ public class ExceptionHandler implements nachos.machine.ExceptionHandler {
 		    pageTable[i].physicalPage = PhysicalMemoryManager
 			    .getInstance()
 			    .getPhysicalPage(pageTable[i].virtualPage);
+		    Debug.println('+',"____________________Return new pp " + pageTable[i].physicalPage+" "+errorThread.space.getSpaceID());
 
 		    pageTable[i].valid = false;
 		    pageTable[i].use = false;
@@ -108,8 +113,10 @@ public class ExceptionHandler implements nachos.machine.ExceptionHandler {
 			    errorThread.space.getSpaceID(), true);
 
 		    }
+		    
 		}
-
+		
+		  
 	    }
 
 	    // errorThread.space.deAllocateOldPageTable();
@@ -118,7 +125,7 @@ public class ExceptionHandler implements nachos.machine.ExceptionHandler {
 	    // errorThread.space.initRegisters(); // set the initial register
 	    // values
 	    errorThread.space.restoreState(); // load page table register
-
+	    lock.release();
 	    CPU.runUserCode(); // jump to the user progam
 
 	    // Nachos.scheduler.sleepThread(100000);
@@ -145,14 +152,14 @@ public class ExceptionHandler implements nachos.machine.ExceptionHandler {
 
 			pageStatus[] table = PhysicalMemoryManager.getInstance().getCoreMap();
 
-			while (true) {
+			while (i<128) {
 
 			    int pageIndex = PhysicalMemoryManager.getInstance().getFIFO().get(i);
-
+			   
 			    if (table[pageIndex].isExtendRegion() == true
 				    && table[pageIndex]
 					    .getAddressSpace() != currentSpace) {
-
+				 Debug.println('+',"____________________Page Fault Error  "+pageIndex);
 				// write old data into backing store
 
 				byte[] data = new byte[Machine.PageSize];
@@ -181,6 +188,9 @@ public class ExceptionHandler implements nachos.machine.ExceptionHandler {
 			    }
 			    i++;
 			}
+			
+			//Debug.println('+', "Didn't find any page that can be used to evict");
+			
 
 		    }
 		    

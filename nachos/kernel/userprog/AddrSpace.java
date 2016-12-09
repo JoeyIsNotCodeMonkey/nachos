@@ -73,7 +73,7 @@ public class AddrSpace {
     Semaphore allocate_lock = new Semaphore(
 	    "allocate_lock for process " + spaceID, 1);
 
-    private static Lock pmmLock = new Lock("pmmLock");
+    public static Lock pmmLock = new Lock("pmmLock");
 
     /**
      * Create a new address space.
@@ -116,8 +116,8 @@ public class AddrSpace {
 
 
 	Debug.println('+', "DeAllocateMemory SpaceID:" + addrSpace.getSpaceID());
-	allocate_lock.P();
-	//pmmLock.acquire();
+	//allocate_lock.P();
+	pmmLock.acquire();
 	TranslationEntry[] te = addrSpace.getPageTable();
 
 	for (int i = 0; i < te.length; i++) {
@@ -135,14 +135,14 @@ public class AddrSpace {
 		    Machine.mainMemory[z] = (byte) 0;
 		}
 
-		//Debug.println('+', "ZeroOut PhysicAddress:" + te[i].physicalPage);
+//		Debug.println('+', "ZeroOut PhysicAddress:" + te[i].physicalPage);
 	    }
 
 	}
 
 	pmm.getProcessTable().remove(addrSpace.getSpaceID());
-	allocate_lock.V();
-	//pmmLock.release();
+	//allocate_lock.V();
+	pmmLock.release();
     }
     
     
@@ -191,8 +191,8 @@ public class AddrSpace {
      */
     public int exec(OpenFile executable) {
 
-//	pmmLock.acquire();
-	allocate_lock.P();
+	pmmLock.acquire();
+//	allocate_lock.P();
 	this.setExecutable(executable);
 	
 	NoffHeader noffH;
@@ -241,7 +241,7 @@ public class AddrSpace {
 
 	    pageTable[i].physicalPage = pmm
 		    .getPhysicalPage(pageTable[i].virtualPage);
-
+	//  Debug.println('+', "AllocateMemory PhysicAddress:" + pageTable[i].physicalPage );
 	    pageTable[i].valid = true;
 	    pageTable[i].use = false;
 	    pageTable[i].dirty = false;
@@ -289,8 +289,8 @@ public class AddrSpace {
 		    noffH.initData.size);
 	}
 
-//	pmmLock.release();
-	allocate_lock.V();
+	pmmLock.release();
+//	allocate_lock.V();
 	return (0);
     }
 
