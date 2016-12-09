@@ -6,9 +6,12 @@ main()
 {
 
 long *p = heap_start;
-*p=1;
+// int i=1;
+// while(i<1000) {
+//   i++;
+// }
+//
+// *p=1;
 
-Yield();
 
-*p = 2;
 }

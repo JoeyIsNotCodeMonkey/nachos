@@ -14,6 +14,7 @@ import nachos.machine.MachineException;
 import nachos.machine.NachosThread;
 import nachos.machine.TranslationEntry;
 import nachos.kernel.Nachos;
+import nachos.kernel.threads.Semaphore;
 import nachos.kernel.userprog.Syscall;
 
 /**
@@ -51,14 +52,18 @@ public class ExceptionHandler implements nachos.machine.ExceptionHandler {
      * @author Eugene W. Stark (Stony Brook University)
      */
     public void handleException(int which) {
+	Semaphore addressLock = new Semaphore("address lock" , 1);
 	int type = CPU.readRegister(2);
 
 	if (which == MachineException.AddressErrorException) {
-
+	    
+	 
+	    addressLock.P();
 	    int VA = CPU.readRegister(nachos.machine.MIPS.BadVAddrReg);
 	    int VPN = ((VA >> 7) & 0x1ffffff);
+	    addressLock.V();
 
-	    // Debug.println('+',"____________________Address Error " + VPN);
+	    Debug.println('+',"____________________Address Error " + VPN);
 
 	    UserThread errorThread = (UserThread) NachosThread.currentThread();
 
@@ -79,7 +84,7 @@ public class ExceptionHandler implements nachos.machine.ExceptionHandler {
 		    
 		    
 		    /**for testing page replacement*/
-		    if(errorThread.space.getSpaceID() > 1) {
+		    if(errorThread.space.getSpaceID() > 100) {
 			pageTable[i].physicalPage = -1;
 		    }
 		    /**test end*/

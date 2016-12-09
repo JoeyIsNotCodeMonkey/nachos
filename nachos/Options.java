@@ -110,7 +110,7 @@ public class Options {
      * will run concurrently as Java threads, and will run truly concurrently
      * if the host system is a multi-CPU system and the JVM supports it.
      */
-    public int NUM_CPUS = 1;
+    public int NUM_CPUS = 2;
     
     /**
      * The number of consoles on the system.
