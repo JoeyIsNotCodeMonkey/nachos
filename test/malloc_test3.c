@@ -5,26 +5,15 @@ extern void *heap_start;
 
 int main(int argc, char const *argv[])
 {
-	int *addr1 = sf_malloc(3096);
+	int *addr1 = sf_malloc(2048);
 	printAddress(addr1);
 
 	char *ptr = (char *)addr1;
-	int i=0;
-	while(i<3096) {
+	int i=2048;
+	while(i<2048) {
 		*ptr++ = 'a';
 		i++;
 	}
-
-	Yield();
-
-	ptr = (char *)addr1;
-	i=0;
-	char b = 'b';
-	while(i<3096) {
-		b = *ptr++;
-		i++;
-	}
-
 
 
 
