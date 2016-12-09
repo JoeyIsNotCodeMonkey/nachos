@@ -88,12 +88,12 @@ public class ExceptionHandler implements nachos.machine.ExceptionHandler {
 		    
 		    
 		    /**for testing page replacement*/
-		    if(errorThread.space.getSpaceID() > 1) {
-			pageTable[i].physicalPage = -1;
-		    }
-		    /**test end*/
-		    
-		    else {
+//		    if(errorThread.space.getSpaceID() > 1) {
+//			pageTable[i].physicalPage = -1;
+//		    }
+//		    /**test end*/
+//		    
+//		    else {
 		    pageTable[i].physicalPage = PhysicalMemoryManager
 			    .getInstance()
 			    .getPhysicalPage(pageTable[i].virtualPage);
@@ -107,12 +107,15 @@ public class ExceptionHandler implements nachos.machine.ExceptionHandler {
 						   // separate pages, we could
 						   // set code
 						   // pages to be read-only
-
-		    PhysicalMemoryManager.getInstance().setPageStatus(
+		    
+		    if(pageTable[i].physicalPage>0){		    
+			PhysicalMemoryManager.getInstance().setPageStatus(
 			    pageTable[i].physicalPage,
 			    errorThread.space.getSpaceID(), true);
+			}
 
-		    }
+
+		    //}
 		    
 		}
 		
@@ -133,7 +136,8 @@ public class ExceptionHandler implements nachos.machine.ExceptionHandler {
 
 	if (which == MachineException.PageFaultException) {
 	    // Debug.println('+',"____________________Page Fault Error ");
-
+	    lock.acquire();
+	    
 	    UserThread errorThread = (UserThread) NachosThread.currentThread();
 	    int currentSpace = errorThread.space.getSpaceID();
 	    TranslationEntry pageTable[] = errorThread.space.getPageTable();
@@ -145,7 +149,7 @@ public class ExceptionHandler implements nachos.machine.ExceptionHandler {
 		    int pp = pageTable[index].physicalPage;
 
 		    // If no memory avaliable
-		    if (pp == -1) {
+		    if (pp == -1&&PhysicalMemoryManager.getInstance().checkFullMemory()) {
 			// evict one allocated page
 			Debug.println('+', "evicting page");
 			int i = 0;
@@ -157,8 +161,7 @@ public class ExceptionHandler implements nachos.machine.ExceptionHandler {
 			    int pageIndex = PhysicalMemoryManager.getInstance().getFIFO().get(i);
 			   
 			    if (table[pageIndex].isExtendRegion() == true
-				    && table[pageIndex]
-					    .getAddressSpace() != currentSpace) {
+				    && table[pageIndex].getAddressSpace() != currentSpace) {
 				 Debug.println('+',"____________________Page Fault Error  "+pageIndex);
 				// write old data into backing store
 
@@ -189,10 +192,19 @@ public class ExceptionHandler implements nachos.machine.ExceptionHandler {
 			    i++;
 			}
 			
-			//Debug.println('+', "Didn't find any page that can be used to evict");
+			Debug.println('+', "Didn't find any page that can be used to evict");
 			
 
+		    }else if(pp==-1&&!PhysicalMemoryManager.getInstance().checkFullMemory()){
+			Debug.println('+', "Outdated CoreMap");
+			 pageTable[index].physicalPage = PhysicalMemoryManager
+				    .getInstance()
+				    .getPhysicalPage(pageTable[index].virtualPage);
+			 pp = pageTable[index].physicalPage;
 		    }
+		    
+	
+		    
 		    
 		    if(Nachos.backingStore.checkForBackup(currentSpace, index)){
 			Debug.println('+', "found data in backing store");
@@ -222,7 +234,7 @@ public class ExceptionHandler implements nachos.machine.ExceptionHandler {
 
 		index++;
 	    }
-
+	    lock.release();
 	    CPU.runUserCode(); // jump to the user progam
 
 	}

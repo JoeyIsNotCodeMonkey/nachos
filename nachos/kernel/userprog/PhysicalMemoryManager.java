@@ -111,13 +111,15 @@ public class PhysicalMemoryManager {
 	
 	
 	int index = 0;
-	while(physicalPages[index]>0 && index < 128) {
+	while(physicalPages[index] > 0 ) {
 	    index++;
+	    if(index == 128){
+		physicalPage_lock.V();
+		return -1;
+	    }
+		
 	}
-	
-	if(index == 128) {
-	    return -1;
-	}
+
 	
 	physicalPages[index] ++;
 	
@@ -138,6 +140,17 @@ public class PhysicalMemoryManager {
 	ps.setAddressSpace(addressSpace);
 	ps.setExtendRegion(extend);
 	coreMap[pageNumber] = ps;
+    }
+    
+    public boolean checkFullMemory(){
+	boolean result = true;
+	for(pageStatus p : coreMap){
+	    if(p.getAddressSpace()==-1)
+		return false;
+	    
+	}
+	
+	return result;
     }
     
     
