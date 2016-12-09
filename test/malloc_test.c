@@ -1,12 +1,14 @@
 //#include <malloc.h>
+extern void *heap_limit;
 
 int main(int argc, char const *argv[])
 {
 	int *addr1 = sf_malloc(128);
 	printAddress(addr1);
 
-	char *ptr = (char *)addr1 + 16;
-	*ptr = 'a';
+	char *ptr = (char *)addr1;
+
+
 
 	int a = 1;
 
@@ -26,7 +28,9 @@ int main(int argc, char const *argv[])
 	sf_malloc(512);
 	printFreeList();
 
-	char b = *ptr;
+	while(ptr < (char *)heap_limit) {
+		*ptr++ = 'a';
+	}
 
 
 
