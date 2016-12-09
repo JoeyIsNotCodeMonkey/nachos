@@ -69,7 +69,7 @@ public class ExceptionHandler implements nachos.machine.ExceptionHandler {
 	    UserThread errorThread = (UserThread) NachosThread.currentThread();
 
 
-	    Debug.println('+',"____________________Address Error " + VPN+" "+errorThread.space.getSpaceID());
+	    //Debug.println('+',"____________________Address Error " + VPN+" "+errorThread.space.getSpaceID());
 
 	    TranslationEntry oldTable[] = errorThread.space.getPageTable();
 
@@ -97,7 +97,7 @@ public class ExceptionHandler implements nachos.machine.ExceptionHandler {
 		    pageTable[i].physicalPage = PhysicalMemoryManager
 			    .getInstance()
 			    .getPhysicalPage(pageTable[i].virtualPage);
-		    Debug.println('+',"____________________Return new pp " + pageTable[i].physicalPage+" "+errorThread.space.getSpaceID());
+		    //Debug.println('+',"____________________Return new pp " + pageTable[i].physicalPage+" "+errorThread.space.getSpaceID());
 
 		    pageTable[i].valid = false;
 		    pageTable[i].use = false;
@@ -162,7 +162,7 @@ public class ExceptionHandler implements nachos.machine.ExceptionHandler {
 			   
 			    if (table[pageIndex].isExtendRegion() == true
 				    && table[pageIndex].getAddressSpace() != currentSpace) {
-				 Debug.println('+',"____________________Page Fault Error  "+pageIndex);
+				 Debug.println('+',"____________________Saving Physical Page  "+pageIndex + " SID: "+table[pageIndex].getAddressSpace()+" VPN: "+ index);
 				// write old data into backing store
 
 				byte[] data = new byte[Machine.PageSize];
@@ -191,8 +191,8 @@ public class ExceptionHandler implements nachos.machine.ExceptionHandler {
 			    }
 			    i++;
 			}
-			
-			Debug.println('+', "Didn't find any page that can be used to evict");
+			if(i==128)
+			    Debug.println('+', "Didn't find any page that can be used to evict");
 			
 
 		    }else if(pp==-1&&!PhysicalMemoryManager.getInstance().checkFullMemory()){
@@ -207,7 +207,7 @@ public class ExceptionHandler implements nachos.machine.ExceptionHandler {
 		    
 		    
 		    if(Nachos.backingStore.checkForBackup(currentSpace, index)){
-			Debug.println('+', "found data in backing store");
+			Debug.println('+', "****************found data in backing store");
 			
 			byte[] data = Nachos.backingStore.readData(currentSpace, index);
 			
@@ -218,7 +218,7 @@ public class ExceptionHandler implements nachos.machine.ExceptionHandler {
 				Machine.mainMemory[z] = data[i++];
 			    }
 		    }else{
-			Debug.println('+', "data not found");
+//			Debug.println('+', "data not found");
 			    int start = pp * 128;
 			    int end = start + 128;
 			    for (int z = start; z < end; z++) {
