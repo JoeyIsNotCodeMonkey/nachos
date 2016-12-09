@@ -54,12 +54,12 @@ public class ExceptionHandler implements nachos.machine.ExceptionHandler {
      */
     public void handleException(int which) {
 	
-	Lock lock = AddrSpace.pmmLock;
+	Semaphore lock = AddrSpace.pmmLock;
 	int type = CPU.readRegister(2);
 
 	if (which == MachineException.AddressErrorException) {
 	    
-	    lock.acquire();
+	    lock.P();
 	   
 	    int VA = CPU.readRegister(nachos.machine.MIPS.BadVAddrReg);
 	    int VPN = ((VA >> 7) & 0x1ffffff);
@@ -69,7 +69,7 @@ public class ExceptionHandler implements nachos.machine.ExceptionHandler {
 	    UserThread errorThread = (UserThread) NachosThread.currentThread();
 
 
-	    //Debug.println('+',"____________________Address Error " + VPN+" "+errorThread.space.getSpaceID());
+	    Debug.println('+',"____________________Address Error " + VPN+" "+errorThread.space.getSpaceID());
 
 	    TranslationEntry oldTable[] = errorThread.space.getPageTable();
 
@@ -128,7 +128,7 @@ public class ExceptionHandler implements nachos.machine.ExceptionHandler {
 	    // errorThread.space.initRegisters(); // set the initial register
 	    // values
 	    errorThread.space.restoreState(); // load page table register
-	    lock.release();
+	    lock.V();
 	    CPU.runUserCode(); // jump to the user progam
 
 	    // Nachos.scheduler.sleepThread(100000);
@@ -136,7 +136,7 @@ public class ExceptionHandler implements nachos.machine.ExceptionHandler {
 
 	if (which == MachineException.PageFaultException) {
 	    // Debug.println('+',"____________________Page Fault Error ");
-	    lock.acquire();
+	    lock.P();
 	    
 	    UserThread errorThread = (UserThread) NachosThread.currentThread();
 	    int currentSpace = errorThread.space.getSpaceID();
@@ -234,7 +234,10 @@ public class ExceptionHandler implements nachos.machine.ExceptionHandler {
 
 		index++;
 	    }
-	    lock.release();
+	
+		// write old data into backing store
+	    
+	    lock.V();
 	    CPU.runUserCode(); // jump to the user progam
 
 	}
