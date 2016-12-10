@@ -135,9 +135,10 @@ public class PhysicalMemoryManager {
     }
     
     
-    public void setPageStatus(int pageNumber,int addressSpace,boolean extend){
+    public void setPageStatus(int pageNumber,int addressSpace,int vpn,boolean extend){
 	pageStatus ps = new pageStatus();
 	ps.setAddressSpace(addressSpace);
+	ps.setVPN(vpn);
 	ps.setExtendRegion(extend);
 	coreMap[pageNumber] = ps;
     }

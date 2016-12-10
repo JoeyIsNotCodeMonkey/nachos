@@ -73,7 +73,7 @@ public class AddrSpace {
     Semaphore allocate_lock = new Semaphore(
 	    "allocate_lock for process " + spaceID, 1);
 
-    public static Lock pmmLock = new Lock("pmmLock");
+    public static Semaphore pmmLock = new Semaphore("pmmLock",1);
 
     /**
      * Create a new address space.
@@ -117,7 +117,7 @@ public class AddrSpace {
 
 	Debug.println('+', "DeAllocateMemory SpaceID:" + addrSpace.getSpaceID());
 	//allocate_lock.P();
-	pmmLock.acquire();
+	pmmLock.P();
 	TranslationEntry[] te = addrSpace.getPageTable();
 
 	for (int i = 0; i < te.length; i++) {
@@ -127,7 +127,7 @@ public class AddrSpace {
 
 	    if (pmm.getPhysicalPages()[te[i].physicalPage] == 0) {
 		
-		pmm.setPageStatus(te[i].physicalPage, -1, false);
+		pmm.setPageStatus(te[i].physicalPage, -1,-1, false);
 		
 		int start = te[i].physicalPage * 128;
 		int end = start + 128;
@@ -142,7 +142,7 @@ public class AddrSpace {
 
 	pmm.getProcessTable().remove(addrSpace.getSpaceID());
 	//allocate_lock.V();
-	pmmLock.release();
+	pmmLock.V();
     }
     
     
@@ -163,7 +163,7 @@ public class AddrSpace {
      */
     public int exec(OpenFile executable) {
 
-	pmmLock.acquire();
+	pmmLock.P();
 //	allocate_lock.P();
 	this.setExecutable(executable);
 	
@@ -222,7 +222,7 @@ public class AddrSpace {
 					   // pages to be read-only
 	    
 	    
-	   pmm.setPageStatus(pageTable[i].physicalPage, spaceID, false);
+	   pmm.setPageStatus(pageTable[i].physicalPage, spaceID,i, false);
 	    
 	    
 	}
@@ -261,7 +261,7 @@ public class AddrSpace {
 		    noffH.initData.size);
 	}
 
-	pmmLock.release();
+	pmmLock.V();
 //	allocate_lock.V();
 	return (0);
     }
@@ -270,7 +270,7 @@ public class AddrSpace {
     
 	
 	
-	pmmLock.acquire();
+	pmmLock.P();
 	
 	// how big is address space?
 	long size = parentSpace.getSize();
@@ -316,7 +316,7 @@ public class AddrSpace {
 	newSpace.setPageTable(pageTable);
 	
 
-	pmmLock.release();
+	pmmLock.V();
 	
     }
 

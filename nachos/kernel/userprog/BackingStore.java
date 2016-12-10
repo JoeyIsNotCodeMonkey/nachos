@@ -3,6 +3,7 @@ package nachos.kernel.userprog;
 import java.util.HashMap;
 import java.util.Map;
 
+import nachos.Debug;
 import nachos.kernel.Nachos;
 import nachos.kernel.devices.DiskDriver;
 import nachos.machine.Machine;
@@ -29,7 +30,7 @@ public class BackingStore {
     
     public void writeBack(int spaceID, int VPN, byte[]data){
 	 
-	int sectorToWrite = 0;
+	int sectorToWrite = 1;
 	
 	while(sectors[sectorToWrite]==true){
 	    sectorToWrite++;
@@ -50,6 +51,9 @@ public class BackingStore {
     
     
     public byte[] readData(int spaceID, int VPN){
+	
+	Debug.println('+', "adfasdfsdf");
+	
 	byte[] data = new byte[Machine.PageSize];
 	
 	int [] keys = new int[2];
@@ -73,9 +77,9 @@ public class BackingStore {
 	keys[0] = spaceID;
 	keys[1] = VPN;
 	
-	Integer sector = map.get(keys);
 	
-	if(sector!=null){
+	if(map.containsKey(keys)){
+	    Debug.println('+', "tryr");
 	    result = true;
 	}
 
