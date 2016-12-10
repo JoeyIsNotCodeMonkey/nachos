@@ -1,0 +1,128 @@
+------------------------------------------------Part 1------------------------------------------------
+In the first part this assignment, we made the address space for each process to be extended as
+demand. We defined “heap_start” and “heap_limit” inside “start.s”, and set both variables just beyond
+the stack segment. If we create a pointer and point it to heap_start in our test program, then allocate
+memory from that pointer, the program will try to access invalid address, where AddressErrorException
+will occur. After we calculated the physical page number needed, we replace a larger page table and
+copy the data from old table to new table, where all the new entries are set to invalid. Usually the
+PageFaultException will occur once the program return to user mode. We catched the physical memory
+page, calculate the physical memory address and zero out the following 128 bytes. And set this page to
+valid. 
+
+
+
+
+------------------------------------------------Part 2------------------------------------------------
+The second part is writing a malloc() and free() in C. We basically followed all the suggested structure
+and strategy that are on the manual. 
+
+
+struct memory_region {
+struct memory_region *next;
+	int size;
+    	char data[0];  /* The data starts here and continues on. */
+};
+
+
+extern void *heap_start;
+extern void *heap_limit;
+
+
+void *sf_malloc(unsigned int size);
+void sf_free(void *ptr);
+
+
+Following functions are helper function for sf_malloc() and sf_free():
+void sf_init();
+void add_to_freelist(memory_region *ptr);
+void remove_from_freelist(memory_region *ptr);
+
+
+memory_region *find_fit(unsigned int size);
+memory_region *place(memory_region *ptr, unsigned int size);
+memory_region *coalesce(void *ptr);
+memory_region *extend_heap(unsigned int size);
+unsigned int align(unsigned int size);
+
+
+The program will called sf_init() if sf_malloc() is called by the first time. sf_init() will raise heap_limit
+4096 bytes up. So after initialization, we have a 4096 byte first free block. 
+
+
+If a big enough free block is found for the size requested after alignment (single word size alignment)
+during malloc, place() will be called, otherwise, the heap will be extended by calling extend_heap();
+The pointer returned from malloc is the address where the actual data start. 
+
+
+When an allocated block is freed by calling sf_free(), the coalesce() will only check the whether the
+following region was already on the free list. The free blocks are added to the free list by increasing
+order of their starting addresses.
+
+
+The following functions are helper function for print the debug info in C program:
+void* itoa(int num, char* str, int base);
+void reverse(char str[], int length);
+void decToHex(int dec, char* hexadecimalNumber);
+void sf_strcat(char *dest, char *src);
+int sf_strlen(char *s);
+void printAddress(int *addr);
+void printFreeList();
+
+
+All the functions prototype mentioned above are inside malloc.h, and their implementation is inside
+malloc.c
+------------------------------------------------Part 3------------------------------------------------
+For the third part of the assignment, we created a pageDriver as our second diskDriver, which was used
+in our backing store (We created a class called “BackingStore” inside userprog package).
+There is an array of boolean with size of “numDiskSectors” to keep track of the allocation status of each
+sector. 
+We implemented a swap map by using an ArrayList with 3 element for each entry. The first two variable
+are spaceID and VPN, and the last one is the disk sector number.
+
+
+We manage an FIFO ArrayList with entries of physical page number. inside PhysicalMemoryManager
+class. It is initialized with 128 physical page in increasing order inside PhysicalPageManager
+constructor. The FIFO list will be scanned from the beginning once an eviction occur and qualified
+pages will be removed and put back to the end of the list. 
+
+
+Besides we used a core map to keep track of the current status of the physical pages. A core map is an
+array of “pageStatus”, which is a data type we defined with field of addressSpace(int), VPN(int), and
+extendRegion(boolean). The index of pageStatus list is the physical page number. You can find
+“pageStatus” class inside “userProg” package.
+
+
+
+
+------------------------------------------------Test------------------------------------------------
+We prepare a test file called “mallocTest.c” to test part 2. 
+First, you need to make mallocTest, then use “-x test/mallocTest” in the run configuration. 
+******Attention******
+Since my allocation strategy is giving 4096 byte free memory when the first time malloc, so the the size
+of the free list size after the first malloc should be 4096 - size requested - size of header(which should
+be 8).
+******Attention******
+
+
+Pass the pointer of the address to printAddress(addr) will print the address number in eclipse console. 
+printFreeList() will print a list of size of free blocks in eclipse console. 
+Our mallocTest has nicely demonstrated the usage of the above two function.
+
+
+“pageRepTest1.c” and “pageRepTest2.c” are for the part3 test. 
+These two test file run concurrently to assure the page eviction happen in the middle of the process,
+since the memory they requested are guaranteed over 128 pages. 
+Write “-x test/pageRepTest1 -x test/pageRepTest2 -ncpu 2” in run configuration.
+ 
+
+
+
+
+
+
+
+
+
+
+
+

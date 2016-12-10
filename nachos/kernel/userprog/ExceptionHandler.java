@@ -69,7 +69,7 @@ public class ExceptionHandler implements nachos.machine.ExceptionHandler {
 	    UserThread errorThread = (UserThread) NachosThread.currentThread();
 
 
-	    Debug.println('+',"____________________Address Error " + VPN+" "+errorThread.space.getSpaceID());
+	    Debug.println('+',"____________________Address Error in thread " + errorThread.space.getSpaceID());
 
 	    TranslationEntry oldTable[] = errorThread.space.getPageTable();
 
@@ -162,7 +162,7 @@ public class ExceptionHandler implements nachos.machine.ExceptionHandler {
 			   
 			    if (table[pageIndex].isExtendRegion() == true
 				    && table[pageIndex].getAddressSpace() != currentSpace) {
-				 Debug.println('+',"____________________Saving Physical Page  "+pageIndex + " SID: "+table[pageIndex].getAddressSpace()+" VPN: "+ table[pageIndex].getVPN());
+				 Debug.println('+',"____________________Saving Physical Page  "+pageIndex + " thread: "+table[pageIndex].getAddressSpace()+" VPN: "+ table[pageIndex].getVPN());
 				// write old data into backing store
 
 				byte[] data = new byte[Machine.PageSize];

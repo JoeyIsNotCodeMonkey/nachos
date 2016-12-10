@@ -15,7 +15,7 @@ int main(int argc, char const *argv[])
 		i++;
 	}
 
-	Yield();
+	//Yield();
 
 	ptr = (char *)addr1;
 	i=0;
