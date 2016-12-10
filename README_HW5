@@ -1,13 +1,13 @@
 ------------------------------------------------Part 1------------------------------------------------
 In the first part this assignment, we made the address space for each process to be extended as
-demand. We defined ‚Äúheap_start‚Äù and ‚Äúheap_limit‚Äù inside ‚Äústart.s‚Äù, and set both variables just beyond
+demand. We defined °ßheap_start°® and °ßheap_limit°® inside °ßstart.s°®, and set both variables just beyond
 the stack segment. If we create a pointer and point it to heap_start in our test program, then allocate
 memory from that pointer, the program will try to access invalid address, where AddressErrorException
-will occur. After we calculated the physical page number needed, we replace a larger page table and
-copy the data from old table to new table, where all the new entries are set to invalid. Usually the
-PageFaultException will occur once the program return to user mode. We catched the physical memory
-page, calculate the physical memory address and zero out the following 128 bytes. And set this page to
-valid. 
+will occur. Then, we read register # 39 that tells us which table entry caused the exception and we 
+replace a larger page table,which copy the data from old table to new table, where all the new entries are set to invalid.
+Usually the PageFaultException will occur once the program return to user mode because the invalid bit. 
+We caught the memory page, calculate the physical memory address and zero out the following 128 bytes.
+And set this page to valid before return to user code. 
 
 
 
@@ -73,11 +73,10 @@ All the functions prototype mentioned above are inside malloc.h, and their imple
 malloc.c
 ------------------------------------------------Part 3------------------------------------------------
 For the third part of the assignment, we created a pageDriver as our second diskDriver, which was used
-in our backing store (We created a class called ‚ÄúBackingStore‚Äù inside userprog package).
-There is an array of boolean with size of ‚ÄúnumDiskSectors‚Äù to keep track of the allocation status of each
-sector. 
+in our backing store (We created a class called "BackingStore" inside userprog package).
+There is an array of boolean with size of "numDiskSectors" to keep track of the allocation status of each sector. 
 We implemented a swap map by using an ArrayList with 3 element for each entry. The first two variable
-are spaceID and VPN, and the last one is the disk sector number.
+are spaceID and VPN using as keys, and the last one is the disk sector number.
 
 
 We manage an FIFO ArrayList with entries of physical page number. inside PhysicalMemoryManager
@@ -87,20 +86,20 @@ pages will be removed and put back to the end of the list.
 
 
 Besides we used a core map to keep track of the current status of the physical pages. A core map is an
-array of ‚ÄúpageStatus‚Äù, which is a data type we defined with field of addressSpace(int), VPN(int), and
+array of °ßpageStatus°®, which is a data type we defined with field of addressSpace(int), VPN(int), and
 extendRegion(boolean). The index of pageStatus list is the physical page number. You can find
-‚ÄúpageStatus‚Äù class inside ‚ÄúuserProg‚Äù package.
+"pageStatus" class inside °ßuserProg°® package.
 
 
 
 
 ------------------------------------------------Test------------------------------------------------
-We prepare a test file called ‚ÄúmallocTest.c‚Äù to test part 2. 
-First, you need to make mallocTest, then use ‚Äú-x test/mallocTest‚Äù in the run configuration. 
+We prepare a test file called "mallocTest.c" to test part 2. 
+First, you need to make mallocTest, then use °ß-x test/mallocTest°® in the run configuration. 
 ******Attention******
 Since my allocation strategy is giving 4096 byte free memory when the first time malloc, so the the size
-of the free list size after the first malloc should be (4096 - size requested - size of header(which should
-be 8)).
+of the free list size after the first malloc should be 4096 - size requested - size of header(which should
+be 8).
 ******Attention******
 
 
@@ -109,13 +108,15 @@ printFreeList() will print a list of size of free blocks in eclipse console.
 Our mallocTest has nicely demonstrated the usage of the above two function.
 
 
-‚ÄúpageRepTest1.c‚Äù and ‚ÄúpageRepTest2.c‚Äù are for the part3 test. 
+"pageRepTest1.c°® and °ßpageRepTest2.c" are for the part3 test. 
 These two test file run concurrently to assure the page eviction happen in the middle of the process,
 since the memory they requested are guaranteed over 128 pages. 
-Write ‚Äú-x test/pageRepTest1 -x test/pageRepTest2 -ncpu 2‚Äù in run configuration.
+
+Example configuration would be "-x test/pageRepTet1 -x test/pageRepTest2 -ncpu 2"
+
+In the console, it will print out messages when evicting page occurs or when it is reading from backup disk to help debugging the code.
+
  
-
-
 
 
 

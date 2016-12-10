@@ -69,7 +69,7 @@ public class ExceptionHandler implements nachos.machine.ExceptionHandler {
 	    UserThread errorThread = (UserThread) NachosThread.currentThread();
 
 
-	    Debug.println('+',"____________________Address Error in thread " + errorThread.space.getSpaceID());
+	//    Debug.println('+',"____________________Address Error in thread " + errorThread.space.getSpaceID());
 
 	    TranslationEntry oldTable[] = errorThread.space.getPageTable();
 
@@ -162,7 +162,7 @@ public class ExceptionHandler implements nachos.machine.ExceptionHandler {
 			   
 			    if (table[pageIndex].isExtendRegion() == true
 				    && table[pageIndex].getAddressSpace() != currentSpace) {
-				 Debug.println('+',"____________________Saving Physical Page  "+pageIndex + " thread: "+table[pageIndex].getAddressSpace()+" VPN: "+ table[pageIndex].getVPN());
+				 Debug.println('+',"_____Saving Physical Page  "+pageIndex + " for thread: "+table[pageIndex].getAddressSpace()+" VPN: "+ table[pageIndex].getVPN());
 				// write old data into backing store
 
 				byte[] data = new byte[Machine.PageSize];
@@ -204,11 +204,11 @@ public class ExceptionHandler implements nachos.machine.ExceptionHandler {
 			    i++;
 			}
 			if(i==128)
-			    Debug.println('+', "Didn't find any page that can be used to evict");
+			    Debug.println('+', "_____Didn't find any page that can be used to evict");
 			
 
 		    }else if(pp==-1&&!PhysicalMemoryManager.getInstance().checkFullMemory()){
-			Debug.println('+', "Outdated CoreMap");
+			//Debug.println('+', "Outdated CoreMap");
 			 pageTable[index].physicalPage = PhysicalMemoryManager
 				    .getInstance()
 				    .getPhysicalPage(pageTable[index].virtualPage);
@@ -217,7 +217,7 @@ public class ExceptionHandler implements nachos.machine.ExceptionHandler {
 		    
 	
 		    
-		    Debug.println('+',"____________________Page Fault Error "+ currentSpace + " index "+index);
+		   //Debug.println('+',"____________________Page Fault Error "+ currentSpace + " index "+index);
 		    
 		    if(currentSpace==1&&index==47){
 			int i =0;
@@ -225,7 +225,7 @@ public class ExceptionHandler implements nachos.machine.ExceptionHandler {
 		    }
 		    
 		    if(Nachos.backingStore.checkForBackup(currentSpace, index)){
-			Debug.println('+', "****************found data in backing store");
+			Debug.println('+', "_____Using Data from backingStore"  );
 			
 			byte[] data = Nachos.backingStore.readData(currentSpace, index);
 			
@@ -271,7 +271,7 @@ public class ExceptionHandler implements nachos.machine.ExceptionHandler {
 		break;
 
 	    case Syscall.SC_Yield:
-		Debug.println('+', "****************YIELD");
+		//Debug.println('+', "****************YIELD");
 		Syscall.yield();
 		break;
 
