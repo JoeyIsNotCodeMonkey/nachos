@@ -127,7 +127,7 @@ public class AddrSpace {
 
 	    if (pmm.getPhysicalPages()[te[i].physicalPage] == 0) {
 		
-		pmm.setPageStatus(te[i].physicalPage, -1, false);
+		pmm.setPageStatus(te[i].physicalPage, -1,-1, false);
 		
 		int start = te[i].physicalPage * 128;
 		int end = start + 128;
@@ -222,7 +222,7 @@ public class AddrSpace {
 					   // pages to be read-only
 	    
 	    
-	   pmm.setPageStatus(pageTable[i].physicalPage, spaceID, false);
+	   pmm.setPageStatus(pageTable[i].physicalPage, spaceID,i, false);
 	    
 	    
 	}

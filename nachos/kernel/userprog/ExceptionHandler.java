@@ -111,7 +111,7 @@ public class ExceptionHandler implements nachos.machine.ExceptionHandler {
 		    if(pageTable[i].physicalPage>0){		    
 			PhysicalMemoryManager.getInstance().setPageStatus(
 			    pageTable[i].physicalPage,
-			    errorThread.space.getSpaceID(), true);
+			    errorThread.space.getSpaceID(),i, true);
 			}
 
 
@@ -135,14 +135,14 @@ public class ExceptionHandler implements nachos.machine.ExceptionHandler {
 	}
 
 	if (which == MachineException.PageFaultException) {
-	    // Debug.println('+',"____________________Page Fault Error ");
+	    
 	    lock.P();
 	    
 	    UserThread errorThread = (UserThread) NachosThread.currentThread();
 	    int currentSpace = errorThread.space.getSpaceID();
 	    TranslationEntry pageTable[] = errorThread.space.getPageTable();
 	    int index = 0;
-
+	 
 	    while (index < pageTable.length) {
 		if (pageTable[index].valid == false) {
 
@@ -151,7 +151,7 @@ public class ExceptionHandler implements nachos.machine.ExceptionHandler {
 		    // If no memory avaliable
 		    if (pp == -1&&PhysicalMemoryManager.getInstance().checkFullMemory()) {
 			// evict one allocated page
-			Debug.println('+', "evicting page");
+			//Debug.println('+', "evicting page");
 			int i = 0;
 
 			pageStatus[] table = PhysicalMemoryManager.getInstance().getCoreMap();
@@ -162,7 +162,7 @@ public class ExceptionHandler implements nachos.machine.ExceptionHandler {
 			   
 			    if (table[pageIndex].isExtendRegion() == true
 				    && table[pageIndex].getAddressSpace() != currentSpace) {
-				 Debug.println('+',"____________________Saving Physical Page  "+pageIndex + " SID: "+table[pageIndex].getAddressSpace()+" VPN: "+ index);
+				 Debug.println('+',"____________________Saving Physical Page  "+pageIndex + " SID: "+table[pageIndex].getAddressSpace()+" VPN: "+ table[pageIndex].getVPN());
 				// write old data into backing store
 
 				byte[] data = new byte[Machine.PageSize];
@@ -175,7 +175,19 @@ public class ExceptionHandler implements nachos.machine.ExceptionHandler {
 				     
 				 }
 								
-				Nachos.backingStore.writeBack(table[pageIndex].getAddressSpace(),index, data);
+				Nachos.backingStore.writeBack(table[pageIndex].getAddressSpace(),table[pageIndex].getVPN(), data);
+				
+				
+				AddrSpace old = PhysicalMemoryManager.getInstance().getSpaceByID(table[pageIndex].getAddressSpace());
+				TranslationEntry oldTable[] = old.getPageTable();
+				for(TranslationEntry e : oldTable){
+				    if(e.physicalPage==pageIndex){
+					
+					e.valid=false;
+				    }				    
+				}
+				
+								
 				table[pageIndex].setAddressSpace(currentSpace);
 
 				PhysicalMemoryManager.getInstance().getFIFO()
@@ -205,6 +217,12 @@ public class ExceptionHandler implements nachos.machine.ExceptionHandler {
 		    
 	
 		    
+		    Debug.println('+',"____________________Page Fault Error "+ currentSpace + " index "+index);
+		    
+		    if(currentSpace==1&&index==47){
+			int i =0;
+			i++;
+		    }
 		    
 		    if(Nachos.backingStore.checkForBackup(currentSpace, index)){
 			Debug.println('+', "****************found data in backing store");
@@ -253,6 +271,7 @@ public class ExceptionHandler implements nachos.machine.ExceptionHandler {
 		break;
 
 	    case Syscall.SC_Yield:
+		Debug.println('+', "****************YIELD");
 		Syscall.yield();
 		break;
 
