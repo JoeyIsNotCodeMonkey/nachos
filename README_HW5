@@ -99,8 +99,8 @@ We prepare a test file called “mallocTest.c” to test part 2.
 First, you need to make mallocTest, then use “-x test/mallocTest” in the run configuration. 
 ******Attention******
 Since my allocation strategy is giving 4096 byte free memory when the first time malloc, so the the size
-of the free list size after the first malloc should be 4096 - size requested - size of header(which should
-be 8).
+of the free list size after the first malloc should be (4096 - size requested - size of header(which should
+be 8)).
 ******Attention******
 
 
