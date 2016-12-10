@@ -1,5 +1,6 @@
 package nachos.kernel.userprog;
 
+import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.Map;
 
@@ -16,7 +17,7 @@ public class BackingStore {
     public final int numDiskSectors;
     
     public final boolean [] sectors;
-    Map<int[], Integer> map;
+    ArrayList<Object[]> map;
     
     
     
@@ -24,7 +25,7 @@ public class BackingStore {
 	this.diskDriver = disk;
 	numDiskSectors = diskDriver.getNumSectors();
 	sectors = new boolean[numDiskSectors];
-	map = new  HashMap <int[],  Integer>();
+	map = new  ArrayList<Object[]>();
     }
     
     
@@ -38,11 +39,13 @@ public class BackingStore {
 	
 	sectors[sectorToWrite] = true;
 	
-	int [] keys = new int[2];
-	keys[0] = spaceID;
-	keys[1] = VPN;
+	Object [] entry = new Object[3];
+	entry[0] = spaceID;
+	entry[1] = VPN;
+	entry[2] = sectorToWrite;
 	
-	map.put(keys, sectorToWrite);
+	
+	map.add(entry);
 	
 	diskDriver.writeSector(sectorToWrite, data, 0);
 	
@@ -52,39 +55,38 @@ public class BackingStore {
     
     public byte[] readData(int spaceID, int VPN){
 	
-	Debug.println('+', "adfasdfsdf");
+	
 	
 	byte[] data = new byte[Machine.PageSize];
+	int sectorToRead = -1;
 	
-	int [] keys = new int[2];
-	keys[0] = spaceID;
-	keys[1] = VPN;
-	
-	Integer sector = map.get(keys);
-	
-	if(sector!=null){
-	    diskDriver.writeSector(sector, data, 0);
+	for(Object[]e:map){
+	    if((int)e[0]==spaceID && (int)e[1] ==VPN){
+		sectorToRead = (int)e[2];
+	    }
 	}
+	
+	if(sectorToRead!=-1)
+	    diskDriver.writeSector(sectorToRead, data, 0);
+	
 	
 	return data;
 	
     } 
     
     public boolean checkForBackup(int spaceID, int VPN){
-	boolean result = false;
-	int [] keys = new int[2];
 	
-	keys[0] = spaceID;
-	keys[1] = VPN;
-	
-	
-	if(map.containsKey(keys)){
-	    Debug.println('+', "tryr");
-	    result = true;
+	for(Object[] e:map){
+	    
+	    if((int)e[0]==spaceID && (int)e[1] ==VPN){
+		return true;
+	    }
+	    	    
 	}
+	
 
 	
-	return result;
+	return false;
     }
     
     
